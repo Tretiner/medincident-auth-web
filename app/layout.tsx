@@ -1,13 +1,16 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin", "cyrillic"] });
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
+import type { Metadata } from "next";
+import { cn } from "@/lib/utils";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MedSafety",
-  description: "App",
+  title: {
+    template: '%s | MedSafety',
+    default: 'MedSafety',
+  },
+  description: "Вход в медицинскую систему",
 };
 
 export default function RootLayout({
@@ -17,7 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={cn("min-h-screen bg-brand-bg", inter.className)}>
+      <body className={cn(
+         "min-h-screen bg-brand-bg antialiased",
+         GeistSans.variable,
+         GeistMono.variable,
+      )}>
         {children}
       </body>
     </html>
