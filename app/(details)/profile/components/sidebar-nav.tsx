@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils"; // Утилита shadcn для классов
+import { cn } from "@/lib/utils";
 import { UserIcon, ShieldCheckIcon, LogOutIcon } from "lucide-react";
 import { Button } from "@/presentation/components/ui/button";
 
 const navItems = [
   {
     title: "Мои данные",
-    href: "/profile/details", // <--- Было "/profile", стало "/profile/details"
+    href: "/profile/details",
     icon: UserIcon,
-    exact: false // Теперь можно false, так как это отдельный сегмент
+    exact: false
   },
   {
     title: "Безопасность",
@@ -38,9 +38,9 @@ export function SidebarNav() {
                 "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200",
                 isActive 
                   ? "bg-brand-green/10 text-brand-green shadow-sm" 
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}>
-                <item.icon className={cn("h-5 w-5", isActive ? "text-brand-green" : "text-gray-400")} />
+                <item.icon className={cn("h-5 w-5", isActive ? "text-brand-green" : "text-muted-foreground/70")} />
                 {item.title}
               </span>
             </Link>
@@ -48,12 +48,12 @@ export function SidebarNav() {
         })}
       </div>
 
-      {/* Кнопка "Вернуться" в самом низу */}
-      <div className="mt-auto pt-6 border-t border-gray-100">
+      {/* Кнопка "Вернуться" */}
+      <div className="mt-auto pt-6 border-t border-border">
         <Button 
           variant="ghost" 
-          className="w-full justify-start gap-3 text-gray-500 hover:text-red-500 hover:bg-red-50"
-          onClick={() => window.location.href = '/login'} // Или router.back(), как вы хотите
+          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          onClick={() => window.location.href = '/login'}
         >
           <LogOutIcon className="h-5 w-5" />
           Вернуться

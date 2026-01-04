@@ -20,15 +20,18 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
 
-        // custom
-        telegram: "border-2 border-[#2AABEE] text-[#2AABEE] hover:bg-[#2AABEE]/10 bg-transparent",
-        max: "border-2 border-brand-green text-brand-green hover:bg-brand-green/10 bg-transparent",
+        /* Custom */
+        telegram: "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90",
+        max: "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
+        
+        /* Custom */
+        brand: "h-12 px-8 text-lg font-bold rounded-xl hover:scale-[1.01] active:scale-[0.99] duration-300",
       },
     },
     defaultVariants: {
