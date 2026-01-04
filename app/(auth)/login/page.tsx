@@ -7,7 +7,7 @@ export default async function LoginPage() {
   const initialQrUrl = await fetchQrCode();
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="container">
       <LoginForm initialQrUrl={initialQrUrl} />
     </div>
   );

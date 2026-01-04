@@ -59,8 +59,8 @@ export function LoginForm({ initialQrUrl }: LoginFormProps) {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-brand-bg p-4">
       
-      <Card className="w-full max-w-[960px] overflow-hidden rounded-[2rem] border border-gray-200 shadow-0 
-                       hover:shadow-xl transition-all duration-300 ease-in-out
+      <Card className="w-full max-w-[960px] overflow-hidden rounded-[2rem] shadow-none 
+                       border border-gray-200 hover:shadow-xl transition-all duration-300 ease-in-out
                        grid md:grid-cols-2 bg-white">
         
         {/* LEFT COLUMN: Dynamic QR Code */}
@@ -71,9 +71,6 @@ export function LoginForm({ initialQrUrl }: LoginFormProps) {
             <div className="relative z-10 flex flex-col items-center">
                 {/* QR Container */}
                 <div className="bg-white p-4 rounded-3xl border-2 border-brand-green/10 relative overflow-hidden group w-56 h-56 flex items-center justify-center shadow-sm">
-                    {/* SSR Logic: У нас всегда есть qrUrl при старте.
-                        Скелетон показываем только если вдруг URL пустой (защита) 
-                    */}
                     {!qrUrl ? (
                         <div className="w-full h-full bg-gray-100 animate-pulse rounded-xl" />
                     ) : (
@@ -81,11 +78,11 @@ export function LoginForm({ initialQrUrl }: LoginFormProps) {
                         <img 
                           src={qrUrl} 
                           alt="QR Code" 
-                          // Добавили transition-opacity для плавности обновления картинки таймером
                           className="w-full h-full object-contain transition-opacity duration-500" 
                         />
                     )}
                     
+                    {/* Scan Animation Overlay */}
                     {qrUrl && (
                       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-green/20 to-transparent -translate-y-full animate-[accordion-down_2s_infinite]" />
                     )}
@@ -114,7 +111,6 @@ export function LoginForm({ initialQrUrl }: LoginFormProps) {
               Войдите с помощью:
             </p>
 
-            {/* Error Message Display (Optional integration) */}
             {error && (
                 <div className="p-3 rounded-lg bg-red-50 text-red-500 text-sm text-center">
                     {error}
@@ -134,11 +130,11 @@ export function LoginForm({ initialQrUrl }: LoginFormProps) {
           </div>
            
            <p className="mt-10 text-center text-xs text-gray-400 leading-relaxed">
-             Нажимая на кнопки входа, вы принимаете 
-             <a href="#" className="text-brand-green underline">пользовательское соглашение</a>  
-             и
-             <a href="#" className="text-brand-green underline">политику конфиденциальности</a>  
-             сервиса Ilizarov ID.
+             Нажимая на кнопки входа, вы принимаете{' '} 
+             <a href="#" className="text-brand-green hover:underline">пользовательское соглашение</a>
+             {' '}и{' '}
+             <a href="#" className="text-brand-green hover:underline">политику конфиденциальности</a> 
+             {' '}сервиса Ilizarov ID.
            </p>
         </CardContent>
       </Card>

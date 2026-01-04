@@ -31,13 +31,14 @@ function reducer(state: LoginState, intent: LoginIntent): LoginState {
 }
 
 export const useLoginViewModel = (initialQrUrl: string) => {
-  const router = useRouter();
-
-  const [state, dispatchLocal] = useReducer(reducer, {
+  const initialState = {
     qrUrl: initialQrUrl,
     isLoading: false,
     error: null,
-  });
+  }
+  
+  const router = useRouter();
+  const [state, dispatchLocal] = useReducer(reducer, initialState);
 
   const dispatch = useCallback(async (intent: LoginIntent) => {
     dispatchLocal(intent);
