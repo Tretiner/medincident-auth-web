@@ -3,6 +3,7 @@
 import { useReducer, useCallback, useEffect } from "react";
 import { fetchQrCode, login } from "./actions";
 import { useRouter } from "next/navigation";
+import useSWR from 'swr';
 
 export interface LoginState {
   qrUrl: string;
@@ -36,7 +37,8 @@ export const useLoginViewModel = (initialQrUrl: string) => {
     isLoading: false,
     error: null,
   }
-  
+  const { data: newQr } = useSWR('/api/auth/qr', { refreshInterval: 300000 });
+
   const router = useRouter();
   const [state, dispatchLocal] = useReducer(reducer, initialState);
 
@@ -46,21 +48,19 @@ export const useLoginViewModel = (initialQrUrl: string) => {
     // Логика эффектов
     switch (intent.type) {
       case 'INIT_TIMER':
-        
         break;
       case 'TIMER_TICK':
         try {
-          const newUrl = await fetchQrCode(); // Server Action
+          const newUrl = await fetchQrCode();
           dispatchLocal({ type: 'QR_UPDATED', payload: newUrl });
         } catch (e) {
-          // Silent fail for timer
         }
         break;
 
       case 'LOGIN_CLICKED':
         try {
-          await login(intent.provider); // Server Action
-          router.push('/profile'); // Navigation Side Effect
+          await login(intent.provider);
+          router.push('/profile');
         } catch (e) {
           dispatchLocal({ type: 'ERROR', payload: "Ошибка входа" });
         }

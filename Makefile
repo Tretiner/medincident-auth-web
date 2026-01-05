@@ -7,3 +7,7 @@ release:
 
 build:
 	npm run build
+
+invalidate:
+	powershell -Command "Remove-Item -Recurse -Force node_modules, package-lock.json"
+	npm install

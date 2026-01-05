@@ -9,7 +9,7 @@ let MOCK_USER: User = {
   firstName: "Алексей",
   lastName: "Смирнов",
   middleName: "Викторович",
-  email: "alex.smirnov@ilizarov.ru",
+  email: "alex.smirnov@medsafety.ru",
   phone: "+7 (999) 123-45-67",
   position: "Ведущий хирург",
   avatarUrl: "https://i.pravatar.cc/150?u=USR-7734-21",
