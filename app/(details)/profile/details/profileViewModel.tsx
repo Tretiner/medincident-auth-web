@@ -2,11 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { User } from "@/domain/profile/types";
-import { updateUserProfile } from "../actions"; // Наш Server Action
+import { updateUserProfile } from "../actions";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 
-// Схема данных формы (можно вынести в отдельный файл валидации)
 export interface ProfileFormData {
   firstName: string;
   lastName: string;
@@ -17,10 +16,9 @@ export interface ProfileFormData {
 
 export const useProfileViewModel = (initialUser: User) => {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition(); // Для управления состоянием загрузки Server Actions
+  const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  // Инициализируем форму данными, пришедшими с сервера (SSR)
   const form = useForm<ProfileFormData>({
     defaultValues: {
       firstName: initialUser.firstName,
@@ -31,26 +29,21 @@ export const useProfileViewModel = (initialUser: User) => {
     }
   });
 
-  // Intent: SAVE_CLICKED
   const saveProfile = form.handleSubmit((data) => {
-    setMessage(null); // Сброс сообщений
+    setMessage(null);
     
     startTransition(async () => {
       try {
-        // 1. Вызываем Server Action
         await updateUserProfile({
           id: initialUser.id,
           ...data
         });
 
-        // 2. Обновляем данные на странице (Next.js обновит серверные компоненты)
         router.refresh(); 
+        form.reset(data); 
 
         setMessage({ type: 'success', text: 'Данные успешно сохранены' });
-        
-        // Скрываем сообщение через 3 сек
         setTimeout(() => setMessage(null), 3000);
-
       } catch (error) {
         console.error(error);
         setMessage({ type: 'error', text: 'Не удалось сохранить изменения' });
@@ -62,6 +55,7 @@ export const useProfileViewModel = (initialUser: User) => {
     form,
     state: {
       isSaving: isPending,
+      isDirty: form.formState.isDirty, // Экспортируем флаг изменений
       message
     },
     saveProfile

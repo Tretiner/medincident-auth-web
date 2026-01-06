@@ -55,7 +55,7 @@ export function SessionsList({ sessions, viewModel }: Props) {
                 className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive text-xs h-8 shadow-none"
              >
                 {activeAction === "revoke_all" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Выйти из всех ({otherSessions.length})
+                Выйти из других ({otherSessions.length})
              </Button>
           </div>
       )}

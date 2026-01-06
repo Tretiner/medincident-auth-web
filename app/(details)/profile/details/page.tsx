@@ -10,11 +10,8 @@ export const metadata: Metadata = {
 
 export default async function PersonalDataPage() {
   const user = await getUserProfile();
-
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-
-      {/* 1. Вернули большую карточку */}
+    <div className="space-y-6"> 
       <UserHeaderCard user={user} />
       
       <div>

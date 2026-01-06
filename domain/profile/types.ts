@@ -7,7 +7,6 @@ export interface User {
   phone: string;
   position: string;
   avatarUrl?: string;
-  // Статус привязок для таба Безопасность
   linkedAccounts: {
     telegram: boolean;
     max: boolean;

@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/presentation/components/u
 
 export function UserHeaderCard({ user }: { user: User }) {
   const initials = `${user.firstName[0]}${user.lastName[0]}`;
+  console.log(user.avatarUrl);
 
   return (
     <div className="flex items-center gap-6 p-6 bg-muted/30 rounded-xl border border-border">

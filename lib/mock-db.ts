@@ -1,4 +1,5 @@
 import { User, UserSession } from "@/domain/profile/types";
+import { env } from "@/env";
 
 // Исходные данные (как в БД)
 let USER: User = {
@@ -9,7 +10,7 @@ let USER: User = {
   email: "alex.smirnov@medsafety.ru",
   phone: "+7 (999) 123-45-67",
   position: "Ведущий хирург",
-  avatarUrl: "https://i.pravatar.cc/150?u=USR-7734-21",
+  avatarUrl: `/api/res/avatar/150?u=USR-7734-21`,
   linkedAccounts: {
     telegram: true,
     max: false,

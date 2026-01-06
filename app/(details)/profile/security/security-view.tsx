@@ -4,6 +4,7 @@ import { User, UserSession } from "@/domain/profile/types";
 import { useSecurityViewModel } from "./securityViewModel";
 import { LinkedAccountsCard } from "./components/linked-accounts-card";
 import { SessionsList } from "./components/sessions-list";
+import { Separator } from "@/presentation/components/ui/separator"; // Импорт
 
 interface Props {
   user: User;
