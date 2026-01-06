@@ -3,56 +3,53 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { UserIcon, ShieldCheckIcon, LogOutIcon } from "lucide-react";
+import { ShieldCheckIcon, LogOutIcon, ArrowLeft } from "lucide-react";
 import { Button } from "@/presentation/components/ui/button";
 import { logout } from "@/app/(auth)/login/actions";
+import { User } from "@/domain/profile/types";
+import { Separator } from "@/presentation/components/ui/separator";
+import { SidebarUserCard } from "./sidebar-user-card";
 
-const navItems = [
-  {
-    title: "Мои данные",
-    href: "/profile/details",
-    icon: UserIcon,
-    exact: false
-  },
-  {
-    title: "Безопасность",
-    href: "/profile/security",
-    icon: ShieldCheckIcon,
-    exact: false
-  },
-];
+interface Props {
+  user: User;
+}
 
-export function SidebarNav() {
+export function SidebarNav({ user }: Props) {
   const pathname = usePathname();
+  
+  const isSecurityActive = pathname?.startsWith("/profile/security");
 
   return (
-    <nav className="flex flex-col gap-2 h-full">
-      <div className="space-y-1 flex-1">
-        {navItems.map((item) => {
-           const isActive = item.exact 
-            ? pathname === item.href 
-            : pathname?.startsWith(item.href);
+    // Убрали h-full, чтобы меню не растягивалось на всю высоту
+    <nav className="flex flex-col gap-2">
+      {/* 1. Мини-карточка пользователя */}
+      <SidebarUserCard user={user} />
 
-          return (
-             <Link key={item.href} href={item.href}>
-              <span className={cn(
-                "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200",
-                isActive 
-                  ? "bg-brand-green/10 text-brand-green shadow-sm" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}>
-                <item.icon className={cn("h-5 w-5", isActive ? "text-brand-green" : "text-muted-foreground/70")} />
-                {item.title}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+      {/* 2. Группа кнопок меню */}
+      <div className="flex flex-col gap-1">
+        
+        {/* Кнопка Безопасность */}
+        <Link href="/profile/security">
+          <span className={cn(
+            "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200",
+            isSecurityActive 
+              ? "bg-brand-green/10 text-brand-green shadow-sm" 
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}>
+            <ShieldCheckIcon className={cn("h-5 w-5", isSecurityActive ? "text-brand-green" : "text-muted-foreground/70")} />
+            Безопасность
+          </span>
+        </Link>
 
-      <div className="mt-auto pt-6 border-t border-border">
+        {/* Разделитель перед выходом */}
+        <div className="px-2 my-1">
+             <Separator />
+        </div>
+
+        {/* Кнопка Выйти (теперь идет сразу следом, а не внизу) */}
         <Button 
           variant="ghost" 
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
           onClick={() => logout()} 
         >
           <LogOutIcon className="h-5 w-5" />

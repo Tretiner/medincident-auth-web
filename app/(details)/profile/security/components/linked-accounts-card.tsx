@@ -21,7 +21,7 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
       
       <div className="grid md:grid-cols-2 gap-4">
         {/* TELEGRAM */}
-        <div className="p-4 rounded-2xl border border-border bg-muted/30 flex items-center justify-between transition-colors hover:bg-muted/50">
+        <div className="p-4 rounded-xl border border-border bg-muted/30 flex items-center justify-between transition-colors hover:bg-muted/50">
             <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#229ED9]/10 flex items-center justify-center">
                     <TelegramLogoIcon className="w-5 h-5 text-[#229ED9]" />
@@ -51,7 +51,7 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
         </div>
 
         {/* MAX */}
-        <div className="p-4 rounded-2xl border border-border bg-muted/30 flex items-center justify-between transition-colors hover:bg-muted/50">
+        <div className="p-4 rounded-xl border border-border bg-muted/30 flex items-center justify-between transition-colors hover:bg-muted/50">
             <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                     <MaxLogoIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />

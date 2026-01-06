@@ -4,7 +4,7 @@ import { User } from "@/domain/profile/types";
 import { Button } from "@/presentation/components/ui/button";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
-import { useProfileViewModel } from "../details/profileViewModel";
+import { useProfileViewModel } from "../profileViewModel";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,16 +17,16 @@ export function ProfileForm({ user }: { user: User }) {
       
       <div className="grid gap-6">
         {/* Блок Имя Фамилия Отчество */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Фамилия</Label>
-            <Input id="lastName" {...register("lastName")} placeholder="Иванов" className="bg-background" />
-          </div>
+
           <div className="space-y-2">
             <Label htmlFor="firstName">Имя</Label>
             <Input id="firstName" {...register("firstName")} placeholder="Иван" className="bg-background" />
           </div>
-        </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Фамилия</Label>
+            <Input id="lastName" {...register("lastName")} placeholder="Иванов" className="bg-background" />
+          </div>
         
         <div className="space-y-2">
             <Label htmlFor="middleName">Отчество</Label>

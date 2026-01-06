@@ -17,7 +17,7 @@ export const useSecurityViewModel = () => {
     startTransition(async () => {
       try {
         await actionFn();
-        router.refresh(); // Обновляем данные на странице
+        router.refresh();
       } catch (e) {
         console.error(e);
       } finally {
@@ -27,10 +27,8 @@ export const useSecurityViewModel = () => {
   };
 
   return {
-    isPending, // Глобальный статус (если нужно)
-    activeAction, // ID текущей крутилки
-    
-    // Intents (Намерения)
+    isPending,
+    activeAction,
     toggleTelegram: () => performAction("tg_link", () => toggleAccountLink('telegram')),
     toggleMax: () => performAction("max_link", () => toggleAccountLink('max')),
     revokeAllOthers: () => performAction("revoke_all", revokeAllOtherSessions),

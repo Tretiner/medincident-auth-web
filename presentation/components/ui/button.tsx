@@ -29,9 +29,6 @@ const buttonVariants = cva(
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
-        
-        /* Custom */
-        brand: "h-12 px-8 text-lg font-bold rounded-xl hover:scale-[1.01] active:scale-[0.99] duration-300",
       },
     },
     defaultVariants: {
