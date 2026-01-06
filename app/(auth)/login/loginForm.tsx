@@ -145,7 +145,7 @@ export function LoginForm({ initialQrUrl }: { initialQrUrl: string }) {
             </div>
           </div>
 
-          <p className="mt-8 md:mt-10 text-center text-[10px] md:text-xs text-muted-foreground leading-relaxed px-4 md:px-0">
+          <p className="mt-6 md:mt-8 text-center text-[10px] md:text-xs text-muted-foreground leading-relaxed px-4 md:px-0">
             Нажимая на кнопки входа, вы принимаете{" "}
             <a
               href="#"

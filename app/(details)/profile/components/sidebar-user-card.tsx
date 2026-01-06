@@ -27,7 +27,7 @@ export function SidebarUserCard({ user }: Props) {
       )}>
         {/* Убрали border у аватара */}
         <Avatar className="h-10 w-10">
-          <AvatarImage src={user.avatarUrl} alt={user.lastName} />
+          <AvatarImage src={user.avatarUrl} alt={user.lastName}/>
           <AvatarFallback className="bg-brand-green/10 text-brand-green text-xs font-bold">
             {initials}
           </AvatarFallback>

@@ -42,11 +42,11 @@ export function MockTelegramWidget({ botName, authUrl }: Props) {
   
   const handleMockLogin = () => {
     const mockParams = new URLSearchParams({
-      id: "123456789",
-      first_name: "Ivan",
-      last_name: "Mockov",
-      username: "ivan_mock",
-      photo_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ivan",
+      id: "773421",
+      first_name: "Алексей",
+      last_name: "Смирнов",
+      username: "alex_smirnov",
+      photo_url: "https://i.pravatar.cc/150?u=USR-7734-21",
       auth_date: Math.floor(Date.now() / 1000).toString(),
       hash: "mock_dev_hash"
     });
@@ -65,7 +65,7 @@ export function MockTelegramWidget({ botName, authUrl }: Props) {
         className="bg-[#54a9eb] hover:bg-[#4092d1] text-white w-full rounded-full"
       >
         <User className="w-4 h-4 mr-2" />
-        Log in as Ivan (Mock)
+        Войти как Алексей (Mock)
       </Button>
       
       <p className="text-[10px] text-muted-foreground mt-3 text-center">
