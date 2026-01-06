@@ -68,7 +68,7 @@ export function LoginForm({ initialQrUrl }: { initialQrUrl: string }) {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-brand-bg p-4 font-sans animate-in fade-in duration-500">
       <Card
-        className="w-full max-w-[960px] overflow-hidden rounded-3xl shadow-none 
+        className="w-full max-w-[960px] overflow-hidden rounded-2xl shadow-none 
                        border border-border bg-card transition-all duration-300
                        grid md:grid-cols-2"
       >

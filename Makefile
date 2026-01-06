@@ -13,4 +13,4 @@ invalidate:
 	npm install
 
 filemap:
-	
+	py folder_map.py -fcg --hide-empty --no-format -o folder_map.txt --match "^(?!package-lock|README)"

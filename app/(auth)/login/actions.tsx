@@ -1,12 +1,27 @@
 'use server';
 
-import { deleteSession } from "@/lib/session"; // Импортируем функцию удаления куки
+import { deleteSession } from "@/lib/session";
 import { redirect } from "next/navigation";
+import { env } from "@/env"; // Используем env для получения базового URL
 
 export async function fetchQrCode(): Promise<string> {
-  const token = Math.random().toString(36).substring(7);
-  return `/медведь-гол-гоооол.gif`;
-  // return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Auth_${token}`;
+  try {
+    const response = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/auth`, {
+      method: 'GET',
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch QR code');
+    }
+
+    const data = await response.json();
+    return `/медведь-гол-гоооол.gif`;
+    // return data.url; // Возвращаем URL, сгенерированный в API
+  } catch (error) {
+    console.error("QR Fetch Error:", error);
+    return `/медведь-гол-гоооол.gif`; 
+  }
 }
 
 export async function login(provider: string): Promise<boolean> {
