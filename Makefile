@@ -12,5 +12,5 @@ invalidate:
 	powershell -Command "Remove-Item -Recurse -Force node_modules, package-lock.json"
 	npm install
 
-filemap:
+foldermap:
 	py folder_map.py -fcg --hide-empty --no-format -o folder_map.txt --match "^(?!package-lock|README)"

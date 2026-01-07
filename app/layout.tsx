@@ -4,11 +4,12 @@ import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import "./globals.css";
+import { APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | MedSafety',
-    default: 'MedSafety',
+    template: `%s | ${APP_NAME}`,
+    default:  APP_NAME,
   },
   description: "Вход в медицинскую систему",
 };

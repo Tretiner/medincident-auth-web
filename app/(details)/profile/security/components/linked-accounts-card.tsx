@@ -15,9 +15,7 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
   const { linkedAccounts } = user;
   const { activeAction, toggleTelegram, toggleMax } = viewModel;
 
-  // Базовые стили карточки:
-  // - flex-wrap: перенос на новую строку, если не влезает
-  // - min-w-[300px]: минимальная ширина одной карточки
+  const connectedCount = (linkedAccounts.telegram ? 1 : 0) + (linkedAccounts.max ? 1 : 0);
   const cardBaseClass = cn(
     "flex-1 min-w-[300px]", 
     "p-4 rounded-xl border border-border bg-card transition-all duration-200",
@@ -54,28 +52,25 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
                 </div>
             </div>
 
-            <Button
-                size="sm"
-                // Variant "outline" нужен только для кнопки "Отвязать" (чтобы была рамка), 
-                // для "Привязать" мы полностью переопределяем стиль
-                variant={linkedAccounts.telegram ? "outline" : "default"}
-                onClick={toggleTelegram}
-                disabled={!!activeAction}
-                className={cn(
-                  "font-medium  shadow-none w-full sm:w-auto",
-                  linkedAccounts.telegram 
-                    ? "border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive" // Стиль "Отвязать"
-                    : "text-white border-0 hover:opacity-90" // Стиль "Привязать" (Белый текст)
-                )}
-                style={!linkedAccounts.telegram ? {
-                    // Просто заливаем фон градиентом
-                    background: "var(--telegram-gradient)"
-                } : undefined}
-            >
-                {activeAction === "tg_link" ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                    linkedAccounts.telegram ? "Отвязать" : "Привязать"
-                )}
-            </Button>
+            {(!linkedAccounts.telegram || connectedCount > 1) && (
+              <Button
+                  size="sm"
+                  variant={linkedAccounts.telegram ? "outline" : "default"}
+                  onClick={toggleTelegram}
+                  disabled={!!activeAction}
+                  className={cn(
+                    "font-medium shadow-none w-full sm:w-auto transition-all",
+                    linkedAccounts.telegram 
+                      ? "border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive" // Стиль "Отвязать"
+                      : "text-white border-0 hover:opacity-90"
+                  )}
+                  style={!linkedAccounts.telegram ? { background: "var(--telegram-gradient)" } : undefined}
+              >
+                  {activeAction === "tg_link" ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                      linkedAccounts.telegram ? "Отвязать" : "Привязать"
+                  )}
+              </Button>
+            )}
         </div>
 
         {/* --- MAX ID --- */}
@@ -97,31 +92,30 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
                         "text-xs font-medium",
                         linkedAccounts.max ? "text-brand-green" : "text-muted-foreground"
                     )}>
-                         {linkedAccounts.max ? "Подключен" : "Не подключен"}
+                        {linkedAccounts.max ? "Подключен" : "Не подключен"}
                     </span>
                 </div>
             </div>
 
-            <Button
-                size="sm"
-                variant={linkedAccounts.max ? "outline" : "default"}
-                onClick={toggleMax}
-                disabled={!!activeAction}
-                className={cn(
-                  "font-medium shadow-none w-full sm:w-auto",
-                  linkedAccounts.max 
-                     ? "border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                     : "text-white border-0 hover:opacity-90" // Белый текст
-                )}
-                style={!linkedAccounts.max ? {
-                    // Просто заливаем фон градиентом
-                    background: "var(--max-gradient)"
-                } : undefined}
-            >
-                 {activeAction === "max_link" ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                    linkedAccounts.max ? "Отвязать" : "Привязать"
-                )}
-            </Button>
+            {(!linkedAccounts.max || connectedCount > 1) && (
+              <Button
+                  size="sm"
+                  variant={linkedAccounts.max ? "outline" : "default"}
+                  onClick={toggleMax}
+                  disabled={!!activeAction}
+                  className={cn(
+                    "font-medium shadow-none w-full sm:w-auto transition-all",
+                    linkedAccounts.max 
+                      ? "border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+                      : "text-white border-0 hover:opacity-90"
+                  )}
+                  style={!linkedAccounts.max ? { background: "var(--max-gradient)" } : undefined}
+              >
+                  {activeAction === "max_link" ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                      linkedAccounts.max ? "Отвязать" : "Привязать"
+                  )}
+              </Button>
+            )}
         </div>
       </div>
     </div>
