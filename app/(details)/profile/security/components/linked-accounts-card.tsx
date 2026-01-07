@@ -41,7 +41,7 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
                 )}
                 style={linkedAccounts.telegram ? { background: 'var(--telegram-gradient)' } : undefined}
                 >
-                    <TelegramLogoIcon className="w-5 h-5" />
+                    <TelegramLogoIcon className="w-6 h-6" />
                 </div>
                 <div className="flex flex-col">
                     <span className="font-semibold text-foreground">Telegram</span>
@@ -89,7 +89,7 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
                 )}
                 style={linkedAccounts.max ? { background: 'var(--max-gradient)' } : undefined}
                 >
-                    <MaxLogoIcon className="w-5 h-5" />
+                    <MaxLogoIcon className="w-7 h-7" />
                 </div>
                 <div className="flex flex-col">
                     <span className="font-semibold text-foreground">MAX ID</span>

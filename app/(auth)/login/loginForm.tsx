@@ -34,7 +34,7 @@ const TelegramButton = ({ onClick, disabled }: AuthButtonProps) => (
     {disabled ? (
       <Loader2 className="w-5 h-5 animate-spin absolute left-4" />
     ) : (
-      <TelegramLogoIcon className="w-5 h-5 absolute left-4" />
+      <TelegramLogoIcon className="absolute left-4" />
     )}
     <span className="pl-6">Войти через Telegram</span>
   </Button>
@@ -51,7 +51,7 @@ const MaxButton = ({ onClick, disabled }: AuthButtonProps) => (
     {disabled ? (
       <Loader2 className="w-5 h-5 animate-spin absolute left-4" />
     ) : (
-      <MaxLogoIcon className="w-6 h-6 absolute left-4" />
+      <MaxLogoIcon className="absolute left-4" />
     )}
     <span className="pl-6">Войти через MAX</span>
   </Button>

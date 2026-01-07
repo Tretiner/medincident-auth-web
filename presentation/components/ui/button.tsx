@@ -21,8 +21,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
 
         /* Custom */
-        telegram: "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90",
-        max: "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90",
+        telegram: "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90 [&_svg]:size-6",
+        max: "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 [&_svg]:size-6",
       },
       size: {
         default: "h-9 px-4 py-2",
