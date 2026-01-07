@@ -1,4 +1,3 @@
-
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
@@ -22,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body className={cn(
-         "min-h-screen bg-brand-bg antialiased",
+         "min-h-screen bg-background antialiased",
          GeistSans.variable,
          GeistMono.variable,
       )}>

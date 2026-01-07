@@ -59,7 +59,7 @@ export function LoginForm({ initialQrUrl }: { initialQrUrl: string }) {
   const tgAuthUrl = `${env.NEXT_PUBLIC_APP_URL}/api/callback/telegram`;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-brand-bg p-4 font-sans animate-in fade-in duration-500">
+    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4 font-sans animate-in fade-in duration-500">
       <Card
         className="w-full max-w-[960px] overflow-hidden rounded-2xl shadow-none
                        border border-border bg-card transition-all duration-300
@@ -68,11 +68,12 @@ export function LoginForm({ initialQrUrl }: { initialQrUrl: string }) {
         
         {/* ЛЕВАЯ КОЛОНКА: QR Code */}
         <div className="hidden md:flex bg-muted/30 p-12 flex-col items-center justify-center text-center relative overflow-hidden border-r border-border">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,var(--color-brand-green),transparent)] opacity-5 pointer-events-none" />
+          {/* Используем var(--color-primary) для градиента */}
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,var(--color-primary),transparent)] opacity-5 pointer-events-none" />
 
           <div className="relative z-10 flex flex-col items-center">
             <div className="bg-white p-4 rounded-[2rem] border border-border relative overflow-hidden group w-64 h-64 flex items-center justify-center shadow-sm mb-8">
-              
+               
               {isQrError ? (
                  <div className="flex flex-col items-center text-destructive gap-2 px-4">
                     <AlertCircle className="w-8 h-8 opacity-50" />
@@ -88,12 +89,11 @@ export function LoginForm({ initialQrUrl }: { initialQrUrl: string }) {
                     unoptimized
                     className="object-contain p-4 transition-opacity duration-500"
                   />
-                  {/* Показываем скелетон только если совсем пусто (на всякий случай) */}
                   {!qrUrl && isQrLoading && (
                     <div className="absolute inset-0 bg-muted animate-pulse" />
                   )}
                   
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-green/20 to-transparent -translate-y-full animate-[accordion-down_2s_infinite] pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent -translate-y-full animate-[accordion-down_2s_infinite] pointer-events-none" />
                 </>
               )}
 
@@ -111,8 +111,8 @@ export function LoginForm({ initialQrUrl }: { initialQrUrl: string }) {
         {/* ПРАВАЯ КОЛОНКА: Кнопки */}
         <CardContent className="p-6 sm:p-8 md:p-12 flex flex-col justify-center min-h-[500px] md:min-h-auto">
           <div className="flex flex-col items-center md:items-start mb-6 md:mb-10">
-            <div className="w-14 h-14 md:w-16 md:h-16 bg-brand-green/10 rounded-2xl flex items-center justify-center mb-4 md:mb-6 text-brand-green shadow-sm">
-              <ServiceLogoIcon className="w-7 h-7 md:w-8 md:h-8" />
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 md:mb-6 text-primary shadow-sm">
+               <ServiceLogoIcon className="w-7 h-7 md:w-8 md:h-8" />
             </div>
             
             <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight text-center md:text-left">
@@ -126,7 +126,7 @@ export function LoginForm({ initialQrUrl }: { initialQrUrl: string }) {
           <div className="space-y-4 md:space-y-6 w-full">
             {globalError && (
               <div className="p-4 rounded-xl bg-destructive/10 text-destructive text-sm font-medium 
-                              border border-destructive/20 flex items-center gap-2 animate-in slide-in-from-top-2">
+                               border border-destructive/20 flex items-center gap-2 animate-in slide-in-from-top-2">
                 <span className="block w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0" />
                 {globalError}
               </div>
@@ -147,11 +147,11 @@ export function LoginForm({ initialQrUrl }: { initialQrUrl: string }) {
 
           <p className="mt-6 md:mt-8 text-center text-[10px] md:text-xs text-muted-foreground leading-relaxed px-4 md:px-0">
             Нажимая на кнопки входа, вы принимаете{" "}
-            <a href="#" className="text-brand-green hover:underline font-medium">
+            <a href="#" className="text-primary hover:underline font-medium">
               пользовательское соглашение
             </a>{" "}
             и{" "}
-            <a href="#" className="text-brand-green hover:underline font-medium">
+            <a href="#" className="text-primary hover:underline font-medium">
               политику конфиденциальности
             </a>{" "}
             сервиса {APP_NAME}.

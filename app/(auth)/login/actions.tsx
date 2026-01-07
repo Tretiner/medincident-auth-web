@@ -2,7 +2,7 @@
 
 import { deleteSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { env } from "@/env"; // Используем env для получения базового URL
+import { env } from "@/env";
 
 export async function fetchQrCode(): Promise<string> {
   try {
@@ -17,7 +17,7 @@ export async function fetchQrCode(): Promise<string> {
 
     const data = await response.json();
     return `/медведь-гол-гоооол.gif`;
-    // return data.url; // Возвращаем URL, сгенерированный в API
+    // return data.url;
   } catch (error) {
     console.error("QR Fetch Error:", error);
     return `/медведь-гол-гоооол.gif`; 

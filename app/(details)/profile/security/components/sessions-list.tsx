@@ -24,19 +24,20 @@ export function SessionsList({ sessions, viewModel }: Props) {
       
     <h4 className="text-lg font-medium text-foreground">Активные сессии</h4>
       {currentSession && (
-          <div className="p-4 rounded-xl bg-brand-green/10 border border-brand-green/20 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center text-brand-green shadow-sm border border-brand-green/10">
+          // Brand colors -> Primary colors
+          <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center text-primary shadow-sm border border-primary/10">
                   <DeviceIcon name={currentSession.deviceName} />
               </div>
               <div className="flex-1">
                   <div className="flex items-center gap-2">
                       <h4 className="font-semibold text-foreground">{currentSession.deviceName}</h4>
-                      <span className="px-2 py-0.5 rounded-full bg-brand-green text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
-                          Этот браузер
+                      <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                         Этот браузер
                       </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                      IP: {currentSession.ip} • <span className="text-brand-green font-medium">Онлайн</span>
+                     IP: {currentSession.ip} • <span className="text-primary font-medium">Онлайн</span>
                   </p>
               </div>
           </div>
@@ -45,7 +46,7 @@ export function SessionsList({ sessions, viewModel }: Props) {
       {/* 2. ЗАГОЛОВОК "ДРУГИЕ СЕССИИ" И КНОПКА */}
       {otherSessions.length > 0 && (
           <div className="flex items-center justify-between pt-2">
-            <h3 className="text-lg font-medium text-foreground">Другие сессии</h3>
+             <h3 className="text-lg font-medium text-foreground">Другие сессии</h3>
 
              <Button 
                 variant="outline" 

@@ -9,7 +9,6 @@ import { Button } from "@/presentation/components/ui/button";
 
 export function MobileNav() {
   const pathname = usePathname();
-
   // Определяем активные табы
   const tabs = [
     {
@@ -39,11 +38,11 @@ export function MobileNav() {
               "flex-1 flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium rounded-lg transition-all duration-200",
               // Стили активного состояния (белая плашка с тенью) vs неактивного
               tab.isActive 
-                ? "bg-background text-brand-green shadow-sm" 
+                ? "bg-background text-primary shadow-sm" 
                 : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
             )}
           >
-            <tab.icon className={cn("w-5 h-5 mb-0.5", tab.isActive && "text-brand-green")} />
+            <tab.icon className={cn("w-5 h-5 mb-0.5", tab.isActive && "text-primary")} />
             {tab.name}
           </Link>
         ))}

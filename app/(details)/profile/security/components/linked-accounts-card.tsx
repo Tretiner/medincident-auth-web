@@ -41,11 +41,12 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
                 >
                     <TelegramLogoIcon className="w-6 h-6" />
                 </div>
+              
                 <div className="flex flex-col">
                     <span className="font-semibold text-foreground">Telegram</span>
                     <span className={cn(
                         "text-xs font-medium",
-                        linkedAccounts.telegram ? "text-brand-green" : "text-muted-foreground"
+                        linkedAccounts.telegram ? "text-primary" : "text-muted-foreground"
                     )}>
                         {linkedAccounts.telegram ? "Подключен" : "Не подключен"}
                     </span>
@@ -90,7 +91,7 @@ export function LinkedAccountsCard({ user, viewModel }: Props) {
                     <span className="font-semibold text-foreground">MAX ID</span>
                     <span className={cn(
                         "text-xs font-medium",
-                        linkedAccounts.max ? "text-brand-green" : "text-muted-foreground"
+                        linkedAccounts.max ? "text-primary" : "text-muted-foreground"
                     )}>
                         {linkedAccounts.max ? "Подключен" : "Не подключен"}
                     </span>

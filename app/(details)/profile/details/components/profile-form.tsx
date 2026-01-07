@@ -28,7 +28,6 @@ export function ProfileForm({ user }: { user: User }) {
     if (state.isDirty) {
       setIsConfirmOpen(true);
     } else {
-      // На случай если кнопка активна, но изменений нет (редкий кейс)
       saveProfile();
     }
   };
@@ -126,7 +125,7 @@ export function ProfileForm({ user }: { user: User }) {
         <Button 
           onClick={handleSaveClick} 
           disabled={state.isSaving || !state.isDirty}
-          className="bg-brand-green hover:bg-brand-green/90 text-white min-w-[140px] shadow-sm transition-all"
+          className="bg-primary hover:bg-primary/90 text-white min-w-[140px] shadow-sm transition-all"
         >
           {state.isSaving ? (
             <>
@@ -154,7 +153,7 @@ export function ProfileForm({ user }: { user: User }) {
             </Button>
             <Button 
                 onClick={confirmSave}
-                className="bg-brand-green hover:bg-brand-green/90 text-white rounded-lg"
+                className="bg-primary hover:bg-primary/90 text-white rounded-lg"
             >
               Подтвердить
             </Button>

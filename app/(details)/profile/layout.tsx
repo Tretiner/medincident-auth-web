@@ -12,7 +12,7 @@ export default async function ProfileLayout({
 
   return (
     // Контейнер на весь экран (dvh для мобилок) с отступами
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full bg-brand-bg p-3 md:p-8 font-sans">
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full bg-background p-3 md:p-8 font-sans">
       
       <Card className="
         w-full max-w-[1000px] 
