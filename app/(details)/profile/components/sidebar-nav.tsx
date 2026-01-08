@@ -29,7 +29,7 @@ export function SidebarNav({ user }: Props) {
         {/* Кнопка Безопасность */}
         <Link href="/profile/security">
            <span className={cn(
-            "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200",
+            "flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200",
             isSecurityActive 
               ? "bg-primary/10 text-primary shadow-sm" 
               : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -50,7 +50,7 @@ export function SidebarNav({ user }: Props) {
           className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
           onClick={() => logout()} 
         >
-          <LogOutIcon className="h-5 w-5" />
+          <LogOutIcon className="h-5 w-5"  />
           Выйти
         </Button>
       </div>

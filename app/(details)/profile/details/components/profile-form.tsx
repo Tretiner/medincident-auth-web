@@ -42,7 +42,7 @@ export function ProfileForm({ user }: { user: User }) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* FORM FIELDS */}
       <div className="grid gap-6">
         <div className="space-y-2">

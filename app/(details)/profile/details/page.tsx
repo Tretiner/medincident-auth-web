@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import { getUserProfile } from "../actions";
 import { UserHeaderCard } from "./components/user-header-card";
 import { ProfileForm } from "./components/profile-form";
+import { PageHeader } from "../components/page-header";
+import { UserRound } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Мои данные",
@@ -11,11 +13,12 @@ export const metadata: Metadata = {
 export default async function PersonalDataPage() {
   const user = await getUserProfile();
   return (
-    <div className="space-y-6"> 
-      <div>
-        <h3 className="text-lg font-bold text-foreground">Мои данные</h3>
-        <p className="text-sm text-muted-foreground">Редактирование личной информации и контактов</p>
-      </div>
+    <div className="space-y-4"> 
+      <PageHeader 
+        title="Мои данные" 
+        description="Редактирование личной информации и контактов"
+        icon={UserRound}
+      />
 
       <UserHeaderCard user={user} />
 

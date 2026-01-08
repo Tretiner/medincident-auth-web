@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import { getUserProfile, getUserSessions } from "../actions";
 import { SecurityView } from "./security-view";
+import { ShieldCheck } from "lucide-react";
+import { PageHeader } from "../components/page-header";
 
 export const metadata: Metadata = {
   title: "Безопасность",
@@ -16,13 +18,12 @@ export default async function SecurityPage() {
   return (
     <div className="space-y-6">
       
-      {/* Заголовок и описание */}
-      <div>
-        <h3 className="text-lg font-bold text-foreground">Безопасность и вход</h3>
-        <p className="text-sm text-muted-foreground">Управление привязанными аккаунтами и сессиями</p>
-      </div>
+      <PageHeader 
+        title="Безопасность и вход"
+        description="Управление привязанными аккаунтами и активными сессиями"
+        icon={ShieldCheck}
+      />
       
-      {/* Контент */}
       <SecurityView user={user} sessions={sessions} />
     </div>
   );
