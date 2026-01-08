@@ -12,12 +12,12 @@ export default async function PersonalDataPage() {
   const user = await getUserProfile();
   return (
     <div className="space-y-6"> 
-      <UserHeaderCard user={user} />
-      
       <div>
         <h3 className="text-lg font-bold text-foreground">Мои данные</h3>
         <p className="text-sm text-muted-foreground">Редактирование личной информации и контактов</p>
       </div>
+
+      <UserHeaderCard user={user} />
 
       {/* Форма */}
       <ProfileForm user={user} />

@@ -5,8 +5,9 @@ export function UserHeaderCard({ user }: { user: User }) {
   const initials = `${user.firstName[0]}${user.lastName[0]}`;
   
   return (
-    <div className="flex items-center gap-6 p-6 bg-muted/30 rounded-xl border border-border">
-      <Avatar className="h-20 w-20 border-4 border-background shadow-sm">
+    <div className="flex items-center gap-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
+
+      <Avatar className="h-16 w-16 shadow-none">
         <AvatarImage src={user.avatarUrl} alt={user.lastName} />
         <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
           {initials}
@@ -14,15 +15,16 @@ export function UserHeaderCard({ user }: { user: User }) {
       </Avatar>
 
       <div className="flex flex-col">
-        <h2 className="text-2xl font-bold text-foreground leading-tight">
+
+        <h2 className="text-xl font-bold text-primary leading-tight">
            {user.firstName} {user.lastName}
         </h2>
         {user.position && (
             <span className="text-sm text-muted-foreground font-medium">{user.position}</span>
         )}
-        <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono font-medium bg-muted text-muted-foreground w-fit border border-border mt-1">
+        <span className="inline-flex items-center rounded-md text-xs font-mono text-muted-foreground mt-0.5">
           ID: {user.id}
-        </div>
+        </span>
       </div>
     </div>
   );

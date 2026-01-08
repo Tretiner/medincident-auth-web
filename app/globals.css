@@ -12,6 +12,8 @@
   --palette-brand-green-dark: oklch(0.25 0.08 132.22);  /* Темно-зеленый для текста */
   --palette-brand-orange: oklch(0.817 0.155 77.58);
   --palette-brand-orange-dark: oklch(0.14 0.05 77.58);
+  --palette-brand-telegram: oklch(66.23% 0.133 235.92);
+  --palette-brand-max: oklch(54.258% 0.20561 279.283);
 
   /* Neutrals (Grays/Whites) */
   --palette-white: oklch(1 0 0);
@@ -100,12 +102,13 @@
   /* ========================================= */
   
   /* Dark Primitives Overrides (Local to dark mode) */
-  --palette-dark-bg: oklch(0.246 0 0);       /* Brand Dark #222 */
-  --palette-dark-card: oklch(0.28 0 0);      /* Lighter #222 */
+  --palette-dark-bg: oklch(0.246 0 0);   
+  --palette-dark-card: oklch(0.28 0 0);   
   --palette-dark-border: oklch(0.279 0.041 260.031);
   --palette-dark-muted: oklch(0.279 0.041 260.031);
   --palette-dark-text-muted: oklch(0.704 0.04 256.788);
   --palette-dark-destructive: oklch(0.704 0.191 22.216);
+  --palette-brand-max: oklch(68.01% 0.158 276.93);
 
   /* Mapping */
   --background: var(--palette-dark-bg);
@@ -207,6 +210,8 @@
 
   --background-image-gradient-telegram: var(--telegram-gradient);
   --background-image-gradient-max: var(--max-gradient);
+  --color-brand-telegram: var(--palette-brand-telegram);
+  --color-brand-max: var(--palette-brand-max);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;

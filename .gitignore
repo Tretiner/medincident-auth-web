@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-folder_map.txt
-folder_map.py
+/*.py
+/*.txt

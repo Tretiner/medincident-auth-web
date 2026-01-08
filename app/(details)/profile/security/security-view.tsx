@@ -1,10 +1,9 @@
 'use client';
 
 import { User, UserSession } from "@/domain/profile/types";
-import { useSecurityViewModel } from "./securityViewModel";
+import { useSecurity } from "./security.hooks";
 import { LinkedAccountsCard } from "./components/linked-accounts-card";
 import { SessionsList } from "./components/sessions-list";
-import { Separator } from "@/presentation/components/ui/separator"; // Импорт
 
 interface Props {
   user: User;
@@ -12,19 +11,27 @@ interface Props {
 }
 
 export function SecurityView({ user, sessions }: Props) {
-  const viewModel = useSecurityViewModel();
+  const { state, actions } = useSecurity();
 
   return (
     <div className="space-y-8">
       
-      {/* Секция: Привязанные аккаунты */}
       <div id="linked-accounts" className="space-y-4 scroll-mt-6">
-        <LinkedAccountsCard user={user} viewModel={viewModel} />
+        <LinkedAccountsCard 
+            user={user} 
+            activeActionId={state.activeActionId}
+            onToggleTelegram={actions.onToggleTelegram}
+            onToggleMax={actions.onToggleMax}
+        />
       </div>
       
-      {/* Секция: Активные сессии */}
       <div id="active-sessions" className="space-y-4 scroll-mt-6">
-        <SessionsList sessions={sessions} viewModel={viewModel} />
+        <SessionsList 
+            sessions={sessions} 
+            activeActionId={state.activeActionId}
+            onRevokeSession={actions.onRevokeSession}
+            onRevokeAllOthers={actions.onRevokeAllOthers}
+        />
       </div>
 
     </div>
