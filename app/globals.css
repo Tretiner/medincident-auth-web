@@ -1,95 +1,66 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  /* ========================================= */
-  /* 1. PRIMITIVES (Базовая палитра цветов)    */
-  /* ========================================= */
+  /* --- 1. BRAND & BASE PALETTE (OKLCH) --- */
+  --brand-green: oklch(0.696 0.176 132.22);
+  --brand-green-light: oklch(0.94 0.03 132.22);
+  --brand-green-dark: oklch(0.25 0.08 132.22);
   
-  /* Brand Colors */
-  --palette-brand-green: oklch(0.696 0.176 132.22);
-  --palette-brand-green-light: oklch(0.94 0.03 132.22); /* Светло-зеленый */
-  --palette-brand-green-dark: oklch(0.25 0.08 132.22);  /* Темно-зеленый для текста */
-  --palette-brand-orange: oklch(0.817 0.155 77.58);
-  --palette-brand-orange-dark: oklch(0.14 0.05 77.58);
+  --brand-orange: oklch(0.817 0.155 77.58);
+  --brand-orange-dark: oklch(0.14 0.05 77.58);
   --palette-brand-telegram: oklch(66.23% 0.133 235.92);
   --palette-brand-max: oklch(54.258% 0.20561 279.283);
 
-  /* Neutrals (Grays/Whites) */
-  --palette-white: oklch(1 0 0);
-  --palette-gray-50: oklch(0.985 0.002 247.858); /* Новый, более светлый фон */
-  --palette-gray-100: oklch(0.956 0.005 248.06); /* Старый фон (чуть темнее) */
-  --palette-gray-200: oklch(0.929 0.013 255.508); /* Borders */
-  --palette-gray-500: oklch(0.554 0.046 257.417); /* Muted text */
-  --palette-gray-900: oklch(0.129 0.042 264.695); /* Main text */
-  --palette-black: oklch(0 0 0);
+  --gray-50: oklch(0.985 0.002 247.858);
+  --gray-100: oklch(0.956 0.005 248.06);
+  --gray-200: oklch(0.929 0.013 255.508);
+  --gray-500: oklch(0.554 0.046 257.417);
+  --gray-900: oklch(0.129 0.042 264.695);
 
-  /* Functional Colors */
-  --palette-red: oklch(0.577 0.245 27.325);
-  --palette-red-foreground: oklch(0.984 0.003 247.858);
+  --red: oklch(0.577 0.245 27.325);
+  --red-foreground: oklch(0.984 0.003 247.858);
 
-  /* Chart Colors (Primitive) */
-  --palette-chart-1: oklch(0.646 0.222 41.116);
-  --palette-chart-2: oklch(0.6 0.118 184.704);
-  --palette-chart-3: oklch(0.398 0.07 227.392);
-  --palette-chart-4: oklch(0.828 0.189 84.429);
-  --palette-chart-5: oklch(0.769 0.188 70.08);
+  /* --- 2. SEMANTIC TOKENS (LIGHT MODE) --- */
+  --background: var(--gray-50);
+  --foreground: var(--gray-900);
 
-  /* ========================================= */
-  /* 2. SEMANTIC THEME (Light Mode)            */
-  /* ========================================= */
+  --card: var(--white);
+  --card-foreground: var(--gray-900);
 
-  /* BACKGROUND: Был gray-100, стал gray-50 (светлее) */
-  --background: var(--palette-gray-50);
-  --foreground: var(--palette-gray-900);
+  --popover: var(--white);
+  --popover-foreground: var(--gray-900);
 
-  --card: var(--palette-white);
-  --card-foreground: var(--palette-gray-900);
+  --primary: var(--brand-green);
+  --primary-foreground: var(--white);
 
-  --popover: var(--palette-white);
-  --popover-foreground: var(--palette-gray-900);
+  --secondary: var(--brand-green-light);
+  --secondary-foreground: var(--brand-green-dark);
 
-  --primary: var(--palette-brand-green);
-  --primary-foreground: var(--palette-white);
+  --muted: var(--gray-100);
+  --muted-foreground: var(--gray-500);
 
-  --secondary: var(--palette-brand-green-light);
-  --secondary-foreground: var(--palette-brand-green-dark);
+  --accent: var(--brand-green-light);
+  --accent-foreground: var(--brand-green-dark);
 
-  --muted: var(--palette-gray-100);
-  --muted-foreground: var(--palette-gray-500);
+  --destructive: var(--red);
+  --destructive-foreground: var(--red-foreground);
 
-  --accent: var(--palette-brand-green-light);
-  --accent-foreground: var(--palette-brand-green-dark);
+  --warning: var(--brand-orange);
+  --warning-foreground: var(--brand-orange-dark);
 
-  --destructive: var(--palette-red);
-  --destructive-foreground: var(--palette-red-foreground);
-
-  /* Brand Warning */
-  --warning: var(--palette-brand-orange);
-  --warning-foreground: var(--palette-brand-orange-dark);
-
-  --border: var(--palette-gray-200);
-  --input: var(--palette-gray-200);
-  --ring: var(--palette-brand-green);
+  --border: var(--gray-200);
+  --input: var(--gray-200);
+  --ring: var(--brand-green);
 
   --radius: 0.625rem;
 
   /* Sidebar */
-  --sidebar: var(--palette-gray-50);
-  --sidebar-foreground: var(--palette-gray-900);
-  --sidebar-primary: var(--palette-brand-green);
-  --sidebar-primary-foreground: var(--palette-white);
-  --sidebar-accent: var(--palette-gray-100);
-  --sidebar-accent-foreground: var(--palette-brand-green);
-  --sidebar-border: var(--palette-gray-200);
-  --sidebar-ring: var(--palette-brand-green);
-
-  /* Charts Maps */
-  --chart-1: var(--palette-chart-1);
-  --chart-2: var(--palette-chart-2);
-  --chart-3: var(--palette-chart-3);
-  --chart-4: var(--palette-chart-4);
-  --chart-5: var(--palette-chart-5);
+  --sidebar-background: var(--gray-50);
+  --sidebar-foreground: var(--gray-900);
+  --sidebar-primary: var(--brand-green);
+  --sidebar-border: var(--gray-200);
 
   /* Gradients */
   --telegram-gradient: linear-gradient(to right, #2AABEE, #229ED9);
@@ -97,68 +68,37 @@
 }
 
 .dark {
-  /* ========================================= */
-  /* 3. SEMANTIC THEME (Dark Mode)             */
-  /* ========================================= */
-  
-  /* Dark Primitives Overrides (Local to dark mode) */
-  --palette-dark-bg: oklch(0.246 0 0);   
-  --palette-dark-card: oklch(0.28 0 0);   
-  --palette-dark-border: oklch(0.279 0.041 260.031);
-  --palette-dark-muted: oklch(0.279 0.041 260.031);
-  --palette-dark-text-muted: oklch(0.704 0.04 256.788);
-  --palette-dark-destructive: oklch(0.704 0.191 22.216);
   --palette-brand-max: oklch(68.01% 0.158 276.93);
+  /* --- 3. SEMANTIC TOKENS (DARK MODE) --- */
+  --background: oklch(0.246 0 0);
+  --foreground: oklch(0.984 0.003 247.858);
 
-  /* Mapping */
-  --background: var(--palette-dark-bg);
-  --foreground: var(--palette-red-foreground); /* White-ish */
+  --card: oklch(0.28 0 0);
+  --card-foreground: oklch(0.984 0.003 247.858);
 
-  --card: var(--palette-dark-card);
-  --card-foreground: var(--palette-red-foreground);
+  --popover: oklch(0.28 0 0);
+  --popover-foreground: oklch(0.984 0.003 247.858);
 
-  --popover: var(--palette-dark-card);
-  --popover-foreground: var(--palette-red-foreground);
-
-  /* Primary остается брендовым зеленым */
-  --primary: var(--palette-brand-green);
-  --primary-foreground: var(--palette-white);
+  --primary: var(--brand-green);
+  --primary-foreground: var(--white);
 
   --secondary: var(--palette-dark-muted);
   --secondary-foreground: var(--palette-red-foreground);
 
-  --muted: var(--palette-dark-muted);
-  --muted-foreground: var(--palette-dark-text-muted);
+  --muted: oklch(0.35 0 0);
+  --muted-foreground: oklch(0.704 0.04 256.788);
 
-  --accent: var(--palette-dark-muted);
-  --accent-foreground: var(--palette-red-foreground);
+  --accent: oklch(0.35 0 0);
+  --accent-foreground: var(--red-foreground);
 
-  --destructive: var(--palette-dark-destructive);
-  --destructive-foreground: var(--palette-red-foreground);
+  --destructive: oklch(0.5 0.15 22.2);
+  --destructive-foreground: var(--red-foreground);
 
-  --warning: var(--palette-brand-orange);
-  --warning-foreground: var(--palette-brand-orange-dark);
-
-  --border: var(--palette-dark-border);
-  --input: var(--palette-dark-border);
-  --ring: var(--palette-brand-green);
-
-  /* Sidebar Dark */
-  --sidebar: var(--palette-dark-bg);
-  --sidebar-foreground: var(--palette-red-foreground);
-  --sidebar-primary: var(--palette-brand-green);
-  --sidebar-primary-foreground: var(--palette-white);
-  --sidebar-accent: var(--palette-dark-muted);
-  --sidebar-accent-foreground: var(--palette-red-foreground);
-  --sidebar-border: var(--palette-dark-border);
-  --sidebar-ring: var(--palette-brand-green);
-
-  /* Charts Dark Overrides */
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --border: oklch(0.32 0 0);
+  --input: oklch(0.32 0 0);
+  
+  --sidebar-background: oklch(0.246 0 0);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
 }
 
 @theme {
@@ -215,13 +155,14 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-
+  
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
-
+  
+  /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
@@ -261,32 +202,31 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+}
 
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+@layer utilities {
+  .scrollbar-app {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--border);
+      border-radius: 9999px;
+      &:hover {
+        background-color: var(--muted-foreground);
+      }
+    }
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-
-  .scrollbar-app {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
-  }
-  .scrollbar-app::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  .scrollbar-app::-webkit-scrollbar-track {
-    background: transparent;
-    margin-block: 4px;
-  }
-  .scrollbar-app::-webkit-scrollbar-thumb {
-    background-color: var(--color-border);
-    border-radius: 9999px;
-  }
-  .scrollbar-app::-webkit-scrollbar-thumb:hover {
-     background-color: var(--color-muted-foreground);
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
