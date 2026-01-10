@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import { APP_NAME } from "@/lib/constants";
+import { ThemeProvider } from "./providers";
 
 export const metadata: Metadata = {
   title: {
@@ -25,7 +26,9 @@ export default function RootLayout({
          GeistSans.variable,
          GeistMono.variable,
       )}>
-        {children}
+        <ThemeProvider attribute="class" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
