@@ -26,7 +26,7 @@ export default function RootLayout({
          GeistSans.variable,
          GeistMono.variable,
       )}>
-        <ThemeProvider attribute="class" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="root" enableSystem>
           {children}
         </ThemeProvider>
       </body>

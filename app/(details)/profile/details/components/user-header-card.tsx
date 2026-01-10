@@ -17,7 +17,7 @@ export function UserHeaderCard({ user }: { user: User }) {
       <div className="flex flex-col">
 
         <h2 className="text-xl font-bold text-foreground leading-tight">
-           {user.firstName} {user.lastName}
+           {user.firstName} {user.middleName} {user.lastName}
         </h2>
         {user.position && (
             <span className="text-sm text-foreground/60 font-medium">{user.position}</span>
