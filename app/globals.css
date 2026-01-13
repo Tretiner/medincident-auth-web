@@ -3,37 +3,44 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* --- 1. BRAND & BASE PALETTE (OKLCH) --- */
+  /* Primary */
   --brand-green: oklch(0.696 0.176 132.22);
-  --brand-green-light: oklch(0.94 0.03 132.22);
-  --brand-green-dark: oklch(0.25 0.08 132.22);
+  /* Secondary */
+  --brand-green-light: oklch(0.96 0.03 133);
+  /* Secondary Foreground */
+  --brand-green-dark: oklch(0.20 0.02 265);
   
-  --brand-orange: oklch(0.817 0.155 77.58);
-  --brand-orange-dark: oklch(0.14 0.05 77.58);
-  --palette-brand-telegram: oklch(66.23% 0.133 235.92);
-  --palette-brand-max: oklch(54.258% 0.20561 279.283);
+  /* Warning */
+  --brand-orange: oklch(0.67 0.19 65);
+  --brand-orange-dark: oklch(0.98 0 0);
+  
+  /* Status Colors */
+  --palette-brand-telegram: oklch(0.65 0.18 250); 
+  --palette-brand-max: oklch(0.65 0.25 290);   
 
-  --gray-50: oklch(0.985 0.002 247.858);
-  --gray-100: oklch(0.956 0.005 248.06);
-  --gray-200: oklch(0.929 0.013 255.508);
-  --gray-500: oklch(0.554 0.046 257.417);
-  --gray-900: oklch(0.129 0.042 264.695);
+  /* Destructive (Red) */
+  --red: oklch(0.64 0.22 25);
+  --red-foreground: oklch(0.98 0 0);
 
-  --red: oklch(0.577 0.245 27.325);
-  --red-foreground: oklch(0.984 0.003 247.858);
+  /* Grays */
+  --gray-50: oklch(1 0 0);              
+  --gray-100: oklch(0.96 0.01 265);     
+  --gray-200: oklch(0.92 0.01 265);     
+  --gray-500: oklch(0.55 0.03 265);     
+  --gray-900: oklch(0.20 0.03 265);  
 
-  /* --- 2. SEMANTIC TOKENS (LIGHT MODE) --- */
+  /* --- 2. LIGHT MODE --- */
   --background: var(--gray-50);
   --foreground: var(--gray-900);
 
-  --card: var(--white);
+  --card: var(--gray-50);
   --card-foreground: var(--gray-900);
 
-  --popover: var(--white);
+  --popover: var(--gray-50);
   --popover-foreground: var(--gray-900);
 
   --primary: var(--brand-green);
-  --primary-foreground: var(--white);
+  --primary-foreground: oklch(1 0 0);
 
   --secondary: var(--brand-green-light);
   --secondary-foreground: var(--brand-green-dark);
@@ -41,7 +48,7 @@
   --muted: var(--gray-100);
   --muted-foreground: var(--gray-500);
 
-  --accent: var(--brand-green-light);
+  --accent: oklch(0.94 0.04 133);
   --accent-foreground: var(--brand-green-dark);
 
   --destructive: var(--red);
@@ -54,7 +61,7 @@
   --input: var(--gray-200);
   --ring: var(--brand-green);
 
-  --radius: 0.625rem;
+  --radius: 0.5rem;
 
   /* Sidebar */
   --sidebar-background: var(--gray-50);
@@ -68,37 +75,44 @@
 }
 
 .dark {
-  --palette-brand-max: oklch(68.01% 0.158 276.93);
-  /* --- 3. SEMANTIC TOKENS (DARK MODE) --- */
-  --background: oklch(0.246 0 0);
-  --foreground: oklch(0.984 0.003 247.858);
-
-  --card: oklch(0.28 0 0);
-  --card-foreground: oklch(0.984 0.003 247.858);
-
-  --popover: oklch(0.28 0 0);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-
-  --primary: var(--brand-green);
-  --primary-foreground: var(--white);
-
-  --secondary: var(--palette-dark-muted);
-  --secondary-foreground: var(--palette-red-foreground);
-
-  --muted: oklch(0.35 0 0);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-
-  --accent: oklch(0.35 0 0);
-  --accent-foreground: var(--red-foreground);
-
-  --destructive: oklch(0.5 0.15 22.2);
-  --destructive-foreground: var(--red-foreground);
-
-  --border: oklch(0.32 0 0);
-  --input: oklch(0.32 0 0);
+  --palette-brand-max: oklch(0.70 0.20 290);
   
-  --sidebar-background: oklch(0.246 0 0);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  /* --- 3. SEMANTIC TOKENS (SOFT DARK MODE) --- */
+  
+  /* Background: Подняли L с 0.18 до 0.25 (Мягкий темно-серый) */
+  --background: oklch(0.25 0.02 270);
+  --foreground: oklch(0.98 0 0);
+
+  /* Card: Подняли L с 0.20 до 0.29 (Для выделения на фоне) */
+  --card: oklch(0.29 0.02 270);
+  --card-foreground: oklch(0.98 0 0);
+
+  --popover: oklch(0.29 0.02 270);
+  --popover-foreground: oklch(0.98 0 0);
+
+  /* Primary Dark: Чуть светлее для контраста на сером фоне */
+  --primary: oklch(0.62 0.15 133);
+  --primary-foreground: oklch(1 0 0);
+
+  /* Secondary/Muted: Подняли L до 0.32 */
+  --secondary: oklch(0.32 0.02 270);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  --muted: oklch(0.32 0.02 270);
+  --muted-foreground: oklch(0.75 0.03 270);
+
+  --accent: oklch(0.32 0.02 270);
+  --accent-foreground: oklch(0.98 0 0);
+
+  --destructive: oklch(0.65 0.18 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Border: Должен быть светлее фона (0.25), ставим 0.35 */
+  --border: oklch(0.35 0.02 270);
+  --input: oklch(0.35 0.02 270);
+  
+  --sidebar-background: oklch(0.25 0.02 270);
+  --sidebar-foreground: oklch(0.98 0 0);
 }
 
 @theme {

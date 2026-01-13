@@ -20,7 +20,7 @@ export function TabTransition({ children }: { children: React.ReactNode }) {
     <div
       className={cn(
         shouldAnimate &&
-          "animate-in fade-in slide-in-from-bottom-4 duration-300"
+          "animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out"
       )}
     >
       {children}

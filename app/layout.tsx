@@ -1,5 +1,5 @@
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+// import { GeistSans } from "geist/font/sans";
+// import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -9,7 +9,7 @@ import { ThemeProvider } from "./providers";
 export const metadata: Metadata = {
   title: {
     template: `%s | ${APP_NAME}`,
-    default:  APP_NAME,
+    default: APP_NAME,
   },
   description: "Вход в медицинскую систему",
 };
@@ -20,13 +20,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru">
-      <body className={cn(
-         "min-h-screen bg-background antialiased",
-         GeistSans.variable,
-         GeistMono.variable,
-      )}>
-        <ThemeProvider attribute="class" defaultTheme="root" enableSystem>
+    <html
+      lang="ru"
+      className={cn(
+        "min-h-screen bg-background antialiased"
+        // GeistSans.variable,
+        // GeistMono.variable
+      )}
+      suppressHydrationWarning
+    >
+      <head />
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
         </ThemeProvider>
       </body>

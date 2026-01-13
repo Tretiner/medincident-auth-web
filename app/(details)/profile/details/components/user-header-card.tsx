@@ -14,7 +14,7 @@ export function UserHeaderCard({ user }: { user: User }) {
         </AvatarFallback>
       </Avatar>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-0.5">
 
         <h2 className="text-xl font-bold text-foreground leading-tight">
            {user.firstName} {user.middleName} {user.lastName}
@@ -22,7 +22,7 @@ export function UserHeaderCard({ user }: { user: User }) {
         {user.position && (
             <span className="text-sm text-foreground/60 font-medium">{user.position}</span>
         )}
-        <span className="inline-flex items-center rounded-md text-xs font-mono text-muted-foreground mt-0.5">
+        <span className="inline-flex items-center rounded-md text-xs font-mono text-muted-foreground">
           ID: {user.id}
         </span>
       </div>

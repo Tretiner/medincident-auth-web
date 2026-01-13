@@ -2,6 +2,7 @@ import { getUserProfile } from "./actions";
 import { SidebarNav } from "./components/sidebar-nav";
 import { MobileNav } from "./components/mobile-nav";
 import { Card } from "@/presentation/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default async function ProfileLayout({
   children,
@@ -11,34 +12,36 @@ export default async function ProfileLayout({
   const user = await getUserProfile();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full bg-background p-0 md:p-8 font-sans">
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full bg-background md:p-6 lg:p-8 font-sans">
       
-      <Card className="
-        w-full max-w-[1000px] shadow-none
+      <Card className={cn(
+        // Базовые стили контейнера
+        "w-full bg-card overflow-hidden flex flex-col transition-all duration-300",
         
-        /* MOBILE: Полный экран, без границ и скруглений */
-        h-[100dvh] 
-        rounded-none 
-        border-0 
+        // MOBILE: Полный экран, сброс границ
+        "h-[100dvh] rounded-none border-0 shadow-none",
         
-        /* DESKTOP: Возвращаем стиль карточки (от md и выше) */
-        md:h-auto md:min-h-[500px] md:max-h-[85vh]
-        md:rounded-xl 
-        md:border 
-        
-        overflow-hidden bg-card 
-        flex flex-col md:grid md:grid-cols-[260px_1fr]
-      ">
+        // DESKTOP: Центрированная карточка, сетка
+        "md:max-w-[1050px] md:h-[85vh] md:min-h-[400px]",
+        "md:rounded-xl md:border md:border-border md:shadow-none",
+        "md:grid md:grid-cols-[260px_1fr]"
+      )}>
 
-        <aside className="hidden md:flex bg-muted/30 p-4 border-r border-border flex-col h-full">
+        {/* SIDEBAR (Desktop Only) */}
+        <aside className="hidden md:flex flex-col h-full bg-muted/25 border-r border-border p-4 overflow-y-auto scrollbar-none">
             <SidebarNav user={user} />
         </aside>
 
-        <main className="flex-1 min-h-0 p-4 md:p-8 overflow-y-auto scrollbar-app scroll-smooth relative">
-          {children}
+        {/* MAIN CONTENT AREA */}
+        <main className="flex-1 min-h-0 overflow-y-auto scrollbar-app relative">
+          {/* Контейнер с отступами внутри скролла */}
+          <div className="p-4 md:p-8 md:max-w-3xl mx-auto w-full h-full">
+            {children}
+          </div>
         </main>
         
-        <div className="md:hidden border-t border-border p-3 bg-card/95 backdrop-blur-sm z-10 shrink-0 pb-safe">
+        {/* MOBILE NAV (Bottom Sticky) */}
+        <div className="md:hidden border-t border-border bg-card/90 backdrop-blur-md p-3 pb-safe z-20 shrink-0">
             <MobileNav />
         </div>
 

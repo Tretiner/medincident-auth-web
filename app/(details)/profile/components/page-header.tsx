@@ -11,11 +11,10 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, icon: Icon, className }: PageHeaderProps) {
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn("space-y-4", className)}>
       <div className="flex items-start gap-4">
-        {/* Если иконка передана, рендерим её в красивом блоке */}
         {Icon && (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
             <Icon className="h-6 w-6" />
           </div>
         )}

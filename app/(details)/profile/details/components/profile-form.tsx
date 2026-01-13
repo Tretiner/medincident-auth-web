@@ -48,26 +48,29 @@ export function ProfileForm({ user }: { user: User }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="grid gap-6">
+        {/* FIRST NAME */}
         <div className="space-y-2">
           <Label
             htmlFor="firstName"
             className={cn(errors.firstName && "text-destructive")}
-          >Имя
+          >
+            Имя
           </Label>
           <Input
             id="firstName"
             {...register("firstName")}
             className={cn(
-              "bg-background",
+              "bg-background transition-colors",
               errors.firstName &&
-                "border-destructive focus-visible:ring-destructive"
+                "border-destructive focus-visible:ring-destructive text-destructive placeholder:text-destructive/50"
             )}
           />
           <ErrorMessage error={errors.firstName} />
         </div>
 
+        {/* LAST NAME */}
         <div className="space-y-2">
           <Label
             htmlFor="lastName"
@@ -79,28 +82,30 @@ export function ProfileForm({ user }: { user: User }) {
             id="lastName"
             {...register("lastName")}
             className={cn(
-              "bg-background",
+              "bg-background transition-colors",
               errors.lastName &&
-                "border-destructive focus-visible:ring-destructive"
+                "border-destructive focus-visible:ring-destructive text-destructive placeholder:text-destructive/50"
             )}
           />
           <ErrorMessage error={errors.lastName} />
         </div>
 
+        {/* MIDDLE NAME */}
         <div className="space-y-2">
           <Label htmlFor="middleName">Отчество</Label>
           <Input
             id="middleName"
             {...register("middleName")}
             className={cn(
-              "bg-background",
+              "bg-background transition-colors",
               errors.middleName &&
-                "border-destructive focus-visible:ring-destructive"
+                "border-destructive focus-visible:ring-destructive text-destructive placeholder:text-destructive/50"
             )}
           />
           <ErrorMessage error={errors.middleName} />
         </div>
 
+        {/* CONTACT GRID */}
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label
@@ -114,9 +119,9 @@ export function ProfileForm({ user }: { user: User }) {
               type="email"
               {...register("email")}
               className={cn(
-                "bg-background",
+                "bg-background transition-colors",
                 errors.email &&
-                  "border-destructive focus-visible:ring-destructive"
+                  "border-destructive focus-visible:ring-destructive text-destructive placeholder:text-destructive/50"
               )}
             />
             <ErrorMessage error={errors.email} />
@@ -133,9 +138,9 @@ export function ProfileForm({ user }: { user: User }) {
               type="tel"
               {...register("phone")}
               className={cn(
-                "bg-background",
+                "bg-background transition-colors",
                 errors.phone &&
-                  "border-destructive focus-visible:ring-destructive"
+                  "border-destructive focus-visible:ring-destructive text-destructive placeholder:text-destructive/50"
               )}
             />
             <ErrorMessage error={errors.phone} />
@@ -144,23 +149,24 @@ export function ProfileForm({ user }: { user: User }) {
       </div>
 
       {/* FOOTER ACTIONS */}
-      <div className="flex items-center justify-between pt-6 border-t border-border">
+      <div className="flex items-center justify-between pt-6 border-t border-border mt-2">
         {/* Feedback Zone */}
         <div className="flex-1 pr-4 flex items-center gap-3">
-          {/* Показываем "Данные изменены", только если нет ошибок валидации */}
+          {/* Status: Modified (Warning Color) */}
           {isDirty && isValid && !message && (
-            <span className="text-sm font-medium text-amber-600 dark:text-amber-500 animate-in fade-in slide-in-from-left-2 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="text-sm font-medium text-warning animate-in fade-in slide-in-from-left-2 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-warning shadow-[0_0_8px_var(--color-warning)]" />
               Данные изменены
             </span>
           )}
 
+          {/* Status: Result Message */}
           {message && (
             <div
               className={cn(
                 "flex items-center gap-2 text-sm font-medium animate-in fade-in zoom-in-95",
                 message.type === "success"
-                  ? "text-green-600 dark:text-green-400"
+                  ? "text-primary"
                   : "text-destructive"
               )}
             >
@@ -176,8 +182,8 @@ export function ProfileForm({ user }: { user: User }) {
 
         <Button
           onClick={handleSaveAttempt}
-          disabled={isSaving || !isDirty} // isValid здесь можно не добавлять, чтобы дать пользователю нажать и увидеть ошибки
-          className="bg-primary hover:bg-primary/90 text-white min-w-[140px] shadow-sm transition-all"
+          disabled={isSaving || !isDirty}
+          className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[140px] shadow-sm transition-all"
         >
           {isSaving ? (
             <>
@@ -192,10 +198,12 @@ export function ProfileForm({ user }: { user: User }) {
 
       {/* CONFIRMATION DIALOG */}
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <DialogContent className="sm:max-w-[400px] rounded-xl">
+        <DialogContent className="sm:max-w-[400px] rounded-xl bg-card border-border shadow-lg">
           <DialogHeader>
-            <DialogTitle>Сохранить изменения?</DialogTitle>
-            <DialogDescription className="pt-2">
+            <DialogTitle className="text-foreground">
+              Сохранить изменения?
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-muted-foreground">
               Вы внесли изменения в личные данные. Подтвердите сохранение, чтобы
               обновить профиль.
             </DialogDescription>
@@ -204,13 +212,13 @@ export function ProfileForm({ user }: { user: User }) {
             <Button
               variant="outline"
               onClick={() => setIsConfirmOpen(false)}
-              className="rounded-lg"
+              className="rounded-lg border-input hover:bg-accent hover:text-accent-foreground"
             >
               Отмена
             </Button>
             <Button
               onClick={handleConfirm}
-              className="bg-primary hover:bg-primary/90 text-white rounded-lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-sm"
             >
               Подтвердить
             </Button>
