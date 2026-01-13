@@ -1,9 +1,11 @@
 dev: redis-reset
 	npm run dev --turbo
+	make redis-down
 
 release: redis-reset
 	npm run build
 	npm run start
+	make redis-down
 
 build:
 	npm run build

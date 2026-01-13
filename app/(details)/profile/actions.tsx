@@ -48,25 +48,6 @@ export async function getUserSessions(): Promise<UserSession[]> {
   }));
 }
 
-// 3. Обновление профиля
-export async function updateUserProfile(formData: Partial<User>): Promise<User> {
-  const result = ProfileSchema.safeParse(formData);
-
-  if (!result.success) {
-    const errorMessage = result.error.issues.map(e => e.message).join(', ');
-    console.error("Server Validation Error:", errorMessage);
-    throw new Error(`Ошибка валидации: ${errorMessage}`);
-  }
-
-  const updatedUser = await fetchApi<User>('me', {
-    method: 'PATCH',
-    body: JSON.stringify(formData)
-  });
-  
-  revalidatePath('/profile');
-  return updatedUser;
-}
-
 // 4. Отзыв сессии
 export async function revokeSession(sessionId: string): Promise<void> {
   await fetchApi(`sessions?id=${sessionId}`, {

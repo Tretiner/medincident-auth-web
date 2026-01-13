@@ -76,22 +76,31 @@ export function LoginForm({ initialQrUrl, redirectPath }: Props) {
     <div className="min-h-screen w-full flex items-center justify-center bg-background p-4 font-sans animate-in fade-in duration-500">
       <Card
         className="w-full max-w-[960px] overflow-hidden rounded-xl shadow-none
-                       border border-border bg-card transition-all duration-300
-                       grid md:grid-cols-2"
+                        border border-border bg-card transition-all duration-300
+                        grid md:grid-cols-2"
       >
         {/* ЛЕВАЯ КОЛОНКА: QR Code */}
-        <div className="hidden md:flex bg-muted/30 p-12 flex-col items-center justify-center text-center relative overflow-hidden border-r border-border">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,var(--color-primary),transparent)] opacity-5 pointer-events-none" />
-
+        <div className="hidden md:flex relative flex-col items-center justify-center text-center p-12 overflow-hidden border-r border-border bg-muted/5">
+          
+          {/* 1. Базовый градиент по диагонали */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/50 to-primary/5 pointer-events-none" />
+          
+          {/* 2. Верхний левый "фонарь" (основной цвет) - создает сильный акцент */}
+          <div className="absolute -top-[30%] -left-[30%] w-[90%] h-[90%] bg-primary/20 blur-[150px] rounded-full pointer-events-none" />
+          
+          {/* 3. Нижний правый "свет" - создает контраст и объем */}
+          <div className="absolute -bottom-[30%] -right-[30%] w-[90%] h-[90%] bg-primary/15 blur-[130px] rounded-full pointer-events-none" />
+          
+          {/* --- CONTENT --- */}
           <div className="relative z-10 flex flex-col items-center">
             <QrCodeCard
               url={qrUrl}
               isLoading={isQrLoading}
               isError={isQrError}
-              className="mb-8"
+              className="mb-8 shadow-sm bg-white/50 backdrop-blur-sm border-white/20" 
             />
 
-            <h2 className="text-2xl font-bold text-foreground mb-3">
+            <h2 className="text-2xl font-bold text-foreground mb-3 tracking-tight">
               Вход по QR-коду
             </h2>
             <p className="text-muted-foreground max-w-xs text-sm leading-relaxed">
@@ -103,7 +112,7 @@ export function LoginForm({ initialQrUrl, redirectPath }: Props) {
         </div>
 
         {/* ПРАВАЯ КОЛОНКА: Кнопки */}
-        <CardContent className="p-6 sm:p-8 md:p-12 flex flex-col justify-center min-h-[500px] md:min-h-auto">
+        <CardContent className="p-6 sm:p-8 md:p-12 flex flex-col justify-center min-h-[400px] md:min-h-auto">
           <div className="flex flex-col items-center md:items-start mb-6 md:mb-10">
             <div className="w-14 h-14 md:w-16 md:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 md:mb-6 text-primary shadow-sm">
               <ServiceLogoIcon className="w-7 h-7 md:w-8 md:h-8" />

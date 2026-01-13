@@ -3,26 +3,32 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { fetchQrCode, login, telegramLoginAction } from "./actions";
+import { fetchQrCode, login, QrResponse, telegramLoginAction } from "./actions";
 import { TelegramUser } from "@/domain/auth/types";
 import { delay } from "@/lib/utils";
 
 // --- QR Auth Hook ---
 export function useQrAuth(initialUrl: string) {
   const {
-    data: qrUrl,
+    data,
     error,
     isLoading,
-  } = useSWR("auth-qr", fetchQrCode, {
-    fallbackData: initialUrl,
-    refreshInterval: 10000,
+  } = useSWR<QrResponse>("auth-qr", fetchQrCode, {
+    fallbackData: { url: undefined, expiresInSeconds: 10 },
+    refreshInterval: (latestData) => {
+      if (!latestData) return 10000;
+
+      return latestData.expiresInSeconds * 1000;
+    },
+    
     revalidateOnFocus: true,
     keepPreviousData: true,
   });
 
   return {
-    qrUrl: qrUrl || initialUrl,
-    isLoading: isLoading && !qrUrl,
+    qrUrl: data?.url,
+    token: data?.token,
+    isLoading: isLoading && !data,
     isError: !!error,
   };
 }

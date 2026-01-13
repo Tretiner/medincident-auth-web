@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { User } from "@/domain/profile/types";
-import { updateUserProfile } from "../actions";
+import { updateUserProfile } from "./actions";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "Имя должно содержать минимум 2 символа"),

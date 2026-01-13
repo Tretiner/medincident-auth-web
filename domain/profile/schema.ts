@@ -5,7 +5,7 @@ export const profileSchema = z.object({
   lastName: z.string().min(2, "Фамилия должна содержать минимум 2 символа"),
   middleName: z.string().optional().or(z.literal('')),
   email: z.email("Введите корректный email адрес"),
-  phone: z.string().min(10, "Телефон слишком короткий"),
+  phone: z.e164("Введите корректный телефон"),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;

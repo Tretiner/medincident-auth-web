@@ -12,24 +12,32 @@ import {
   loginWithTelegramMock,
 } from "@/app/services/server-http-client";
 import { delay } from "@/lib/utils";
+import { randomInt } from "crypto";
 
-export async function fetchQrCode(): Promise<string> {
+export interface QrResponse {
+  url?: string;
+  token?: string;
+  expiresInSeconds: number; // время в секундах
+}
+
+export async function fetchQrCode(): Promise<QrResponse> {
   try {
-    const response = await fetch(`${env.NEXT_PUBLIC_APP_URL}/api/auth`, {
-      method: "GET",
-      cache: "no-store",
-    });
+    const token = crypto.randomUUID();
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Auth_${token}&bgcolor=ffffff&color=000000&margin=0`;
+    
+    await delay(2000);
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch QR code");
-    }
+    return {
+      url: `/медведь-гол-гоооол.gif`,
+      expiresInSeconds: randomInt(1, 5),
+    };
 
-    const data = await response.json();
-    return `/медведь-гол-гоооол.gif`;
-    // return data.url;
   } catch (error) {
     console.error("QR Fetch Error:", error);
-    return `/медведь-гол-гоооол.gif`;
+    return {
+      url: `/медведь-гол-гоооол.gif`,
+      expiresInSeconds: 5 
+    };
   }
 }
 
@@ -74,7 +82,7 @@ export async function telegramLoginAction(user: TelegramUser) {
 }
 
 export async function logout() {
-  deleteSession();
+  await deleteSession();
   redirect("/login");
 }
 
