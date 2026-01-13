@@ -4,6 +4,7 @@ import { User, UserSession } from "@/domain/profile/types";
 import { cookies } from "next/headers";
 import { env } from "@/env";
 import { revalidatePath } from "next/cache";
+import { profileSchema as ProfileSchema } from "@/domain/profile/schema";
 
 // Хелпер для запросов к API с пробросом кук
 async function fetchApi<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -49,6 +50,14 @@ export async function getUserSessions(): Promise<UserSession[]> {
 
 // 3. Обновление профиля
 export async function updateUserProfile(formData: Partial<User>): Promise<User> {
+  const result = ProfileSchema.safeParse(formData);
+
+  if (!result.success) {
+    const errorMessage = result.error.issues.map(e => e.message).join(', ');
+    console.error("Server Validation Error:", errorMessage);
+    throw new Error(`Ошибка валидации: ${errorMessage}`);
+  }
+
   const updatedUser = await fetchApi<User>('me', {
     method: 'PATCH',
     body: JSON.stringify(formData)

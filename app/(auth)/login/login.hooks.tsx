@@ -1,84 +1,87 @@
-'use client';
+"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import useSWR from 'swr';
-import { login, fetchQrCode } from "./actions";
+import useSWR from "swr";
+import { fetchQrCode, login, telegramLoginAction } from "./actions";
+import { TelegramUser } from "@/domain/auth/types";
+import { delay } from "@/lib/utils";
 
 // --- QR Auth Hook ---
-function useQrAuth(initialUrl: string) {
-  const { data: qrUrl, error, isLoading } = useSWR('auth-qr', fetchQrCode, {
+export function useQrAuth(initialUrl: string) {
+  const {
+    data: qrUrl,
+    error,
+    isLoading,
+  } = useSWR("auth-qr", fetchQrCode, {
     fallbackData: initialUrl,
     refreshInterval: 10000,
     revalidateOnFocus: true,
     keepPreviousData: true,
   });
 
-  return { 
+  return {
     qrUrl: qrUrl || initialUrl,
-    isLoading: isLoading && !qrUrl, 
-    isError: !!error 
+    isLoading: isLoading && !qrUrl,
+    isError: !!error,
   };
 }
 
-// --- Social Auth Hook (MAX & General) ---
-function useSocialAuth() {
+// --- Telegram Auth Hook ---
+export function useTelegramAuthDialog(redirectPath: string = "/profile") {
   const router = useRouter();
+  
+  const [isOpen, setIsOpen] = useState(false);
+
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (provider: 'telegram' | 'max') => {
+  const handleAuth = (user: TelegramUser) => {
     setError(null);
+
     startTransition(async () => {
       try {
-        const success = await login(provider);
-        if (success) {
-          router.push('/profile');
-        } else {
-          setError("Не удалось войти");
+        const result = await telegramLoginAction(user);
+
+        if (!result.success) {
+          setError(result.error || "Произошла ошибка");
+          return;
         }
-      } catch (e) {
-        console.error(e);
-        setError("Ошибка соединения");
+
+        setIsOpen(false);
+        router.push(redirectPath);
+        router.refresh();
+      } catch (err) {
+        console.error("Unexpected client error:", err);
+        setError("Что-то пошло не так. Попробуйте позже.");
       }
+    });
+  };
+
+  return {
+    isOpen,
+    setIsOpen,
+    isLoading: isPending,
+    error,
+    onAuth: handleAuth,
+  };
+}
+
+export function useSocialAuth() {
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const handleLogin = (provider: string) => {
+    setError(null);
+
+    startTransition(async () => {
+      await login(provider);
     });
   };
 
   return {
     login: handleLogin,
     isLoading: isPending,
-    error
+    error,
   };
 }
-
-// --- Telegram Auth Hook ---
-export function useTgAuth() {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  return {
-    isOpen,
-    setIsOpen,
-  };
-}
-
-// --- Main Hook ---
-export const useLogin = (initialQrUrl: string) => {
-  const { qrUrl, isError: isQrError, isLoading: isQrLoading } = useQrAuth(initialQrUrl);
-  const { login, isLoading: isAuthLoading, error: authError } = useSocialAuth();
-  
-  const tgAuth = useTgAuth();
-
-  return {
-    state: {
-      qrUrl,
-      isQrLoading,
-      isQrError,
-      isAuthLoading,
-      globalError: authError,
-    },
-    tgAuth,
-    actions: {
-      onLoginMax: () => login('max'),
-    }
-  };
-};

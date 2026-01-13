@@ -1,18 +1,22 @@
 'use client';
 
 import { useState, useTransition } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { User } from "@/domain/profile/types";
 import { updateUserProfile } from "../actions";
 
-export interface ProfileFormData {
-  firstName: string;
-  lastName: string;
-  middleName: string;
-  email: string;
-  phone: string;
-}
+const profileSchema = z.object({
+  firstName: z.string().min(2, "Имя должно содержать минимум 2 символа"),
+  lastName: z.string().min(2, "Фамилия должна содержать минимум 2 символа"),
+  middleName: z.string().optional(),
+  email: z.email("Введите корректный email адрес"),
+  phone: z.e164("Некорректный формат телефона").min(10, "Телефон слишком короткий"),
+});
+
+export type ProfileFormData = z.infer<typeof profileSchema>;
 
 export interface ProfileMessage {
   type: 'success' | 'error';
@@ -25,6 +29,8 @@ export function useProfileDetails(initialUser: User) {
   const [message, setMessage] = useState<ProfileMessage | null>(null);
 
   const form = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    mode: "onChange",
     defaultValues: {
       firstName: initialUser.firstName,
       lastName: initialUser.lastName,
@@ -45,10 +51,9 @@ export function useProfileDetails(initialUser: User) {
         });
 
         router.refresh(); 
-        form.reset(data); // Reset dirty state with new values
-        setMessage({ type: 'success', text: 'Данные успешно сохранены' });
+        form.reset(data);
         
-        // Auto-hide success message
+        setMessage({ type: 'success', text: 'Данные успешно сохранены' });
         setTimeout(() => setMessage(null), 3000);
       } catch (error) {
         console.error(error);
@@ -62,6 +67,8 @@ export function useProfileDetails(initialUser: User) {
       form,
       isSaving: isPending,
       isDirty: form.formState.isDirty,
+      isValid: form.formState.isValid,
+      errors: form.formState.errors,
       message,
     },
     actions: {

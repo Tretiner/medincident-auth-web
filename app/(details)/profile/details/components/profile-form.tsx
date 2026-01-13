@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { User } from "@/domain/profile/types";
@@ -15,24 +15,30 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/presentation/components/ui/dialog";
-
-// Hook Import
 import { useProfileDetails } from "../profile.hooks";
 
+const ErrorMessage = ({ error }: { error?: { message?: string } }) => {
+  if (!error?.message) return null;
+  return (
+    <span className="text-[11px] font-medium text-destructive mt-1 block animate-in fade-in slide-in-from-top-1">
+      {error.message}
+    </span>
+  );
+};
+
 export function ProfileForm({ user }: { user: User }) {
-  // 1. Init ViewModel
   const { state, actions } = useProfileDetails(user);
-  const { form, isSaving, isDirty, message } = state;
+  const { form, isSaving, isDirty, isValid, errors, message } = state;
   const { register } = form;
 
-  // Local UI state (Confirmation Modal)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  // 2. Handlers
   const handleSaveAttempt = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (isDirty) {
+    if (isDirty && isValid) {
       setIsConfirmOpen(true);
+    } else {
+      form.trigger();
     }
   };
 
@@ -43,61 +49,134 @@ export function ProfileForm({ user }: { user: User }) {
 
   return (
     <div className="space-y-4">
-      {/* FORM FIELDS */}
       <div className="grid gap-6">
         <div className="space-y-2">
-            <Label htmlFor="firstName">Имя</Label>
-            <Input id="firstName" {...register("firstName")} className="bg-background" defaultValue={user.firstName} />
+          <Label
+            htmlFor="firstName"
+            className={cn(errors.firstName && "text-destructive")}
+          >Имя
+          </Label>
+          <Input
+            id="firstName"
+            {...register("firstName")}
+            className={cn(
+              "bg-background",
+              errors.firstName &&
+                "border-destructive focus-visible:ring-destructive"
+            )}
+          />
+          <ErrorMessage error={errors.firstName} />
         </div>
 
         <div className="space-y-2">
-            <Label htmlFor="lastName">Фамилия</Label>
-            <Input id="lastName" {...register("lastName")} className="bg-background" defaultValue={user.lastName} />
+          <Label
+            htmlFor="lastName"
+            className={cn(errors.lastName && "text-destructive")}
+          >
+            Фамилия
+          </Label>
+          <Input
+            id="lastName"
+            {...register("lastName")}
+            className={cn(
+              "bg-background",
+              errors.lastName &&
+                "border-destructive focus-visible:ring-destructive"
+            )}
+          />
+          <ErrorMessage error={errors.lastName} />
         </div>
-        
+
         <div className="space-y-2">
-            <Label htmlFor="middleName">Отчество</Label>
-            <Input id="middleName" {...register("middleName")} className="bg-background" defaultValue={user.middleName} />
+          <Label htmlFor="middleName">Отчество</Label>
+          <Input
+            id="middleName"
+            {...register("middleName")}
+            className={cn(
+              "bg-background",
+              errors.middleName &&
+                "border-destructive focus-visible:ring-destructive"
+            )}
+          />
+          <ErrorMessage error={errors.middleName} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register("email")} className="bg-background" defaultValue={user.email} />
+            <Label
+              htmlFor="email"
+              className={cn(errors.email && "text-destructive")}
+            >
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              {...register("email")}
+              className={cn(
+                "bg-background",
+                errors.email &&
+                  "border-destructive focus-visible:ring-destructive"
+              )}
+            />
+            <ErrorMessage error={errors.email} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Телефон</Label>
-            <Input id="phone" type="tel" {...register("phone")} className="bg-background" defaultValue={user.phone} />
+            <Label
+              htmlFor="phone"
+              className={cn(errors.phone && "text-destructive")}
+            >
+              Телефон
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              {...register("phone")}
+              className={cn(
+                "bg-background",
+                errors.phone &&
+                  "border-destructive focus-visible:ring-destructive"
+              )}
+            />
+            <ErrorMessage error={errors.phone} />
           </div>
         </div>
       </div>
 
       {/* FOOTER ACTIONS */}
       <div className="flex items-center justify-between pt-6 border-t border-border">
-        
         {/* Feedback Zone */}
         <div className="flex-1 pr-4 flex items-center gap-3">
-          {isDirty && !message && (
-             <span className="text-sm font-medium text-amber-600 dark:text-amber-500 animate-in fade-in slide-in-from-left-2 flex items-center gap-1.5">
-               <span className="w-2 h-2 rounded-full bg-amber-500" />
-               Данные изменены
-             </span>
+          {/* Показываем "Данные изменены", только если нет ошибок валидации */}
+          {isDirty && isValid && !message && (
+            <span className="text-sm font-medium text-amber-600 dark:text-amber-500 animate-in fade-in slide-in-from-left-2 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              Данные изменены
+            </span>
           )}
 
           {message && (
-            <div className={cn(
-              "flex items-center gap-2 text-sm font-medium animate-in fade-in zoom-in-95",
-              message.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-destructive'
-            )}>
-              {message.type === 'success' ? <CheckCircle2 className="w-4 h-4"/> : <AlertCircle className="w-4 h-4"/>}
+            <div
+              className={cn(
+                "flex items-center gap-2 text-sm font-medium animate-in fade-in zoom-in-95",
+                message.type === "success"
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-destructive"
+              )}
+            >
+              {message.type === "success" ? (
+                <CheckCircle2 className="w-4 h-4" />
+              ) : (
+                <AlertCircle className="w-4 h-4" />
+              )}
               {message.text}
             </div>
           )}
         </div>
 
-        <Button 
-          onClick={handleSaveAttempt} 
-          disabled={isSaving || !isDirty}
+        <Button
+          onClick={handleSaveAttempt}
+          disabled={isSaving || !isDirty} // isValid здесь можно не добавлять, чтобы дать пользователю нажать и увидеть ошибки
           className="bg-primary hover:bg-primary/90 text-white min-w-[140px] shadow-sm transition-all"
         >
           {isSaving ? (
@@ -117,14 +196,22 @@ export function ProfileForm({ user }: { user: User }) {
           <DialogHeader>
             <DialogTitle>Сохранить изменения?</DialogTitle>
             <DialogDescription className="pt-2">
-              Вы внесли изменения в личные данные. Подтвердите сохранение, чтобы обновить профиль.
+              Вы внесли изменения в личные данные. Подтвердите сохранение, чтобы
+              обновить профиль.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4 gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsConfirmOpen(false)} className="rounded-lg">
+            <Button
+              variant="outline"
+              onClick={() => setIsConfirmOpen(false)}
+              className="rounded-lg"
+            >
               Отмена
             </Button>
-            <Button onClick={handleConfirm} className="bg-primary hover:bg-primary/90 text-white rounded-lg">
+            <Button
+              onClick={handleConfirm}
+              className="bg-primary hover:bg-primary/90 text-white rounded-lg"
+            >
               Подтвердить
             </Button>
           </DialogFooter>

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/session';
 import { db } from '@/lib/mock-db';
+import { getUserFromSession } from '@/app/services/session/session-service';
 
 export async function POST(req: NextRequest) {
-  const session = await getSession();
+  const session = await getUserFromSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { provider } = await req.json();

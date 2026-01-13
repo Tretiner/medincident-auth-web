@@ -1,8 +1,19 @@
+import { TelegramUser } from "@/domain/auth/types";
 import { User, UserSession } from "@/domain/profile/types";
 import { env } from "@/env";
 
+export const MockTgUser: TelegramUser = {
+  id: 773421,
+  first_name: "Алексей",
+  last_name: "Смирнов",
+  username: "alex_smirnov",
+  photo_url: "https://i.pravatar.cc/150?u=USR-7734-21",
+  auth_date: Math.floor(Date.now() / 1000),
+  hash: "mock_dev_hash",
+};
+
 // Исходные данные (как в БД)
-let USER: User = {
+export let MockFullUser: User = {
   id: "USR-7734-21",
   firstName: "Алексей",
   lastName: "Смирнов",
@@ -14,7 +25,7 @@ let USER: User = {
   linkedAccounts: {
     telegram: true,
     max: false,
-  }
+  },
 };
 
 let SESSIONS: UserSession[] = [
@@ -23,46 +34,46 @@ let SESSIONS: UserSession[] = [
     deviceName: "Chrome (Windows 11)",
     ip: "192.168.1.1",
     lastActive: new Date(),
-    isCurrent: true
+    isCurrent: true,
   },
   {
     id: "sess_2",
     deviceName: "Safari (iPhone 14 Pro)",
     ip: "10.0.0.5",
     lastActive: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    isCurrent: false
+    isCurrent: false,
   },
   {
     id: "sess_3",
     deviceName: "Firefox (MacOS)",
     ip: "172.16.0.1",
     lastActive: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-    isCurrent: false
-  }
+    isCurrent: false,
+  },
 ];
 
 // Методы для работы с БД
 export const db = {
   user: {
-    get: () => ({ ...USER }), // Возвращаем копию
+    get: () => ({ ...MockFullUser }), // Возвращаем копию
     update: (data: Partial<User>) => {
-      USER = { ...USER, ...data };
-      return USER;
+      MockFullUser = { ...MockFullUser, ...data };
+      return MockFullUser;
     },
-    toggleLink: (provider: 'telegram' | 'max') => {
-      USER.linkedAccounts[provider] = !USER.linkedAccounts[provider];
-      return USER;
-    }
+    toggleLink: (provider: "telegram" | "max") => {
+      MockFullUser.linkedAccounts[provider] = !MockFullUser.linkedAccounts[provider];
+      return MockFullUser;
+    },
   },
   sessions: {
     getAll: () => [...SESSIONS],
     revoke: (id: string) => {
-      SESSIONS = SESSIONS.filter(s => s.id !== id);
+      SESSIONS = SESSIONS.filter((s) => s.id !== id);
       return SESSIONS;
     },
     revokeOthers: () => {
-      SESSIONS = SESSIONS.filter(s => s.isCurrent);
+      SESSIONS = SESSIONS.filter((s) => s.isCurrent);
       return SESSIONS;
-    }
-  }
+    },
+  },
 };

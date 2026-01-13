@@ -2,7 +2,7 @@ export interface User {
   id: string;
   firstName: string;
   lastName: string;
-  middleName?: string; // Добавил отчество, так как оно было в описании формы
+  middleName?: string;
   email: string;
   phone: string;
   position: string;
@@ -18,10 +18,9 @@ export interface UserSession {
   deviceName: string; // "Chrome on Windows", "iPhone 13"
   ip: string;
   lastActive: Date;
-  isCurrent: boolean; // "Эта сессия"
+  isCurrent: boolean;
 }
 
-// DTO для ответа сервера (опционально, но удобно для типизации Actions)
 export interface ProfileData {
   user: User;
 }

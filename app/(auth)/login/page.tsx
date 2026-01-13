@@ -1,4 +1,4 @@
-'server only'
+"server only";
 
 import { Metadata } from "next";
 import { fetchQrCode } from "./actions";
@@ -9,12 +9,20 @@ export const metadata: Metadata = {
   description: "Авторизация в системе",
 };
 
-export default async function LoginPage() {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
+
+export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   const initialQrUrl = await fetchQrCode();
+
+  const resolvedSearchParams = await searchParams;
+  const redirectPath =
+    typeof resolvedSearchParams.from === "string"
+      ? resolvedSearchParams.from
+      : "/profile";
 
   return (
     <main>
-      <LoginForm initialQrUrl={initialQrUrl} />
+      <LoginForm initialQrUrl={initialQrUrl} redirectPath={redirectPath} />
     </main>
   );
 }

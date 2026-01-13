@@ -14,6 +14,7 @@ const envConfig = createEnv({
   },
 
   client: {
+    NEXT_PUBLIC_EXTERNAL_API: z.url(),
     NEXT_PUBLIC_APP_URL: z.url(),
     NEXT_PUBLIC_TELEGRAM_BOT_NAME: z.string().min(1),
   },
@@ -24,6 +25,7 @@ const envConfig = createEnv({
     REDIS_URL: process.env.REDIS_URL,
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
+    NEXT_PUBLIC_EXTERNAL_API: process.env.NEXT_PUBLIC_EXTERNAL_API,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_TELEGRAM_BOT_NAME: process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME,
   },
