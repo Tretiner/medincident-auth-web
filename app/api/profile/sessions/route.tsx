@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/mock-db';
-import { getUserFromSession } from '@/app/services/session/session-service';
+import { getUserFromSession } from '@/services/session/session-service';
 
 export async function GET() {
   const session = await getUserFromSession();

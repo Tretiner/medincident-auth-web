@@ -1,6 +1,6 @@
 import { TelegramUser } from "@/domain/auth/types";
 import { User, UserSession } from "@/domain/profile/types";
-import { env } from "@/env";
+import { env } from "@/config/env";
 
 export const MockTgUser: TelegramUser = {
   id: 773421,

@@ -1,9 +1,9 @@
 "server only";
 
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { rotateTokens, verifyAccessToken } from "@/app/services/session/session-service";
-import { env } from "@/env";
+import { NextRequest } from "next/server";
+import { rotateTokens, verifyAccessToken } from "@/services/session/session-service";
+import { env } from "@/config/env";
 
 // Пути, требующие обязательной авторизации
 const SECURE_PATHS = ["/profile", "/api/profile"];
@@ -59,7 +59,6 @@ export async function proxy(request: NextRequest) {
         
         const response = NextResponse.next();
 
-        // Устанавливаем новые куки
         // Access Token
         response.cookies.set("auth_access", newSession.accessToken, {
           path: "/",

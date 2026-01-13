@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/mock-db";
-import { getAccessCookie } from "@/app/services/session/auth-cookie-service";
-import { getUserFromSession, verifyAccessToken } from "@/app/services/session/session-service";
+import { getAccessCookie } from "@/services/session/auth-cookie-service";
+import { getUserFromSession, verifyAccessToken } from "@/services/session/session-service";
 
 export async function GET() {
   const session = await getUserFromSession();

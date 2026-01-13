@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import { APP_NAME } from "@/lib/constants";
-import { ThemeProvider } from "./providers";
+import { ThemeProvider } from "../components/ui/theme-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -21,19 +21,14 @@ export default function RootLayout({
 }>) {
   return (
     <html
+      className="smooth-scroll"
       lang="ru"
-      className={cn(
-        "min-h-screen bg-background antialiased"
-        // GeistSans.variable,
-        // GeistMono.variable
-      )}
       suppressHydrationWarning
     >
-      <head />
       <body>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
