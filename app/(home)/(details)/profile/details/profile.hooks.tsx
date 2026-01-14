@@ -13,7 +13,7 @@ const profileSchema = z.object({
   lastName: z.string().min(2, "Фамилия должна содержать минимум 2 символа"),
   middleName: z.string().optional(),
   email: z.email("Введите корректный email адрес"),
-  phone: z.e164("Некорректный формат телефона").min(10, "Телефон слишком короткий"),
+  phone: z.string().min(16, "Введите полный номер телефона"), 
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;
@@ -44,21 +44,21 @@ export function useProfileDetails(initialUser: User) {
     setMessage(null);
     
     startTransition(async () => {
-      try {
-        await updateUserProfile({
+        const result = await updateUserProfile({
           id: initialUser.id,
           ...data
         });
 
+        if (!result.success) {
+            setMessage({ type: 'error', text: result.error.message });
+            return;
+        }
+
         router.refresh(); 
-        form.reset(data);
+        form.reset(data); 
         
         setMessage({ type: 'success', text: 'Данные успешно сохранены' });
         setTimeout(() => setMessage(null), 3000);
-      } catch (error) {
-        console.error(error);
-        setMessage({ type: 'error', text: 'Не удалось сохранить изменения' });
-      }
     });
   });
 

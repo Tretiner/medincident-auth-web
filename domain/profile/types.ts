@@ -13,16 +13,33 @@ export interface User {
   };
 }
 
+export interface PersonalInfo {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  email: string;
+  phone: string;
+  position: string;
+  avatarUrl?: string;
+}
+
+export interface LinkedAccountsStatus {
+  telegram: boolean;
+  max: boolean;
+}
+
 export interface UserSession {
   id: string;
-  deviceName: string; // "Chrome on Windows", "iPhone 13"
+  deviceName: string;
   ip: string;
   lastActive: Date;
   isCurrent: boolean;
 }
 
-export interface ProfileData {
-  user: User;
+export interface SecurityState {
+  linkedAccounts: LinkedAccountsStatus;
+  sessions: UserSession[];
 }
 
 export interface SecurityData {

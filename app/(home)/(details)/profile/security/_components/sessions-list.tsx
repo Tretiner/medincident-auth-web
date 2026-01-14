@@ -2,7 +2,7 @@
 
 import { UserSession } from "@/domain/profile/types";
 import { Button } from "@/components/ui/button";
-import { Laptop, Smartphone, LogOut, Loader2, ShieldCheck } from "lucide-react";
+import { Laptop, Smartphone, LogOut, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -38,8 +38,8 @@ function SessionItem({
   activeActionId: string | null,
   onRevoke: (id: string) => void,
 }) {
-  const isRevokingThis = activeActionId === `sess_${session.id}`;
-  const isRevokingAll = activeActionId === "revoke_all";
+  const isRevokingThis = activeActionId === `sess_${session.id}`; // Логика определения загрузки для конкретной кнопки
+  const isRevokingAll = activeActionId === "all"; // Логика для блокировки при массовом удалении
 
   const isLoading = isRevokingThis;
   const isDisabled = isRevokingThis || isRevokingAll;
@@ -92,7 +92,7 @@ export function SessionsList({
   const currentSession = sessions.find((s) => s.isCurrent);
   const otherSessions = sessions.filter((s) => !s.isCurrent);
 
-  const isRevokingAll = activeActionId === "revoke_all";
+  const isRevokingAll = activeActionId === "all";
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">

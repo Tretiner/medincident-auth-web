@@ -2,23 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User } from "@/domain/profile/types";
+import { PersonalInfo } from "@/domain/profile/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  user: User;
+  user: PersonalInfo;
 }
 
 export function SidebarUserCard({ user }: Props) {
   const pathname = usePathname();
   const isActive = pathname === '/profile/details';
-  const initials = `${user.firstName[0]}${user.lastName[0]}`;
+  
+  const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
 
   return (
     <Link href="/profile/details" className="block mb-2 group">
       <div className={cn(
-        // Базовые стили: отступы и скругление как у кнопок меню
         "flex items-center gap-3 px-2 py-2 rounded-xl transition-all duration-200",
         isActive 
           ? "bg-primary/10 shadow-sm" 
@@ -39,7 +39,7 @@ export function SidebarUserCard({ user }: Props) {
             {user.firstName} {user.lastName}
           </h4>
           <p className="text-xs text-muted-foreground truncate mb-0.5">
-            {"Редактировать"}
+            Редактировать
           </p>
         </div>
       </div>

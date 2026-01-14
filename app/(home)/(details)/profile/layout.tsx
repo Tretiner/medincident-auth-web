@@ -1,4 +1,4 @@
-import { getUserProfile } from "./actions";
+import { getPersonalInfo } from "./actions";
 import { SidebarNav } from "./_components/sidebar-nav";
 import { MobileNav } from "./_components/mobile-nav";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,7 @@ export default async function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getUserProfile();
+  const user = await getPersonalInfo();
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full bg-background md:p-6 lg:p-8 font-sans">
@@ -34,7 +34,6 @@ export default async function ProfileLayout({
 
         {/* MAIN CONTENT AREA */}
         <main className="flex-1 min-h-0 overflow-y-auto scrollbar-app relative">
-          {/* Контейнер с отступами внутри скролла */}
           <div className="p-4 md:p-8 md:max-w-3xl mx-auto w-full h-full">
             {children}
           </div>

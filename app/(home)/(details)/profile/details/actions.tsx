@@ -1,27 +1,43 @@
 "use server";
 
 import { User } from "@/domain/profile/types";
-import { profileSchema as ProfileSchema } from "@/domain/profile/schema";
+import { personalInfoSchema } from "@/domain/profile/schema";
 import { getUserFromSession } from "@/services/session/session-service";
 import { unauthorized } from "next/navigation";
 import { db } from "@/lib/mock-db";
+import { Result } from "@/domain/error";
 
 export async function updateUserProfile(
   formData: Partial<User>
-): Promise<User> {
+): Promise<Result<User>> {
   const session = await getUserFromSession();
 
   if (!session) unauthorized();
 
-  const result = ProfileSchema.safeParse(formData);
+  const result = personalInfoSchema.safeParse(formData);
 
   if (!result.success) {
     const errorMessage = result.error.issues.map((e) => e.message).join(", ");
-    console.error("Server Validation Error:", errorMessage);
-    throw new Error(`Ошибка валидации: ${errorMessage}`);
+    return {
+      success: false,
+      error: {
+        type: "VALIDATION_ERROR",
+        message: errorMessage,
+      },
+    };
   }
 
-  const updatedUser = db.user.update(result.data);
-
-  return updatedUser;
+  try {
+    const updatedUser = db.user.update(result.data);
+    return { success: true, data: updatedUser };
+  } catch (error) {
+    console.error("DB Update Error:", error);
+    return {
+      success: false,
+      error: {
+        type: "API_ERROR",
+        message: "Не удалось сохранить данные профиля",
+      },
+    };
+  }
 }

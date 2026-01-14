@@ -1,6 +1,5 @@
-'use client';
+"use client";
 
-import { User } from "@/domain/profile/types";
 import { Button } from "@/components/ui/button";
 import { TelegramLogoIcon, MaxLogoIcon } from "@/components/icons/auth";
 import { Loader2, Link2, Unlink } from "lucide-react";
@@ -8,14 +7,18 @@ import { cn } from "@/lib/utils";
 
 // --- ТИПЫ И КОНФИГУРАЦИЯ ---
 
-type ProviderType = 'telegram' | 'max';
-
-interface AccountItemProps {
-  provider: ProviderType;
+// Интерфейс элемента, который приходит из Smart-контейнера
+export interface LinkedAccountItemProps {
+  id: string;
+  provider: 'telegram' | 'max';
   isConnected: boolean;
   isLoading: boolean;
   canUnlink: boolean;
-  onToggle: () => void;
+}
+
+interface Props {
+  items: LinkedAccountItemProps[];
+  onToggle: (id: string) => void;
 }
 
 const PROVIDER_CONFIG = {
@@ -35,15 +38,16 @@ const PROVIDER_CONFIG = {
   }
 };
 
-// --- ДОЧЕРНИЙ КОМПОНЕНТ КАРТОЧКИ ---
+// --- ДОЧЕРНИЙ КОМПОНЕНТ ---
 
 function LinkedAccountItem({ 
+  id,
   provider, 
   isConnected, 
   isLoading, 
   canUnlink, 
   onToggle 
-}: AccountItemProps) {
+}: LinkedAccountItemProps & { onToggle: () => void }) {
   const config = PROVIDER_CONFIG[provider];
   const Icon = config.icon;
 
@@ -98,12 +102,12 @@ function LinkedAccountItem({
           ) : (
             isConnected ? (
                 <>
-                    <Unlink />
+                    <Unlink className="w-4 h-4 mr-2" />
                     Отвязать
                 </>
             ) : (
                 <>
-                    <Link2 />
+                    <Link2 className="w-4 h-4 mr-2" />
                     Привязать
                 </>
             )
@@ -116,18 +120,7 @@ function LinkedAccountItem({
 
 // --- ОСНОВНОЙ КОМПОНЕНТ ---
 
-interface Props {
-  user: User;
-  activeActionId: string | null;
-  onToggleTelegram: () => void;
-  onToggleMax: () => void;
-}
-
-export function LinkedAccountsCard({ user, activeActionId, onToggleTelegram, onToggleMax }: Props) {
-  const { linkedAccounts } = user;
-  const connectedCount = (linkedAccounts.telegram ? 1 : 0) + (linkedAccounts.max ? 1 : 0);
-  const canUnlink = connectedCount > 1;
-
+export function LinkedAccountsCard({ items, onToggle }: Props) {
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
@@ -135,20 +128,13 @@ export function LinkedAccountsCard({ user, activeActionId, onToggleTelegram, onT
       </h3>
       
       <div className="flex flex-wrap gap-4">
-        <LinkedAccountItem
-          provider="telegram"
-          isConnected={linkedAccounts.telegram}
-          isLoading={activeActionId === "tg_link"}
-          canUnlink={canUnlink}
-          onToggle={onToggleTelegram}
-        />
-        <LinkedAccountItem
-          provider="max"
-          isConnected={linkedAccounts.max}
-          isLoading={activeActionId === "max_link"}
-          canUnlink={canUnlink}
-          onToggle={onToggleMax}
-        />
+        {items.map((item) => (
+          <LinkedAccountItem
+            key={item.id}
+            {...item}
+            onToggle={() => onToggle(item.id)}
+          />
+        ))}
       </div>
     </div>
   );

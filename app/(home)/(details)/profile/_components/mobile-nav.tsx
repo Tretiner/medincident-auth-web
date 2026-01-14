@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 
 export function MobileNav() {
   const pathname = usePathname();
-  // Определяем активные табы
   const tabs = [
     {
       name: "Данные",
@@ -28,7 +27,7 @@ export function MobileNav() {
   return (
     <div className="flex items-center justify-between gap-4 w-full">
       
-      {/* Группа навигации (Табы) */}
+      {/* Табы навигации */}
       <div className="flex bg-muted p-1 rounded-xl flex-1 gap-1">
         {tabs.map((tab) => (
           <Link 
@@ -36,7 +35,6 @@ export function MobileNav() {
             href={tab.href}
             className={cn(
               "flex-1 flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium rounded-lg transition-all duration-200",
-              // Стили активного состояния (белая плашка с тенью) vs неактивного
               tab.isActive 
                 ? "bg-background text-primary shadow-sm" 
                 : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
@@ -48,7 +46,7 @@ export function MobileNav() {
         ))}
       </div>
 
-      {/* Кнопка выхода (отдельная кнопка справа) */}
+      {/* Кнопка выхода */}
       <Button
         variant="ghost"
         size="icon"

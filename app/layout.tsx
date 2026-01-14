@@ -25,10 +25,10 @@ export default function RootLayout({
       lang="ru"
       suppressHydrationWarning
     >
-      <body>
+      <body className="bg-background">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="root"
           enableSystem
           disableTransitionOnChange
         >

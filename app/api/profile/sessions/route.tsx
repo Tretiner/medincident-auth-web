@@ -16,13 +16,19 @@ export async function DELETE(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
-  const type = searchParams.get('type'); // 'single' | 'others'
+  const type = searchParams.get('type');
 
-  if (type === 'others') {
-    db.sessions.revokeOthers();
-  } else if (id) {
-    db.sessions.revoke(id);
+  try {
+      if (type === 'others') {
+        db.sessions.revokeOthers();
+      } else if (id) {
+        db.sessions.revoke(id);
+      } else {
+         return NextResponse.json({ error: "Missing arguments" }, { status: 400 });
+      }
+
+      return NextResponse.json({ success: true });
+  } catch (e) {
+      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
-
-  return NextResponse.json({ success: true });
 }

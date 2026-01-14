@@ -41,7 +41,7 @@ export function AuthFlow({ redirectPath }: AuthFlowProps) {
   );
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4 sm:p-6 font-sans overflow-x-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
       <div className={cn("w-full flex justify-center max-w-full", animationClass)} key={view}>
         {ViewComponents[view]}
       </div>

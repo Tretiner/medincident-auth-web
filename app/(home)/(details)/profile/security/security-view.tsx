@@ -1,39 +1,58 @@
-'use client';
+"use client";
 
-import { User, UserSession } from "@/domain/profile/types";
-import { useSecurity } from "./security.hooks";
-import { LinkedAccountsCard } from "./_components/linked-accounts-card";
+import { useState, useTransition } from "react";
+import { LinkedAccountsStatus, UserSession } from "@/domain/profile/types";
+import { toggleAccountLink, revokeSession, revokeAllOtherSessions } from "../actions";
+import { LinkedAccountsCard, LinkedAccountItemProps } from "./_components/linked-accounts-card";
 import { SessionsList } from "./_components/sessions-list";
 
 interface Props {
-  user: User;
+  linkedAccounts: LinkedAccountsStatus;
   sessions: UserSession[];
 }
 
-export function SecurityView({ user, sessions }: Props) {
-  const { state, actions } = useSecurity();
+export function SecurityView({ linkedAccounts, sessions }: Props) {
+  const [isPending, startTransition] = useTransition();
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const handleAction = (id: string, action: () => Promise<any>) => {
+    setActiveId(id);
+    startTransition(async () => {
+      await action();
+      setActiveId(null);
+    });
+  };
+
+  const accountItems: LinkedAccountItemProps[] = [
+    {
+      id: 'telegram',
+      provider: 'telegram',
+      isConnected: linkedAccounts.telegram,
+      isLoading: isPending && activeId === 'telegram',
+      canUnlink: linkedAccounts.max
+    },
+    {
+      id: 'max',
+      provider: 'max',
+      isConnected: linkedAccounts.max,
+      isLoading: isPending && activeId === 'max',
+      canUnlink: linkedAccounts.telegram
+    }
+  ];
 
   return (
     <div className="space-y-8">
+      <LinkedAccountsCard 
+        items={accountItems}
+        onToggle={(id) => handleAction(id, () => toggleAccountLink(id as 'telegram' | 'max'))}
+      />
       
-      <div id="linked-accounts" className="space-y-4 scroll-mt-6">
-        <LinkedAccountsCard 
-            user={user} 
-            activeActionId={state.activeActionId}
-            onToggleTelegram={actions.onToggleTelegram}
-            onToggleMax={actions.onToggleMax}
-        />
-      </div>
-      
-      <div id="active-sessions" className="space-y-4 scroll-mt-6">
-        <SessionsList 
-            sessions={sessions} 
-            activeActionId={state.activeActionId}
-            onRevokeSession={actions.onRevokeSession}
-            onRevokeAllOthers={actions.onRevokeAllOthers}
-        />
-      </div>
-
+      <SessionsList 
+        sessions={sessions}
+        activeActionId={activeId}
+        onRevoke={(id) => handleAction(id, () => revokeSession(id))}
+        onRevokeAll={() => handleAction('all', revokeAllOtherSessions)}
+      />
     </div>
   );
 }
