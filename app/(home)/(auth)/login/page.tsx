@@ -1,8 +1,7 @@
 "server only";
 
 import { Metadata } from "next";
-import { fetchQrCode } from "./actions";
-import { LoginForm } from "./login-form";
+import { AuthFlow } from "./auth-flow";
 
 export const metadata: Metadata = {
   title: "Вход",
@@ -12,8 +11,6 @@ export const metadata: Metadata = {
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
-  const initialQrUrl = await fetchQrCode();
-
   const resolvedSearchParams = await searchParams;
   const redirectPath =
     typeof resolvedSearchParams.from === "string"
@@ -22,7 +19,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
 
   return (
     <main>
-      <LoginForm initialQrUrl={initialQrUrl} redirectPath={redirectPath} />
+      <AuthFlow redirectPath={redirectPath} />
     </main>
   );
 }

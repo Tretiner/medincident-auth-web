@@ -19,17 +19,19 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        icon: "hover:bg-accent hover:text-accent-foreground [&_svg]:size-6",
 
-        /* Custom */
-        telegram: "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-gradient-to-r from-[#2AABEE] to-[#229ED9] hover:opacity-90 [&_svg]:size-6",
-        max: "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 [&_svg]:size-6",
+        telegram: 
+          "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-[image:var(--telegram-gradient)] hover:opacity-90 [&_svg]:size-6",
+        max: 
+          "transition-all duration-300 border-0 text-white shadow-none hover:shadow-md bg-[image:var(--max-gradient)] hover:opacity-90 [&_svg]:size-6",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         md: "h-10 rounded-md px-4",
         lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        icon: "h-9 w-9 p-2",
       },
     },
     defaultVariants: {

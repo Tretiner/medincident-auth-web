@@ -20,22 +20,22 @@ export function QrCodeCard({
   return (
     <div
       className={cn(
-        "bg-background p-4 rounded-xl border border-border relative overflow-hidden group w-64 h-64 flex items-center justify-center",
+        // Responsive sizing: full width up to 256px, always square
+        "bg-background p-4 rounded-xl border border-border relative overflow-hidden group w-full max-w-[256px] aspect-square flex items-center justify-center",
         className
       )}
     >
       {isError && (
         <div className="flex flex-col items-center text-destructive gap-2 px-4 animate-in fade-in zoom-in-95 duration-300">
           <AlertCircle className="w-8 h-8 opacity-50" />
-          <span className="text-xs font-medium">Ошибка загрузки QR</span>
+          <span className="text-xs font-medium text-center">Ошибка загрузки QR</span>
         </div>
       )}
 
-      {isLoading ||(!url && !isError && (
+      {(isLoading || (!url && !isError)) && (
           <div className="absolute inset-0 z-10 flex items-center justify-center">
             <Loader2 className="size-12 animate-spin text-primary/60" />
           </div>
-        )
       )}
 
       {!isError && !isLoading && url && (

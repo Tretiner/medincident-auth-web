@@ -12,34 +12,6 @@ import {
   loginWithTelegramMock,
 } from "@/services/server-http-client";
 import { delay } from "@/lib/utils";
-import { randomInt } from "crypto";
-
-export interface QrResponse {
-  url?: string;
-  token?: string;
-  expiresInSeconds: number; // время в секундах
-}
-
-export async function fetchQrCode(): Promise<QrResponse> {
-  try {
-    const token = crypto.randomUUID();
-    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Auth_${token}&bgcolor=ffffff&color=000000&margin=0`;
-    
-    await delay(2000);
-
-    return {
-      url: `/медведь-гол-гоооол.gif`,
-      expiresInSeconds: randomInt(1, 5),
-    };
-
-  } catch (error) {
-    console.error("QR Fetch Error:", error);
-    return {
-      url: `/медведь-гол-гоооол.gif`,
-      expiresInSeconds: 5 
-    };
-  }
-}
 
 export async function telegramLoginAction(user: TelegramUser) {
   try {

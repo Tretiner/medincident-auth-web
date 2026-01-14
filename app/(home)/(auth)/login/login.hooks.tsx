@@ -3,41 +3,56 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { fetchQrCode, login, QrResponse, telegramLoginAction } from "./actions";
-import { TelegramUser } from "@/domain/auth/types";
-import { delay } from "@/lib/utils";
+import { login, telegramLoginAction } from "./actions";
+import { QrData, TelegramUser } from "@/domain/auth/types";
+import { handleFetch } from "@/lib/fetch-helper";
+import z from "zod";
 
-// --- QR Auth Hook ---
-export function useQrAuth(initialUrl: string) {
-  const {
-    data,
-    error,
-    isLoading,
-  } = useSWR<QrResponse>("auth-qr", fetchQrCode, {
-    fallbackData: { url: undefined, expiresInSeconds: 10 },
-    refreshInterval: (latestData) => {
-      if (!latestData) return 10000;
 
-      return latestData.expiresInSeconds * 1000;
-    },
-    
-    revalidateOnFocus: true,
-    keepPreviousData: true,
-  });
+const QrDataSchema = z.object({
+  url: z.string(),
+  expiresInSeconds: z.number(),
+}) satisfies z.ZodType<QrData>;
+
+const fetchQrCodeAPI = async (): Promise<QrData> => {
+  const result = await handleFetch(
+    () => fetch("/api/auth/qr", { 
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' }
+    }),
+    QrDataSchema
+  );
+
+  if (!result.success) {
+    throw new Error(result.error.message);
+  }
+
+  return result.data;
+};
+
+export function useQrAuth(enabled: boolean = true) {
+  const { data, error, isLoading, isValidating } = useSWR(
+    enabled ? "/api/auth/qr" : null,
+    fetchQrCodeAPI,
+    {
+      fallbackData: { url: undefined, expiresInSeconds: 10 },
+      refreshInterval: (latest) => (latest ? latest.expiresInSeconds * 1000 : 10000),
+      revalidateOnFocus: false,
+      keepPreviousData: false,
+      shouldRetryOnError: false,
+    }
+  );
 
   return {
     qrUrl: data?.url,
-    token: data?.token,
-    isLoading: isLoading && !data,
+    isLoading: isLoading || isValidating,
     isError: !!error,
   };
 }
 
 // --- Telegram Auth Hook ---
-export function useTelegramAuthDialog(redirectPath: string = "/profile") {
+export function useTelegramAuth(redirectPath: string = "/profile") {
   const router = useRouter();
-  
-  const [isOpen, setIsOpen] = useState(false);
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +69,6 @@ export function useTelegramAuthDialog(redirectPath: string = "/profile") {
           return;
         }
 
-        setIsOpen(false);
         router.push(redirectPath);
         router.refresh();
       } catch (err) {
@@ -65,8 +79,6 @@ export function useTelegramAuthDialog(redirectPath: string = "/profile") {
   };
 
   return {
-    isOpen,
-    setIsOpen,
     isLoading: isPending,
     error,
     onAuth: handleAuth,
