@@ -1,11 +1,9 @@
-dev: redis-reset
+dev:
 	npm run dev --turbo
-	make redis-down
 
-release: redis-reset
+release:
 	npm run build
 	npm run start
-	make redis-down
 
 build:
 	npm run build
@@ -13,17 +11,6 @@ build:
 invalidate:
 	powershell -Command "Remove-Item -Recurse -Force .next, node_modules, package-lock.json"
 	npm install
-
-
-redis-up:
-	docker run -d -p 6379:6379 --name my-redis redis
-
-redis-down:
-	docker stop my-redis || true
-	docker rm my-redis || true
-
-redis-reset: redis-down redis-up
-
 
 foldermap:
 	py folder_map.py -fcg --hide-empty --no-format -o folder_map.txt --match "^(?!package-lock|README)"

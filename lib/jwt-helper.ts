@@ -1,4 +1,5 @@
-import { JwtUser } from "@/domain/auth/types";
+"server only"
+
 import { JWTPayload, jwtVerify } from "jose";
 import { SignJWT } from "jose/jwt/sign";
 

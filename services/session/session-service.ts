@@ -1,17 +1,14 @@
-"use server";
+"server only";
 
-import { v4 as uuidv4 } from "uuid";
-import { redis } from "@/lib/redis";
 import { env } from "@/config/env";
 import {
-  deleteCookies,
+  deleteSessionCookies,
   getAccessCookie,
   getRefreshCookie,
   setAccessCookie,
   setRefreshCookie,
 } from "./auth-cookie-service";
-import { verifyJwt } from "./jwt-helper";
-import { SessionRedisService } from "./session-redis-service";
+import { verifyJwt } from "../../lib/jwt-helper";
 import { createSessionWithRefreshMock } from "../server-http-client";
 import { JwtUser } from "@/domain/auth/types";
 
@@ -23,12 +20,6 @@ export async function createSession(
   refreshExpiresAt: Date
 ) {
   console.log("Create session: a:" + accessToken + ":" + accessExpiresAt + " r:" + refreshToken);
-
-  await SessionRedisService.saveRefreshToken(
-    refreshToken,
-    userId,
-    refreshExpiresAt
-  );
 
   await setAccessCookie({
     token: accessToken,
@@ -44,13 +35,7 @@ export async function createSession(
 }
 
 export async function deleteSession() {
-  const refreshToken = await getRefreshCookie();
-
-  if (refreshToken) {
-    SessionRedisService.deleteRefreshToken(refreshToken);
-  }
-
-  await deleteCookies();
+  await deleteSessionCookies();
 }
 
 export async function verifyAccessToken(token: string) {
@@ -92,17 +77,12 @@ export async function getUserFromSession() {
 }
 
 export async function rotateTokens(oldRefreshToken: string) {
-  const userId = await SessionRedisService.getUserIdByRefreshToken(
-    oldRefreshToken
-  );
+  const refreshToken = getRefreshCookie()
 
-  if (!userId) {
+  if (!refreshToken) {
     await deleteSession();
     return null;
   }
-
-  // Это предотвращает Replay Attacks
-  await SessionRedisService.deleteRefreshToken(oldRefreshToken);
 
   const sessionData = await createSessionWithRefreshMock(oldRefreshToken);
 

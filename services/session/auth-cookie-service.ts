@@ -1,4 +1,4 @@
-"use server";
+"server only";
 
 import { cookies } from "next/headers";
 import { env } from "@/config/env";
@@ -40,15 +40,17 @@ export async function setRefreshCookie({
 
 export async function getAccessCookie() {
   const cookieStore = await cookies();
+
   return cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
 }
 
 export async function getRefreshCookie() {
   const cookieStore = await cookies();
+
   return cookieStore.get(REFRESH_TOKEN_COOKIE)?.value;
 }
 
-export async function deleteCookies() {
+export async function deleteSessionCookies() {
   const cookieStore = await cookies();
 
   cookieStore.delete(ACCESS_TOKEN_COOKIE);
