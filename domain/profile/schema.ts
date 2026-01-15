@@ -5,7 +5,7 @@ export const personalInfoSchema = z.object({
   lastName: z.string().min(2, "Фамилия должна содержать минимум 2 символа"),
   middleName: z.string().optional().or(z.literal('')),
   email: z.email("Введите корректный email адрес"),
-  phone: z.string().min(10, "Введите корректный номер телефона"),
+  phone: z.e164("Введите корректный номер телефона").startsWith("+7", "Номер должен начинаться с 8").length(12, "Введите корректный номер телефона"),
 });
 
 export type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;

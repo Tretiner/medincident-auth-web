@@ -1,12 +1,13 @@
 "use client";
 
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { PersonalInfoFormData } from "@/domain/profile/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 export interface FormMessage {
   type: "success" | "error";
@@ -129,14 +130,24 @@ export function ProfileForm({
             >
               Телефон
             </Label>
-            <Input
-              id="phone"
-              type="tel"
-              {...register("phone")}
-              disabled={isSaving}
-              className={cn(
-                errors.phone &&
-                  "border-destructive focus-visible:ring-destructive"
+            <Controller
+              name="phone"
+              control={form.control}
+              render={({ field }) => (
+                <PhoneInput
+                  {...field}
+                  id="phone"
+                  defaultCountry="RU"
+                  disabled={isSaving}
+              international={false}
+              initialValueFormat="national"
+          
+                  className={cn(
+                    errors.phone &&
+                      "border-destructive focus-visible:ring-destructive"
+                  )}
+                  placeholder="Введите номер телефона"
+                />
               )}
             />
             {errors.phone && (

@@ -5,6 +5,10 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 import { APP_NAME } from "@/lib/constants";
 import { ThemeProvider } from "../components/ui/theme-provider";
+import z from "zod";
+import { ru } from "zod/v4/locales";
+
+z.config(ru());
 
 export const metadata: Metadata = {
   title: {

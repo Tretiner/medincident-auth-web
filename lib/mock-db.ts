@@ -19,7 +19,7 @@ export let MockFullUser: User = {
     lastName: "Смирнов",
     middleName: "Викторович",
     email: "alex.smirnov@medsafety.ru",
-    phone: "+7 (999) 123-45-67",
+    phone: "+79991234567",
     position: "Ведущий хирург",
     avatarUrl: `/api/res/avatar/150?u=USR-7734-21`,
   },
