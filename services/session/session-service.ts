@@ -7,7 +7,7 @@ import {
   getRefreshCookie,
   setAccessCookie,
   setRefreshCookie,
-} from "./auth-cookie-service";
+} from "./session-cookie-service";
 import { verifyJwt } from "../../lib/jwt-helper";
 import { createSessionWithRefreshMock } from "../server-http-client";
 import { JwtUser } from "@/domain/auth/types";
@@ -74,6 +74,9 @@ export async function getUserFromSession() {
   }
 
   return null;
+}
+export async function requireUserFromSession(){
+  return await getUserFromSession()!
 }
 
 export async function rotateTokens(oldRefreshToken: string) {

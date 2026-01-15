@@ -50,8 +50,8 @@ export function SecurityView({ linkedAccounts, sessions }: Props) {
       <SessionsList 
         sessions={sessions}
         activeActionId={activeId}
-        onRevoke={(id) => handleAction(id, () => revokeSession(id))}
-        onRevokeAll={() => handleAction('all', revokeAllOtherSessions)}
+        onRevokeSession={(id) => handleAction(id, () => revokeSession(id))}
+        onRevokeAllOthers={() => handleAction('all', revokeAllOtherSessions)}
       />
     </div>
   );

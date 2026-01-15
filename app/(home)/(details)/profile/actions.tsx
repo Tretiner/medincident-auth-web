@@ -20,16 +20,7 @@ export async function getPersonalInfo(): Promise<PersonalInfo> {
   if (!session) unauthorized();
   
   const user = db.user.get();
-  return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    middleName: user.middleName,
-    email: user.email,
-    phone: user.phone,
-    position: user.position,
-    avatarUrl: user.avatarUrl
-  };
+  return user.info
 }
 
 export async function getLinkedAccounts(): Promise<LinkedAccountsStatus> {
@@ -67,7 +58,7 @@ export async function updatePersonalInfo(data: PersonalInfoFormData): Promise<Re
   }
 
   try {
-    const updated = db.user.update(parse.data);
+    const updated = db.user.updateInfo(parse.data);
     
     revalidatePath('/profile/details');
     
@@ -121,7 +112,7 @@ export async function revokeAllOtherSessions(): Promise<Result<void>> {
     db.sessions.revokeOthers();
     revalidatePath('/profile/security');
     return { success: true, data: undefined };
-  } catch (e) {
+  } catch (error) {
     return { 
       success: false, 
       error: { type: "API_ERROR", message: "Ошибка сервера" } 

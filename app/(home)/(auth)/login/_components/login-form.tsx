@@ -2,8 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ServiceLogoIcon } from "@/components/icons/base";
-import { MaxLogoIcon, TelegramLogoIcon } from "@/components/icons/auth";
+import { AppLogoIcon, MaxLogoIcon, TelegramLogoIcon } from "@/components/icons";
 import { useQrAuth } from "../login.hooks";
 import { APP_NAME } from "@/lib/constants";
 import { QrCodeCard } from "./qr-code-card";
@@ -105,7 +104,7 @@ export function LoginForm({ onTelegramClick, onMaxClick }: Props) {
       <CardContent className="p-6 sm:p-8 md:p-12 flex flex-col justify-center min-h-[450px] md:min-h-auto">
         <div className="flex flex-col items-center md:items-start mb-6 md:mb-8">
           <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-primary shadow-none border border-primary/20">
-            <ServiceLogoIcon className="w-6 h-6 md:w-8 md:h-8" />
+            <AppLogoIcon className="w-6 h-6 md:w-8 md:h-8" />
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight text-center md:text-left">

@@ -1,5 +1,5 @@
 export type GenericError = {
-  type: 'API_ERROR' | 'NETWORK_ERROR' | 'VALIDATION_ERROR';
+  type: 'ERROR' | 'API_ERROR' | 'NETWORK_ERROR' | 'VALIDATION_ERROR';
   message: string;
   code?: string | number;
 };

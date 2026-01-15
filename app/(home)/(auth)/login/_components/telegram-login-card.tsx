@@ -4,10 +4,9 @@ import { Loader2, AlertCircle, ArrowLeft, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MockTelegramWidget } from "./telegram-widget";
-import { TelegramLogoIcon } from "@/components/icons/auth";
+import { AppLogoIcon, TelegramLogoIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useTelegramAuth } from "../login.hooks";
-import { ServiceLogoIcon } from "@/components/icons/base";
 
 interface Props {
   redirectPath: string;
@@ -33,7 +32,7 @@ export function TelegramLoginCard({ redirectPath, onBack }: Props) {
         <div className="flex flex-row items-center justify-center gap-4 mb-4">
           {/* Иконка сервиса (стиль из login-form) */}
           <div className="w-12 h-12 bg-primary/10 rounded-xl border border-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/7">
-            <ServiceLogoIcon className="w-6 h-6" />
+            <AppLogoIcon className="w-6 h-6" />
           </div>
 
           {/* Иконка связи */}

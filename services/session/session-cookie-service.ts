@@ -6,12 +6,12 @@ import { env } from "@/config/env";
 const ACCESS_TOKEN_COOKIE = "auth_access";
 const REFRESH_TOKEN_COOKIE = "auth_refresh";
 
-interface AuthCookieOptions {
+interface Cookie {
   token: string;
   expiresAt: Date;
 }
 
-export async function setAccessCookie({ token, expiresAt }: AuthCookieOptions) {
+export async function setAccessCookie({ token, expiresAt }: Cookie) {
   const cookieStore = await cookies();
 
   cookieStore.set(ACCESS_TOKEN_COOKIE, token, {
@@ -26,7 +26,7 @@ export async function setAccessCookie({ token, expiresAt }: AuthCookieOptions) {
 export async function setRefreshCookie({
   token,
   expiresAt,
-}: AuthCookieOptions) {
+}: Cookie) {
   const cookieStore = await cookies();
 
   cookieStore.set(REFRESH_TOKEN_COOKIE, token, {

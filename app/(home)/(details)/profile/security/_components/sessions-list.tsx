@@ -133,7 +133,7 @@ export function SessionsList({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
-              Активные сеансы
+              Другие сессии
             </h3>
             <Button
               variant="outline"

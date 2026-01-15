@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { TelegramLogoIcon, MaxLogoIcon } from "@/components/icons/auth";
+import { TelegramLogoIcon, MaxLogoIcon } from "@/components/icons";
 import { Loader2, Link2, Unlink } from "lucide-react";
 import { cn } from "@/lib/utils";
 

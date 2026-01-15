@@ -1,6 +1,5 @@
 "server only"
 
-import { ServiceAuthResponse, ServiceAuthResponseSchema } from "@/domain/auth/dto";
 import { JwtUser, TelegramUser } from "@/domain/auth/types";
 import { Result } from "@/domain/error";
 import { env } from "@/config/env";
@@ -8,6 +7,7 @@ import { MockFullUser } from "@/lib/mock-db";
 import { randomInt } from "crypto";
 import { SignJWT } from "jose/jwt/sign";
 import { handleFetch } from "@/lib/fetch-helper";
+import { ServiceAuthResponse, ServiceAuthResponseSchema } from "@/domain/external-api";
 
 const BASE_URL = env.NEXT_PUBLIC_EXTERNAL_API;
 
@@ -28,6 +28,9 @@ export async function loginWithTelegram(
   );
 }
 
+
+// MOCK CALLS
+
 const key = new TextEncoder().encode(env.SESSION_SECRET);
 
 export async function loginWithTelegramMock(): Promise<Result<ServiceAuthResponse>> {
@@ -43,7 +46,7 @@ export async function createSessionWithRefreshMock(
 async function mockSession(): Promise<Result<ServiceAuthResponse>> {
   const jwtUser: JwtUser = {
     sid: randomInt(100000).toString(),
-    uid: MockFullUser.id
+    uid: MockFullUser.info.id
   }
 
   return { success: true, data: { 

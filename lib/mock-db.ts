@@ -1,6 +1,5 @@
 import { TelegramUser } from "@/domain/auth/types";
-import { User, UserSession } from "@/domain/profile/types";
-import { env } from "@/config/env";
+import { LinkedAccountsStatus, PersonalInfo, User, UserSession } from "@/domain/profile/types";
 
 export const MockTgUser: TelegramUser = {
   id: 773421,
@@ -14,14 +13,16 @@ export const MockTgUser: TelegramUser = {
 
 // Исходные данные (как в БД)
 export let MockFullUser: User = {
-  id: "USR-7734-21",
-  firstName: "Алексей",
-  lastName: "Смирнов",
-  middleName: "Викторович",
-  email: "alex.smirnov@medsafety.ru",
-  phone: "+7 (999) 123-45-67",
-  position: "Ведущий хирург",
-  avatarUrl: `/api/res/avatar/150?u=USR-7734-21`,
+  info: {
+    id: "USR-7734-21",
+    firstName: "Алексей",
+    lastName: "Смирнов",
+    middleName: "Викторович",
+    email: "alex.smirnov@medsafety.ru",
+    phone: "+7 (999) 123-45-67",
+    position: "Ведущий хирург",
+    avatarUrl: `/api/res/avatar/150?u=USR-7734-21`,
+  },
   linkedAccounts: {
     telegram: true,
     max: false,
@@ -59,6 +60,14 @@ export const db = {
     update: (data: Partial<User>) => {
       MockFullUser = { ...MockFullUser, ...data };
       return MockFullUser;
+    },
+    updateInfo: (data: Partial<PersonalInfo>) => {
+      MockFullUser.info = { ...MockFullUser.info, ...data };
+      return MockFullUser.info;
+    },
+    updateLinkedAccounts: (data: Partial<LinkedAccountsStatus>) => {
+      MockFullUser.linkedAccounts = { ...MockFullUser.linkedAccounts, ...data };
+      return MockFullUser.info;
     },
     toggleLink: (provider: "telegram" | "max") => {
       MockFullUser.linkedAccounts[provider] = !MockFullUser.linkedAccounts[provider];

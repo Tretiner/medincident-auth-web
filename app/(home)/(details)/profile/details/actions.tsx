@@ -1,6 +1,6 @@
 "use server";
 
-import { User } from "@/domain/profile/types";
+import { PersonalInfo } from "@/domain/profile/types";
 import { personalInfoSchema } from "@/domain/profile/schema";
 import { getUserFromSession } from "@/services/session/session-service";
 import { unauthorized } from "next/navigation";
@@ -8,8 +8,8 @@ import { db } from "@/lib/mock-db";
 import { Result } from "@/domain/error";
 
 export async function updateUserProfile(
-  formData: Partial<User>
-): Promise<Result<User>> {
+  formData: Partial<PersonalInfo>
+): Promise<Result<PersonalInfo>> {
   const session = await getUserFromSession();
 
   if (!session) unauthorized();
@@ -28,7 +28,7 @@ export async function updateUserProfile(
   }
 
   try {
-    const updatedUser = db.user.update(result.data);
+    const updatedUser = db.user.updateInfo(result.data);
     return { success: true, data: updatedUser };
   } catch (error) {
     console.error("DB Update Error:", error);

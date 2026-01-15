@@ -1,25 +1,5 @@
 import { JWTPayload } from "jose";
 
-export interface ExternalAuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresInSeconds: number;
-}
-
-export interface TokenPayload {
-  id: string;
-  userId: string;
-  exp: number;
-  type: 'access' | 'refresh';
-}
-
-export interface RedisSessionData {
-  userId: string;
-  fingerprint: string;
-  createdAt: number;
-  lastActive: number;
-}
-
 export interface TelegramUser {
   id: number;
   first_name: string;
@@ -28,6 +8,12 @@ export interface TelegramUser {
   photo_url?: string;
   auth_date: number;
   hash: string;
+}
+
+export interface ExternalAuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresInSeconds: number;
 }
 
 export interface JwtUser extends JWTPayload {

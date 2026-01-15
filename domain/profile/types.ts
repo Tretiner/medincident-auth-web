@@ -1,16 +1,6 @@
 export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  middleName?: string;
-  email: string;
-  phone: string;
-  position: string;
-  avatarUrl?: string;
-  linkedAccounts: {
-    telegram: boolean;
-    max: boolean;
-  };
+  info: PersonalInfo
+  linkedAccounts: LinkedAccountsStatus
 }
 
 export interface PersonalInfo {

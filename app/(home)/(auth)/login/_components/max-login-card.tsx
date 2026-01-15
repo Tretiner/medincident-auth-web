@@ -3,7 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { MaxLogoIcon } from "@/components/icons/auth";
+import { MaxLogoIcon } from "@/components/icons";
 import { useSocialAuth } from "../login.hooks";
 
 interface Props {
