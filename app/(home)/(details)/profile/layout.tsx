@@ -33,10 +33,8 @@ export default async function ProfileLayout({
         </aside>
 
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 min-h-0 overflow-y-auto scrollbar-app relative">
-          <div className="p-4 md:p-8 md:max-w-3xl mx-auto w-full h-full">
+        <main className="flex-1 min-h-0 overflow-y-auto scrollbar-app relative p-4 md:p-8 md:max-w-3xl mx-auto w-full h-full">
             {children}
-          </div>
         </main>
         
         {/* MOBILE NAV (Bottom Sticky) */}
