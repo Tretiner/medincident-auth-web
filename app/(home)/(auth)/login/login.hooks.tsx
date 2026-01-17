@@ -3,11 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { login, telegramLoginAction } from "./actions";
 import { QrData, TelegramUser } from "@/domain/auth/types";
 import { handleFetch } from "@/lib/fetch-helper";
 import z from "zod";
-
 
 const QrDataSchema = z.object({
   url: z.string(),
@@ -50,31 +48,35 @@ export function useQrAuth(enabled: boolean = true) {
   };
 }
 
-// --- Telegram Auth Hook ---
+const SuccessResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string().optional()
+});
+
 export function useTelegramAuth(redirectPath: string = "/profile") {
   const router = useRouter();
-
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const handleAuth = (user: TelegramUser) => {
     setError(null);
-
     startTransition(async () => {
-      try {
-        const result = await telegramLoginAction(user);
+      const result = await handleFetch(
+        () => fetch("/api/auth/telegram", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(user),
+        }),
+        SuccessResponseSchema
+      );
 
-        if (!result.success) {
-          setError(result.error || "Произошла ошибка");
-          return;
-        }
-
-        router.push(redirectPath);
-        router.refresh();
-      } catch (err) {
-        console.error("Unexpected client error:", err);
-        setError("Что-то пошло не так. Попробуйте позже.");
+      if (!result.success) {
+        setError(result.error.message || "Произошла ошибка");
+        return;
       }
+
+      router.push(redirectPath);
+      router.refresh();
     });
   };
 
@@ -91,9 +93,17 @@ export function useSocialAuth() {
 
   const handleLogin = (provider: string) => {
     setError(null);
-
     startTransition(async () => {
-      await login(provider);
+      if (provider === "max") {
+        const result = await handleFetch(
+            () => fetch("/api/auth/max", { method: "POST" }),
+            SuccessResponseSchema
+        );
+
+        if (!result.success) {
+            setError(result.error.message);
+        }
+      }
     });
   };
 
@@ -102,4 +112,9 @@ export function useSocialAuth() {
     isLoading: isPending,
     error,
   };
+}
+
+export async function logoutClient() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
 }

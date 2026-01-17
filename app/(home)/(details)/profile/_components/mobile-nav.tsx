@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { User as UserIcon, ShieldCheck, LogOut } from "lucide-react";
-import { logout } from "@/app/(home)/(auth)/login/actions";
 import { Button } from "@/components/ui/button";
+import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -50,7 +50,7 @@ export function MobileNav() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => logout()}
+        onClick={() => logoutClient()}
         className="h-11 w-11 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
       >
         <LogOut className="w-5 h-5" />
