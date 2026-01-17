@@ -23,14 +23,14 @@
   --red-foreground: oklch(0.98 0 0);
 
   /* Grays */
-  --gray-50: oklch(1 0 0);              
-  --gray-100: oklch(0.96 0.01 265);     
+  --gray-50: oklch(0.99 0.002 265);
+  --gray-100: oklch(0.96 0.005 265);  
   --gray-200: oklch(0.92 0.01 265);     
   --gray-500: oklch(0.55 0.03 265);     
   --gray-900: oklch(0.20 0.03 265);  
 
   /* --- 2. LIGHT MODE --- */
-  --background: var(--gray-50);
+  --background: var(--gray-100);
   --foreground: var(--gray-900);
 
   --card: var(--gray-50);
