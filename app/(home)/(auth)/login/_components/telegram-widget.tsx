@@ -27,14 +27,11 @@ export function TelegramWidget({ botName, onAuth }: Props) {
 
   useEffect(() => {
     if (!ref.current) return;
-    // Prevent duplicate scripts if re-rendering
     if (ref.current.querySelector("script")) return;
 
-    const callbackName: string = `onTelegramAuth_${Math.floor(Math.random() * 100000)}`;
+    const callbackName: string = `onTelegramAuth_${Math.floor(Math.random() * 10000)}`;
     // @ts-expect-error - Telegram widget requires a global function name string
     window[callbackName] = (rawUser: string) => {
-      delete window[callbackName];
-
       const result = telegramUserSchema.safeParse(rawUser);
       if (!result.success) {
         console.error("Telegram прислал некорректные данные:", result.error);
@@ -49,18 +46,20 @@ export function TelegramWidget({ botName, onAuth }: Props) {
 
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.async = true;
 
     script.setAttribute("data-telegram-login", botName);
-    script.setAttribute("data-size", "large");
-    script.setAttribute('data-radius', '16');
+    script.setAttribute('data-lang', 'ru');
+    script.setAttribute('data-radius', '8');
 
     script.setAttribute("data-onauth", `${callbackName}(user)`);
     script.setAttribute("data-request-access", "write");
 
-    script.async = true;
-    ref.current.appendChild(script);
+    const currRef = ref.current;
+    currRef.appendChild(script);
 
     return () => {
+      currRef?.removeChild(script);
       // @ts-expect-error - cleanup
       delete window[callbackName];
     };
