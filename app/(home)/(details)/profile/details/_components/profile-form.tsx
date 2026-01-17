@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PhoneInput } from "@/components/ui/phone-input";
 
 export interface FormMessage {
   type: "success" | "error";
@@ -97,65 +96,29 @@ export function ProfileForm({
         </div>
 
         {/* КОНТАКТЫ (GRID) */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label
-              htmlFor="email"
-              className={cn(errors.email && "text-destructive")}
-            >
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              {...register("email")}
-              defaultValue={form.getValues().email}
-              disabled={isSaving}
-              className={cn(
-                errors.email &&
-                  "border-destructive focus-visible:ring-destructive"
-              )}
-            />
-            {errors.email && (
-              <span className="text-[11px] text-destructive">
-                {errors.email.message}
-              </span>
+        <div className="space-y-2">
+          <Label
+            htmlFor="email"
+            className={cn(errors.email && "text-destructive")}
+          >
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            {...register("email")}
+            defaultValue={form.getValues().email}
+            disabled={isSaving}
+            className={cn(
+              errors.email &&
+                "border-destructive focus-visible:ring-destructive"
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label
-              htmlFor="phone"
-              className={cn(errors.phone && "text-destructive")}
-            >
-              Телефон
-            </Label>
-            <Controller
-              name="phone"
-              control={form.control}
-              render={({ field }) => (
-                <PhoneInput
-                  {...field}
-                  id="phone"
-                  defaultCountry="RU"
-                  disabled={isSaving}
-              international={false}
-              initialValueFormat="national"
-          
-                  className={cn(
-                    errors.phone &&
-                      "border-destructive focus-visible:ring-destructive"
-                  )}
-                  placeholder="Введите номер телефона"
-                />
-              )}
-            />
-            {errors.phone && (
-              <span className="text-[11px] text-destructive">
-                {errors.phone.message}
-              </span>
-            )}
-          </div>
+          />
+          {errors.email && (
+            <span className="text-[11px] text-destructive">
+              {errors.email.message}
+            </span>
+          )}
         </div>
       </div>
 

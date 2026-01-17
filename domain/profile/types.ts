@@ -9,7 +9,6 @@ export interface PersonalInfo {
   lastName: string;
   middleName?: string;
   email: string;
-  phone: string;
   position: string;
   avatarUrl?: string;
 }

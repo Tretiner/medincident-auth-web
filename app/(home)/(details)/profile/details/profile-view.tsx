@@ -19,7 +19,6 @@ export function ProfileDetailsView({ initialData }: { initialData: PersonalInfo 
       lastName: initialData.lastName,
       middleName: initialData.middleName || "",
       email: initialData.email,
-      phone: initialData.phone,
     },
     mode: "onChange"
   });
@@ -39,8 +38,6 @@ export function ProfileDetailsView({ initialData }: { initialData: PersonalInfo 
       form.reset(data); 
       
       setMessage({ type: 'success', text: 'Данные успешно сохранены' });
-      
-      // Скрываем сообщение об успехе через 3 секунды
       setTimeout(() => setMessage(null), 3000);
     });
   });
