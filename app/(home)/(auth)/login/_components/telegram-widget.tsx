@@ -3,19 +3,9 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
-import { z } from "zod";
 import type { TelegramUser } from "@/domain/auth/types";
 import { MockTgUser } from "@/lib/mock-db";
-
-export const telegramUserSchema = z.object({
-  id: z.number(),
-  first_name: z.string(),
-  last_name: z.string().optional(),
-  username: z.string().optional(),
-  photo_url: z.string().optional(),
-  auth_date: z.number(),
-  hash: z.string(),
-}) satisfies z.ZodType<TelegramUser>;
+import { telegramUserSchema } from "@/domain/auth/schema";
 
 interface Props {
   botName: string;
@@ -94,3 +84,4 @@ export function MockTelegramWidget({ botName, onAuth }: Props) {
     </div>
   );
 }
+

@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { env } from "@/config/env";
-import { telegramUserSchema } from "@/app/(home)/(auth)/login/_components/telegram-widget";
 import { loginWithTelegram, loginWithTelegramMock } from "@/services/server-http-client";
 import { createSession } from "@/services/session/session-service";
+import { telegramUserSchema } from "@/domain/auth/schema";
 
 export async function POST(req: NextRequest) {
   try {
