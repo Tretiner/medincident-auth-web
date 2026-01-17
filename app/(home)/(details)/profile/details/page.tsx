@@ -1,17 +1,13 @@
 import { Metadata } from "next";
-import { getPersonalInfo } from "../actions";
 import { PageHeader } from "../_components/page-header";
-import { UserHeaderCard } from "./_components/user-header-card"; // This component needs to accept PersonalInfo, not User
-import { ProfileDetailsView } from "./profile-view";
 import { UserRound } from "lucide-react";
+import { ProfileDetailsView, ProfileHeaderView } from "./profile-view";
 
 export const metadata: Metadata = {
   title: "Мои данные",
 };
 
-export default async function PersonalDataPage() {
-  const data = await getPersonalInfo();
-
+export default function PersonalDataPage() {
   return (
     <div className="space-y-4"> 
       <PageHeader 
@@ -19,10 +15,10 @@ export default async function PersonalDataPage() {
         description="Редактирование личной информации и контактов"
         icon={UserRound}
       />
+      
+      <ProfileHeaderView />
 
-      <UserHeaderCard user={data} />
-
-      <ProfileDetailsView initialData={data} />
+      <ProfileDetailsView />
     </div>
   );
 }

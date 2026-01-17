@@ -1,19 +1,17 @@
 'use client';
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import useSWR, { useSWRConfig } from "swr";
+
 import { PersonalInfo } from "@/domain/profile/types";
 import { handleFetch } from "@/lib/fetch-helper";
 import { personalInfoSchema } from "@/domain/profile/schema";
 
-const ApiResponseSchema = z.object({
-  id: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-}).loose(); 
+const ApiProfileSchema = z.custom<PersonalInfo>();
 
 export type ProfileFormData = z.infer<typeof personalInfoSchema>;
 
@@ -22,8 +20,37 @@ export interface ProfileMessage {
   text: string;
 }
 
-export function useProfileDetails(initialUser: PersonalInfo) {
+const PROFILE_API_KEY = "/api/profile/me";
+
+export function useProfileData() {
+  const { data, error, isLoading, isValidating } = useSWR(
+    PROFILE_API_KEY,
+    async (url) => {
+      const result = await handleFetch(
+        () => fetch(url),
+        ApiProfileSchema
+      );
+      if (!result.success) throw new Error(result.error.message);
+      return result.data;
+    },
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    }
+  );
+
+  return {
+    user: data,
+    isLoading: isLoading,
+    isValidating,
+    isError: error,
+  };
+}
+
+// --- 2. HOOK FOR MUTATION (UPDATE) ---
+export function useProfileDetails(user?: PersonalInfo) {
   const router = useRouter();
+  const { mutate } = useSWRConfig();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<ProfileMessage | null>(null);
 
@@ -31,25 +58,35 @@ export function useProfileDetails(initialUser: PersonalInfo) {
     resolver: zodResolver(personalInfoSchema),
     mode: "onChange",
     defaultValues: {
-      firstName: initialUser.firstName,
-      lastName: initialUser.lastName,
-      middleName: initialUser.middleName || "",
-      email: initialUser.email,
+      firstName: "",
+      lastName: "",
+      middleName: "",
+      email: "",
     }
   });
+
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        middleName: user.middleName || "",
+        email: user.email,
+      });
+    }
+  }, [user, form]);
 
   const handleSubmit = form.handleSubmit((data) => {
     setMessage(null);
     
     startTransition(async () => {
-        // REST API вызов вместо Server Action
         const result = await handleFetch(
             () => fetch("/api/profile/me", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
             }),
-            ApiResponseSchema
+            ApiProfileSchema
         );
 
         if (!result.success) {
@@ -57,12 +94,17 @@ export function useProfileDetails(initialUser: PersonalInfo) {
             return;
         }
 
+        // Обновляем локальный кэш SWR без лишнего запроса
+        await mutate(PROFILE_API_KEY, result.data, false);
+
+        // Обновляем Server Components (например, Sidebar)
         router.refresh(); 
         
-        // Обновляем состояние формы полученными данными
+        // Сбрасываем isDirty
         form.reset({
-             ...data,
-             // Если API вернул отформатированные поля, можно использовать result.data
+             ...form.getValues(),
+             firstName: result.data.firstName,
+             lastName: result.data.lastName
         }); 
         
         setMessage({ type: 'success', text: 'Данные успешно сохранены' });

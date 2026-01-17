@@ -3,21 +3,21 @@ import { db } from "@/lib/mock-db";
 import { requireUserFromSession } from "@/services/session/session-service";
 
 export async function GET() {
-  const session = await requireUserFromSession();
-
+  await requireUserFromSession();
+  await new Promise(resolve => setTimeout(resolve, 800)); 
+  
   const sessions = db.sessions.getAll();
   return NextResponse.json(sessions);
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await requireUserFromSession();
-
+  await requireUserFromSession();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   const type = searchParams.get("type");
 
   try {
-    if (type === "others") {
+    if (type === "revoke_all") {
       db.sessions.revokeOthers();
     } else if (id) {
       db.sessions.revoke(id);
@@ -27,10 +27,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.log("Internal Server Error", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("API Error", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

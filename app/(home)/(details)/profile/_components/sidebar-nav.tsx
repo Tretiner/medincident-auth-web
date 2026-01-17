@@ -1,49 +1,43 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ShieldCheckIcon, LogOutIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-// ИМПОРТИРУЕМ НОВУЮ ФУНКЦИЮ
 import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
-import { PersonalInfo } from "@/domain/profile/types";
 import { Separator } from "@/components/ui/separator";
 import { SidebarUserCard } from "./sidebar-user-card";
 
-interface Props {
-  user: PersonalInfo;
-}
-
-export function SidebarNav({ user }: Props) {
+export function SidebarNav() {
   const pathname = usePathname();
   const isSecurityActive = pathname?.startsWith("/profile/security");
 
   return (
     <nav className="flex flex-col gap-2 h-full">
-      <SidebarUserCard user={user} />
+      <SidebarUserCard />
 
       <div className="flex flex-col gap-1">
         <Link href="/profile/security">
-           <span className={cn(
-            "flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200",
-            isSecurityActive 
-              ? "bg-primary/10 text-primary shadow-sm" 
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
-          )}>
+          <span className={cn(
+              "flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200",
+              isSecurityActive
+                ? "bg-primary/10 text-primary shadow-sm"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}>
             <ShieldCheckIcon className={cn("h-5 w-5", isSecurityActive ? "text-primary" : "text-muted-foreground/70")} />
             Безопасность
           </span>
         </Link>
 
         <div className="px-2 my-1">
-             <Separator />
+          <Separator />
         </div>
 
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
-          onClick={() => logoutClient()} 
+          onClick={() => logoutClient()}
         >
           <LogOutIcon className="h-5 w-5" />
           Выйти

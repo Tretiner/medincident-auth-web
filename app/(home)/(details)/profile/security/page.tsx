@@ -1,20 +1,14 @@
 import { Metadata } from "next";
-import { getLinkedAccounts, getUserSessions } from "../actions";
-import { SecurityView } from "./security-view";
-import { ShieldCheck } from "lucide-react";
 import { PageHeader } from "../_components/page-header";
+import { ShieldCheck } from "lucide-react";
+import { SecurityView } from "./security-view";
 
 export const metadata: Metadata = {
   title: "Безопасность",
   description: "Управление доступом и сессиями",
 };
 
-export default async function SecurityPage() {
-  const [accounts, sessions] = await Promise.all([
-    getLinkedAccounts(),
-    getUserSessions()
-  ]);
-
+export default function SecurityPage() {
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -23,7 +17,7 @@ export default async function SecurityPage() {
         icon={ShieldCheck}
       />
       
-      <SecurityView linkedAccounts={accounts} sessions={sessions} />
+      <SecurityView />
     </div>
   );
 }

@@ -1,53 +1,42 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PersonalInfo } from "@/domain/profile/types";
-import { PersonalInfoFormData, personalInfoSchema } from "@/domain/profile/schema";
-import { updatePersonalInfo } from "../actions";
-import { ProfileForm, FormMessage } from "./_components/profile-form";
+import { ProfileForm } from "./_components/profile-form";
+import { UserHeaderCard } from "./_components/user-header-card";
+import { useProfileData, useProfileDetails } from "./profile.hooks";
+import { ProfileHeaderSkeleton, ProfileFormSkeleton } from "../skeletons";
+import { AlertCircle } from "lucide-react";
 
-export function ProfileDetailsView({ initialData }: { initialData: PersonalInfo }) {
-  const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<FormMessage | null>(null);
+export function ProfileHeaderView() {
+  const { user, isLoading, isError } = useProfileData();
 
-  const form = useForm<PersonalInfoFormData>({
-    resolver: zodResolver(personalInfoSchema),
-    defaultValues: {
-      firstName: initialData.firstName,
-      lastName: initialData.lastName,
-      middleName: initialData.middleName || "",
-      email: initialData.email,
-    },
-    mode: "onChange"
-  });
+  if (isLoading) return <ProfileHeaderSkeleton />;
+  
+  if (isError) return (
+    <div className="p-4 rounded-xl bg-destructive/10 text-destructive flex gap-2 items-center">
+      <AlertCircle className="w-5 h-5" />
+      <span>Не удалось загрузить профиль</span>
+    </div>
+  );
 
-  const handleSubmit = form.handleSubmit((data) => {
-    setMessage(null);
+  if (!user) return null;
 
-    startTransition(async () => {
-      const result = await updatePersonalInfo(data);
-      
-      if (!result.success) {
-        setMessage({ type: 'error', text: result.error.message });
-        return;
-      }
+  return <UserHeaderCard user={user} />;
+}
 
-      // Обновляем состояние формы, чтобы isDirty сбросился
-      form.reset(data); 
-      
-      setMessage({ type: 'success', text: 'Данные успешно сохранены' });
-      setTimeout(() => setMessage(null), 3000);
-    });
-  });
+export function ProfileDetailsView() {
+  const { user, isLoading } = useProfileData();
+  const { state, actions } = useProfileDetails(user);
+
+  if (isLoading) return <ProfileFormSkeleton />;
+
+  if (!user) return null;
 
   return (
     <ProfileForm 
-      form={form} 
-      isSaving={isPending} 
-      message={message}
-      onSubmit={handleSubmit} 
+      form={state.form} 
+      isSaving={state.isSaving} 
+      message={state.message}
+      onSubmit={actions.onSubmit} 
     />
   );
 }
