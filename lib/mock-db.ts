@@ -32,6 +32,7 @@ let SESSIONS: UserSession[] = [
   {
     id: "sess_1",
     deviceName: "Chrome (Windows 11)",
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     ip: "192.168.1.1",
     lastActive: new Date(),
     isCurrent: true,
@@ -39,6 +40,7 @@ let SESSIONS: UserSession[] = [
   {
     id: "sess_2",
     deviceName: "Safari (iPhone 14 Pro)",
+    userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
     ip: "10.0.0.5",
     lastActive: new Date(Date.now() - 1000 * 60 * 60 * 24),
     isCurrent: false,
@@ -46,6 +48,7 @@ let SESSIONS: UserSession[] = [
   {
     id: "sess_3",
     deviceName: "Firefox (MacOS)",
+    userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
     ip: "172.16.0.1",
     lastActive: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
     isCurrent: false,

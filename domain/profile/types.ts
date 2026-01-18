@@ -21,6 +21,7 @@ export interface LinkedAccountsStatus {
 export interface UserSession {
   id: string;
   deviceName: string;
+  userAgent: string;
   ip: string;
   lastActive: Date;
   isCurrent: boolean;

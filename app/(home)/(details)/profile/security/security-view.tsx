@@ -50,7 +50,7 @@ export function SecurityView() {
         <div className="space-y-8">
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
-              Текущее устройство
+              Текущая сессия
             </h4>
             <Skeleton className="h-20 w-full rounded-xl border border-primary/10" />
           </div>
