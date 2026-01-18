@@ -12,7 +12,7 @@ export default function ProfileLayout({
   return (
     <div className="flex flex-col items-center min-h-[100dvh] w-full bg-background md:p-6 lg:p-8 font-sans">
       
-      <div className="md:hidden w-full sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border">
+      <div className="md:hidden w-full sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-1">
          <MobileTopBar />
       </div>
 
@@ -20,12 +20,10 @@ export default function ProfileLayout({
         "w-full flex flex-col transition-all duration-300",
         
         // MOBILE
-        "flex-1", // [!code change] Исправлено для заполнения высоты
+        "flex-1",
         
-        // DESKTOP: Центрирование и сетка
-        // [!code change] Убрали mr-24, добавили mx-auto, увеличили gap
         "md:max-w-[1050px] md:mx-auto md:h-[85vh] md:min-h-[400px]",
-        "md:grid md:grid-cols-[280px_1fr] md:gap-6" 
+        "md:grid md:grid-cols-[280px_1fr] md:gap-4" 
       )}>
 
         <aside className="hidden md:block h-fit">
@@ -36,9 +34,9 @@ export default function ProfileLayout({
 
         <main className="flex-1 min-h-0 h-full">
             <Card className={cn(
-                "h-full w-full bg-card shadow-none flex flex-col overflow-hidden",
-                "rounded-none border-0", // Mobile
-                "md:rounded-xl md:border md:border-border" // Desktop
+                "w-full bg-card shadow-none flex flex-col overflow-hidden",
+                "rounded-none border-0 h-full", // Mobile
+                "md:rounded-xl md:border md:border-border md:h-fit" // Desktop
             )}>
                 <div className="flex-1 overflow-y-auto scrollbar-app relative p-4 md:p-8 md:max-w-4xl mx-auto w-full">
                      {children}
@@ -46,11 +44,9 @@ export default function ProfileLayout({
             </Card>
         </main>
         
-        {/* MOBILE NAV (Bottom Sticky) */}
-        <div className="md:hidden border-t border-border bg-card/90 backdrop-blur-md p-3 pb-safe z-20 shrink-0">
+        <div className="md:hidden border-t border-border bg-background/90 backdrop-blur-md p-3 pb-safe z-20 shrink-0 sticky bottom-0 z-30">
             <MobileNav />
         </div>
-
       </div>
     </div>
   );

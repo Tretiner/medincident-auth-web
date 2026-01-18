@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ShieldCheckIcon, LogOutIcon } from "lucide-react";
+import { ShieldCheckIcon, LogOutIcon, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
 import { Separator } from "@/components/ui/separator";
@@ -11,6 +11,9 @@ import { SidebarUserCard } from "./sidebar-user-card";
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
+  
   const isSecurityActive = pathname?.startsWith("/profile/security");
 
   return (
@@ -33,6 +36,19 @@ export function SidebarNav() {
         <div className="px-2 my-1">
           <Separator />
         </div>
+        
+        {from && (
+            <Button
+                variant="ghost"
+                asChild
+                className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-xl font-medium"
+            >
+                <Link href={from}>
+                    <ArrowLeft className="h-5 w-5" />
+                    Вернуться
+                </Link>
+            </Button>
+        )}
 
         <Button
           variant="ghost"

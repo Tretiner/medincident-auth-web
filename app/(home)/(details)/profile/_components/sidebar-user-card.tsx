@@ -17,11 +17,16 @@ export function SidebarUserCard() {
 
   if (isLoading || !user) {
     return (
-      <div className="flex items-center gap-3 px-2 py-2 rounded-xl mb-2">
+      <div className={cn(
+        "flex items-center gap-3 px-2 py-2 rounded-xl transition-all duration-200",
+        isActive 
+          ? "bg-primary/10 shadow-sm" 
+          : "hover:bg-muted"
+      )}>
         <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-        <div className="flex-1">
-          <Skeleton className="h-4 w-24" />
-          <p className="text-xs text-muted-foreground truncate mt-0.5">
+        <div className="flex-1 gap-0.3">
+          <Skeleton className="h-4.5 w-24" />
+          <p className="text-xs text-muted-foreground truncate">
             Редактировать
           </p>
         </div>
@@ -32,7 +37,7 @@ export function SidebarUserCard() {
   const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
 
   return (
-    <Link href="/profile/details" className="block mb-2 group">
+    <Link href="/profile/details" className="block group">
       <div className={cn(
         "flex items-center gap-3 px-2 py-2 rounded-xl transition-all duration-200",
         isActive 
@@ -60,14 +65,14 @@ export function SidebarUserCard() {
           </AvatarFallback>
         </Avatar>
         
-        <div className="flex-1 min-w-0 text-left">
+        <div className="flex-1 min-w-0 text-left gap-0.3">
           <h4 className={cn(
             "text-sm font-bold break-words leading-tight transition-all duration-200",
             isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
           )}>
             {user.firstName} {user.lastName}
           </h4>
-          <p className="text-xs text-muted-foreground truncate mb-0.5">
+          <p className="text-xs text-muted-foreground truncate">
             Редактировать
           </p>
         </div>

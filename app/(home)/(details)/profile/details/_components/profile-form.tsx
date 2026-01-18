@@ -53,7 +53,7 @@ export function ProfileForm({
             )}
           />
           {errors.firstName && (
-            <span className="text-[11px] font-medium text-destructive mt-1 block animate-in fade-in">
+            <span className="text-xs font-medium text-destructive mt-1 block animate-in fade-in">
               {errors.firstName.message}
             </span>
           )}

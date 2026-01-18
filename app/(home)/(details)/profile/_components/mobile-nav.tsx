@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { User as UserIcon, ShieldCheck, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
+import { User as UserIcon, ShieldCheck } from "lucide-react";
 
 export function MobileNav() {
   const pathname = usePathname();
+
   const tabs = [
     {
       name: "Данные",
@@ -26,35 +25,21 @@ export function MobileNav() {
 
   return (
     <div className="flex items-center justify-between gap-4 w-full">
-      
-      {/* Табы навигации */}
-      <div className="flex bg-muted p-1 rounded-xl flex-1 gap-1">
         {tabs.map((tab) => (
           <Link 
             key={tab.href} 
             href={tab.href}
             className={cn(
-              "flex-1 flex flex-col items-center justify-center py-2 px-1 text-[10px] font-medium rounded-lg transition-all duration-200",
+              "flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium rounded-lg transition-all duration-200",
               tab.isActive 
-                ? "bg-background text-primary shadow-sm" 
-                : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                ? "bg-card text-primary shadow-sm" 
+                : "text-muted-foreground hover:bg-card hover:text-foreground"
             )}
           >
-            <tab.icon className={cn("w-5 h-5 mb-0.5", tab.isActive && "text-primary")} />
+             <tab.icon className={cn("w-5 h-5 mb-0.5", tab.isActive && "text-primary")} />
             {tab.name}
           </Link>
         ))}
-      </div>
-
-      {/* Кнопка выхода */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => logoutClient()}
-        className="h-11 w-11 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
-      >
-        <LogOut className="w-5 h-5" />
-      </Button>
     </div>
   );
 }
