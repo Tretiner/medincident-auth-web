@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useTelegramAuth } from "./login.hooks";
 import { MockTelegramWidget } from "./_components/telegram-widget";
 import { LinkServiceCard } from "./_components/link-service-card";
+import { env } from "@/config/env";
 
 interface Props {
   redirectPath: string;
@@ -43,7 +44,7 @@ export function TelegramLoginCard({ redirectPath, backLink }: Props) {
       )}
 
       <div className={cn("transition-all duration-300 w-full flex justify-center", isLoading ? "opacity-40 blur-sm scale-95" : "opacity-100 scale-100")}>
-        <MockTelegramWidget botName="mock_bot" onAuth={onAuth} />
+        <MockTelegramWidget botName={env.NEXT_PUBLIC_TELEGRAM_BOT_NAME} onAuth={onAuth} />
       </div>
     </LinkServiceCard>
   );

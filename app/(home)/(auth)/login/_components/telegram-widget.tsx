@@ -21,17 +21,17 @@ export function TelegramWidget({ botName, onAuth }: Props) {
 
     const callbackName: string = `onTelegramAuth_${Math.floor(Math.random() * 10000)}`;
     // @ts-expect-error - Telegram widget requires a global function name string
-    window[callbackName] = (rawUser: string) => {
-      const result = telegramUserSchema.safeParse(rawUser);
+    window[callbackName] = (user: string) => {
+      console.log("Got a user: " + user)
+
+      const result = telegramUserSchema.safeParse(user);
       if (!result.success) {
         console.error("Telegram прислал некорректные данные:", result.error);
         // TODO: Обработка ошибок
         return;
       }
 
-      const user = result.data;
-
-      onAuth(user);
+      onAuth(result.data);
     };
 
     const script = document.createElement("script");
@@ -39,11 +39,12 @@ export function TelegramWidget({ botName, onAuth }: Props) {
     script.async = true;
 
     script.setAttribute("data-telegram-login", botName);
-    script.setAttribute('data-lang', 'ru');
-    script.setAttribute('data-radius', '8');
-
     script.setAttribute("data-onauth", `${callbackName}(user)`);
     script.setAttribute("data-request-access", "write");
+
+    script.setAttribute('data-lang', 'ru');
+    script.setAttribute('data-size', 'large');
+    script.setAttribute('data-radius', '6');
 
     const currRef = ref.current;
     currRef.appendChild(script);
@@ -65,8 +66,8 @@ export function MockTelegramWidget({ botName, onAuth }: Props) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-yellow-400 bg-yellow-50/50 rounded-xl w-full max-w-[300px]">
-      <div className="text-xs font-mono text-yellow-600 mb-3 uppercase tracking-wider font-bold">
+    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-yellow-400 bg-yellow-400/5 rounded-xl w-full max-w-[300px]">
+      <div className="text-xs font-mono text-yellow-500 mb-3 uppercase tracking-wider font-bold">
         Dev Mode: Mock Widget
       </div>
 
