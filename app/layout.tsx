@@ -1,5 +1,5 @@
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className="bg-background">
         <ThemeProvider
           attribute="class"
-          defaultTheme="root"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >

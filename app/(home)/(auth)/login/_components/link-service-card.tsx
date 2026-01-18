@@ -20,7 +20,7 @@ export function LinkServiceCard({
   children,
 }: LinkServiceProps) {
   return (
-    <Card className="w-full max-w-[420px] shadow-none border-border bg-card overflow-hidden relative animate-in fade-in slide-in-from-right-8 duration-300">
+    <Card className="w-full max-w-[420px] shadow-none border-border bg-card overflow-hidden relative animate-in fade-in slide-in-from-left-6 duration-300">
       <div className="absolute top-4 left-4 z-10">
         <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground -ml-2 h-8 px-2">
           <Link href={backLink}>
