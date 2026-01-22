@@ -14,6 +14,8 @@ export function SidebarNav() {
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
   
+  const getHref = (path: string) => from ? `${path}?from=${from}` : path;
+
   const isSecurityActive = pathname?.startsWith("/profile/security");
 
   return (
@@ -21,7 +23,7 @@ export function SidebarNav() {
       <SidebarUserCard />
 
       <div className="flex flex-col gap-1">
-        <Link href="/profile/security">
+        <Link href={getHref("/profile/security")}> 
           <span className={cn(
               "flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200",
               isSecurityActive
@@ -45,9 +47,9 @@ export function SidebarNav() {
             >
                 <Link href={from}>
                     <ArrowLeft className="h-5 w-5" />
-                    Вернуться
+                    Вернуться в приложение
                 </Link>
-            </Button>
+           </Button>
         )}
 
         <Button

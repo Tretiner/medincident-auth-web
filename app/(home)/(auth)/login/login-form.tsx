@@ -61,10 +61,10 @@ interface Props {
 }
 
 export function LoginForm({ searchParams }: Props) {
-  const createLink = (provider: string) => {
+const createLink = (provider: string) => {
     const params = new URLSearchParams(searchParams);
-    params.set("provider", provider);
-    return `?${params.toString()}`;
+    const queryString = params.toString();
+    return `/login/${provider}${queryString ? `?${queryString}` : ""}`;
   };
 
   return (

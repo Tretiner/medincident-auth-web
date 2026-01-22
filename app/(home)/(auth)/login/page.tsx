@@ -1,46 +1,28 @@
 import { Metadata } from "next";
 import { LoginForm } from "./login-form";
-import { TelegramLoginCard } from "./telegram-login-card";
-import { MaxLoginCard } from "./max-login-card";
+import { getUserFromSession } from "@/services/session/session-service";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Вход",
   description: "Авторизация в системе",
 };
 
-type SearchParams = Promise<{ [key: string]: string | undefined }>;
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
-  const resolvedSearchParams = await searchParams;
-  
-  const authProvider = resolvedSearchParams.provider;
-  const from =
-    typeof resolvedSearchParams.from === "string"
-      ? resolvedSearchParams.from
-      : "/profile";
-  
-  const backParams = new URLSearchParams();
-  if (resolvedSearchParams.from) {
-    backParams.set("from", resolvedSearchParams.from.toString());
-  }
-  const backLink = `/login?${backParams.toString()}`;
+  const user = await getUserFromSession()
 
-  const renderView = () => {
-    switch (authProvider) {
-      case "telegram":
-        return <TelegramLoginCard backLink={backLink} redirectPath={from} />;
-      case "max":
-        return <MaxLoginCard backLink={backLink} redirectPath={from} />;
-      default:
-        return <LoginForm searchParams={resolvedSearchParams as Record<string, string>} />;
-    }
-  };
+  const resolvedSearchParams = await searchParams as Record<string, string>;
+  const queryString = new URLSearchParams(resolvedSearchParams).toString()
+
+  if (user) redirect("/profile" + queryString ? `?${queryString}` : "")
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
+    <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
       <div className="w-full flex justify-center max-w-full">
-        {renderView()}
+        <LoginForm searchParams={resolvedSearchParams} />
       </div>
-    </div>
+    </main>
   );
 }

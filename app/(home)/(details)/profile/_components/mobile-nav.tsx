@@ -1,12 +1,16 @@
 'use client';
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { User as UserIcon, ShieldCheck } from "lucide-react";
 
 export function MobileNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
+
+  const getHref = (path: string) => from ? `${path}?from=${from}` : path;
 
   const tabs = [
     {
@@ -28,7 +32,7 @@ export function MobileNav() {
         {tabs.map((tab) => (
           <Link 
             key={tab.href} 
-            href={tab.href}
+            href={getHref(tab.href)}
             className={cn(
               "flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium rounded-lg transition-all duration-200",
               tab.isActive 

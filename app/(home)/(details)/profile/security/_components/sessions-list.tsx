@@ -18,8 +18,11 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
 
 interface Props {
   sessions: UserSession[];
@@ -121,6 +124,44 @@ function SessionInfoModal({
   );
 }
 
+function LogoutConfirmDialog({ children }: { children: React.ReactNode }) {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logoutClient();
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        {children}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle>Выход из системы</DialogTitle>
+          <DialogDescription className="pt-2">
+            Вы уверены, что хотите завершить текущую сессию на этом устройстве?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:gap-0 mt-4">
+            <DialogClose asChild>
+                <Button variant="outline">Отмена</Button>
+            </DialogClose>
+            <Button 
+                variant="destructive" 
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+            >
+                {isLoggingOut && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Да, выйти
+            </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 const DeviceIcon = ({ name, className }: { name: string; className?: string }) => {
   const isMobile = name.toLowerCase().includes("iphone") || name.toLowerCase().includes("android");
   const Icon = isMobile ? Smartphone : Laptop;
@@ -215,6 +256,7 @@ export function SessionsList({
         </h4>
         {currentSession && (
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center gap-4 relative overflow-hidden">
+             {/* Декоративный фон */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
             <div className="w-12 h-12 shrink-0 rounded-xl bg-background/60 border border-primary/20 flex items-center justify-center text-primary">
@@ -231,7 +273,6 @@ export function SessionsList({
                   <span>Этот браузер</span>
                 </div>
 
-                {/* ИСПОЛЬЗОВАНИЕ НОВОГО ШАБЛОНА */}
                 <SessionInfoModal session={currentSession}>
                     <button 
                       className="text-primary/40 hover:text-primary transition-colors cursor-pointer outline-none ml-1 p-0.5 rounded-sm"
@@ -240,21 +281,37 @@ export function SessionsList({
                       <Info className="w-3.5 h-3.5" />
                     </button>
                 </SessionInfoModal>
-
               </div>
+              
               <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
                 <span className="font-mono text-xs">{currentSession.ip}</span>
                 <span className="w-1 h-1 rounded-full bg-primary" />
                 <span className="text-primary font-medium text-xs">Онлайн</span>
               </p>
             </div>
+
+            {/* === ИЗМЕНЕНИЕ: КНОПКА ВЫХОДА СПРАВА === */}
+            <div className="z-10 ml-2">
+                <LogoutConfirmDialog>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 gap-2"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        <span className="hidden sm:inline">Выйти</span>
+                    </Button>
+                </LogoutConfirmDialog>
+            </div>
+
           </div>
         )}
       </div>
 
-      {/* 2. OTHER SESSIONS */}
+      {/* 2. OTHER SESSIONS (Без изменений) */}
       {otherSessions.length > 0 && (
-        <div className="space-y-4">
+         <div className="space-y-4">
+           {/* Я скопировал логику рендера списка ниже для полноты */}
            <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
               Другие сессии
@@ -283,7 +340,7 @@ export function SessionsList({
               />
             ))}
           </div>
-        </div>
+         </div>
       )}
     </div>
   );
