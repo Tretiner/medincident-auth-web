@@ -9,4 +9,13 @@ export const telegramUserSchema = z.object({
   photo_url: z.string().optional(),
   auth_date: z.number(),
   hash: z.string(),
-}) satisfies z.ZodType<TelegramUser>;
+})
+.transform((data) => ({
+  id: data.id,
+  firstName: data.first_name,
+  lastName: data.last_name,
+  username: data.username,
+  photoUrl: data.photo_url,
+  authDate: data.auth_date,
+  hash: data.hash,
+})) satisfies z.ZodType<TelegramUser>;

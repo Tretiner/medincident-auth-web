@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { QrData, TelegramUser } from "@/domain/auth/types";
 import { handleFetch } from "@/lib/fetch-helper";
+import { loginWithTelegram, loginWithTelegramMock } from "@/services/server-http-client";
 import z from "zod";
 
 const QrDataSchema = z.object({
@@ -61,14 +62,7 @@ export function useTelegramAuth(redirectPath: string = "/profile") {
   const handleAuth = (user: TelegramUser) => {
     setError(null);
     startTransition(async () => {
-      const result = await handleFetch(
-        () => fetch("/api/auth/telegram", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(user),
-        }),
-        SuccessResponseSchema
-      );
+      const result = await loginWithTelegram(user);
 
       if (!result.success) {
         setError(result.error.message || "Произошла ошибка");
@@ -118,3 +112,15 @@ export async function logoutClient() {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
 }
+
+// {
+//     "accessToken": {
+//         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJtZWRpbmNpZGVudC1hdXRoLXNlcnZpY2UiLCJzdWIiOiIwMTliZTU2Zi0yOTdmLTcxZGMtYmRlZi1lNGY4ZjU5NDJiMDIiLCJleHAiOjE3NjkwODE1MzcsIm5iZiI6MTc2OTA4MTIzNywiaWF0IjoxNzY5MDgxMjM3LCJqdGkiOiIwMTliZTU3NS03MTZhLTc5NTItOGJmMi0yMjk5MTc3ZmQyNDciLCJzaWQiOiIyZDBiMDZkMy0xYjNmLTRlM2MtYmRhMC1jZDQ2ODgyMGUzZDUifQ._Znh3xnjriZtHof9I66zdrDbwCe8gaoPo5YzUPD4D-c",
+//         "expiresIn": 292
+//     },
+//     "profile": {
+//         "id": "019be56f-297f-71dc-bdef-e4f8f5942b02",
+//         "firstName": "махмед",
+//         "photoUrl": "https://t.me/i/userpic/320/k6xaAMpd0LZltPkCRc7cm2UzdRjUMrG5NMV30g_GJKw.jpg"
+//     }
+// }

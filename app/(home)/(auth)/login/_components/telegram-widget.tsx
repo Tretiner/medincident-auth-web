@@ -30,6 +30,7 @@ export function TelegramWidget({ botName, onAuth }: Props) {
         // TODO: Обработка ошибок
         return;
       }
+        console.error("Telegram прислал крутые данные:", JSON.stringify(result.data));
 
       onAuth(result.data);
     };
@@ -62,7 +63,7 @@ export function TelegramWidget({ botName, onAuth }: Props) {
 // --- MOCK WIDGET ---
 export function MockTelegramWidget({ botName, onAuth }: Props) {
   const handleMockLogin = () => {
-    onAuth(MockTgUser);
+    onAuth(JSON.stringify(MockTgUser));
   };
 
   return (

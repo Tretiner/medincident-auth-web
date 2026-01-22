@@ -14,6 +14,8 @@ const PUBLIC_PATHS = [
   "/static",
   "/api/auth",
   "/api/callback",
+  "/login/telegram",
+  "/login/max",
   "/login",
   "/favicon.ico",
   "/sitemap.xml",

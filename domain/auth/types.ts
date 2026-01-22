@@ -2,11 +2,11 @@ import { JWTPayload } from "jose";
 
 export interface TelegramUser {
   id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-  auth_date: number;
+  firstName: string;
+  lastName?: string;
+  userName?: string;
+  photoUrl?: string;
+  authDate: number;
   hash: string;
 }
 

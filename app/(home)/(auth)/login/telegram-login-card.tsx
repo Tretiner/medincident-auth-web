@@ -4,7 +4,7 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { TelegramLogoIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useTelegramAuth } from "./login.hooks";
-import { MockTelegramWidget } from "./_components/telegram-widget";
+import { MockTelegramWidget, TelegramWidget } from "./_components/telegram-widget";
 import { LinkServiceCard } from "./_components/link-service-card";
 import { env } from "@/config/env";
 
@@ -44,7 +44,7 @@ export function TelegramLoginCard({ redirectPath, backLink }: Props) {
       )}
 
       <div className={cn("transition-all duration-300 w-full flex justify-center", isLoading ? "opacity-40 blur-sm scale-95" : "opacity-100 scale-100")}>
-        <MockTelegramWidget botName={env.NEXT_PUBLIC_TELEGRAM_BOT_NAME} onAuth={onAuth} />
+        <TelegramWidget botName={env.NEXT_PUBLIC_TELEGRAM_BOT_NAME} onAuth={onAuth} />
       </div>
     </LinkServiceCard>
   );

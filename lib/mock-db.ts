@@ -3,11 +3,11 @@ import { LinkedAccountsStatus, PersonalInfo, User, UserSession } from "@/domain/
 
 export const MockTgUser: TelegramUser = {
   id: 773421,
-  first_name: "Алексей",
-  last_name: "Смирнов",
-  username: "alex_smirnov",
-  photo_url: "https://i.pravatar.cc/150?u=USR-7734-21",
-  auth_date: Math.floor(Date.now() / 1000),
+  firstName: "Алексей",
+  lastName: "Смирнов",
+  userName: "alex_smirnov",
+  photoUrl: "https://i.pravatar.cc/150?u=USR-7734-21",
+  authDate: Math.floor(Date.now() / 1000),
   hash: "mock_dev_hash",
 };
 

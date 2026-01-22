@@ -7,24 +7,25 @@ import { MockFullUser } from "@/lib/mock-db";
 import { randomInt } from "crypto";
 import { SignJWT } from "jose/jwt/sign";
 import { handleFetch } from "@/lib/fetch-helper";
-import { ServiceAuthResponse, ServiceAuthResponseSchema } from "@/domain/external-api";
+import { LoginByTelegramWidgetResponse, LoginByTelegramWidgetResponseSchema } from "@/domain/external-api";
 
-const BASE_URL = env.NEXT_PUBLIC_EXTERNAL_API;
+const BASE_URL = env.NEXT_PUBLIC_AUTH_URL;
 
 export async function loginWithTelegram(
   user: TelegramUser
-): Promise<Result<ServiceAuthResponse>> {
+): Promise<Result<LoginByTelegramWidgetResponse>> {
+  console.log("json: " + JSON.stringify(user))
   return handleFetch(
     () =>
-      fetch(`${BASE_URL}/auth.loginWithTelegram`, {
+      fetch(`${BASE_URL}/telegram/widget`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify(user).toString(),
         cache: 'no-store'
       }),
-    ServiceAuthResponseSchema
+    LoginByTelegramWidgetResponseSchema
   );
 }
 
@@ -33,31 +34,41 @@ export async function loginWithTelegram(
 
 const key = new TextEncoder().encode(env.SESSION_SECRET);
 
-export async function loginWithTelegramMock(): Promise<Result<ServiceAuthResponse>> {
+export async function loginWithTelegramMock(): Promise<Result<LoginByTelegramWidgetResponse>> {
   return await mockSession();
 }
 
 export async function createSessionWithRefreshMock(
   refreshToken: string,
-): Promise<Result<ServiceAuthResponse>> {
+): Promise<Result<LoginByTelegramWidgetResponse>> {
   return await mockSession();
 }
 
-async function mockSession(): Promise<Result<ServiceAuthResponse>> {
+async function mockSession(): Promise<Result<LoginByTelegramWidgetResponse>> {
   const jwtUser: JwtUser = {
-    sid: randomInt(100000).toString(),
+    sid: Math.floor(Math.random() * 100000).toString(),
     uid: MockFullUser.info.id
-  }
+  };
 
-  return { success: true, data: { 
-    UserID: jwtUser.uid,
-    AccessToken: await new SignJWT(jwtUser)
-        .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime('7d') // Токен живет 7 дней
-        .sign(key),
-    AccessExpiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    RefreshToken: "refresh:" + jwtUser.uid,
-    RefreshExpiresAt: new Date(Date.now() + 5 * 60 * 60 * 1000),
-   }}
+  const token = await new SignJWT(jwtUser)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('7d')
+    .sign(key);
+
+  return {
+    success: true,
+    data: {
+      accessToken: {
+        token: token,
+        expiresIn: 7 * 24 * 60 * 60,
+      },
+      profile: {
+        id: jwtUser.uid,
+        firstName: "Ivan",
+        lastName: "Ivanov",
+        photoUrl: null, 
+      }
+    }
+  };
 }
