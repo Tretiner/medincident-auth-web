@@ -6,7 +6,6 @@ const envConfig = createEnv({
     // Secrets
     SESSION_SECRET: z.string().min(32),
     TELEGRAM_BOT_TOKEN: z.string().min(1),
-    REDIS_URL: z.url(),
 
     // Default
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -21,7 +20,6 @@ const envConfig = createEnv({
   runtimeEnv: {
     SESSION_SECRET: process.env.SESSION_SECRET,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
-    REDIS_URL: process.env.REDIS_URL,
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
     NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
