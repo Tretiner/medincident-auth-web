@@ -7,6 +7,7 @@ import { APP_NAME } from "@/lib/constants";
 import { ThemeProvider } from "../components/ui/theme-provider";
 import z from "zod";
 import { ru } from "zod/v4/locales";
+import { Toaster } from "@/components/ui/sonner";
 
 z.config(ru());
 
@@ -37,6 +38,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster richColors position="top-center" />
         </ThemeProvider>
       </body>
     </html>

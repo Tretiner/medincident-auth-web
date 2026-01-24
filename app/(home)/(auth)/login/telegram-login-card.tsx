@@ -7,6 +7,8 @@ import { useTelegramAuth } from "./login.hooks";
 import { MockTelegramWidget, TelegramWidget } from "./_components/telegram-widget";
 import { LinkServiceCard } from "./_components/link-service-card";
 import { env } from "@/config/env";
+import { WelcomeDialog } from "./_components/welcome-dialog";
+import { TelegramUser } from "@/domain/auth/types";
 
 interface Props {
   redirectPath: string;
@@ -20,9 +22,27 @@ const TelegramIcon = () => (
 );
 
 export function TelegramLoginCard({ redirectPath, backLink }: Props) {
-  const { isLoading, error, onAuth } = useTelegramAuth(redirectPath);
+  const { isLoading, onAuth, welcomeUser } = useTelegramAuth(redirectPath);
+
+  // const isLoading = false;
+  // const welcomeUser = {
+  //       id: 123,
+  //       firstName: "Michael",
+  //       lastName: "DuremanovOlegovich",
+  //       photoUrl: null, 
+  //     }
+
+  // function onAuth(user: TelegramUser): void {
+    
+  // }
 
   return (
+  <>
+    <WelcomeDialog 
+        isOpen={!!welcomeUser} 
+        user={welcomeUser} 
+      />
+
     <LinkServiceCard
       title="Вход через Telegram"
       description="Используйте виджет для безопасной авторизации"
@@ -36,16 +56,10 @@ export function TelegramLoginCard({ redirectPath, backLink }: Props) {
         </div>
       )}
 
-      {error && (
-        <div className="w-full mb-6 p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-center gap-3 animate-in slide-in-from-top-2 text-left">
-          <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
-          <span className="text-xs font-medium text-destructive">{error}</span>
-        </div>
-      )}
-
       <div className={cn("transition-all duration-300 w-full flex justify-center", isLoading ? "opacity-40 blur-sm scale-95" : "opacity-100 scale-100")}>
         <TelegramWidget botName={env.NEXT_PUBLIC_TELEGRAM_BOT_NAME} onAuth={onAuth} />
       </div>
     </LinkServiceCard>
+    </>
   );
 }

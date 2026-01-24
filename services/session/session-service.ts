@@ -9,8 +9,9 @@ import {
   setRefreshCookie,
 } from "./session-cookie-service";
 import { verifyJwt } from "../../lib/jwt-helper";
-import { createSessionWithRefreshMock } from "../server-http-client";
 import { JwtUser } from "@/domain/auth/types";
+import { createSessionWithRefreshMock } from "@/lib/services/server-http-client";
+import { tokenManager } from "@/lib/services/access-token-manager";
 
 export async function createSession(
   userId: string,
@@ -54,24 +55,25 @@ export async function verifyAccessToken(token: string) {
 
 export async function getUserFromSession() {
   "server only";
+  return tokenManager.getToken();
   // A. Пробуем Access Token
-  const accessToken = await getAccessCookie();
-  if (accessToken) {
-    const payload = await verifyAccessToken(accessToken);
-    if (payload?.uid) return payload.uid;
-  }
+  // const accessToken = await getAccessCookie();
+  // if (accessToken) {
+  //   const payload = await verifyAccessToken(accessToken);
+  //   if (payload?.uid) return payload.uid;
+  // }
 
   // B. Если Access нет или он протух, пробуем Refresh Token
-  const refreshToken = await getRefreshCookie();
-  if (refreshToken) {
-    // Пытаемся обновить токены
-    const newSession = await rotateTokens(refreshToken);
-    if (newSession) {
-      // Декодируем новый access токен, чтобы вернуть ID
-      const payload = await verifyAccessToken(newSession.accessToken);
-      return payload?.uid ?? null;
-    }
-  }
+  // const refreshToken = await getRefreshCookie();
+  // if (refreshToken) {
+  //   // Пытаемся обновить токены
+  //   const newSession = await rotateTokens(refreshToken);
+  //   if (newSession) {
+  //     // Декодируем новый access токен, чтобы вернуть ID
+  //     const payload = await verifyAccessToken(newSession.accessToken);
+  //     return payload?.uid ?? null;
+  //   }
+  // }
 
   return null;
 }
@@ -79,26 +81,26 @@ export async function requireUserFromSession(){
   return await getUserFromSession()!
 }
 
-export async function rotateTokens(oldRefreshToken: string) {
-  const refreshToken = getRefreshCookie()
+// export async function rotateTokens(oldRefreshToken: string) {
+//   const refreshToken = getRefreshCookie()
 
-  if (!refreshToken) {
-    await deleteSession();
-    return null;
-  }
+//   if (!refreshToken) {
+//     await deleteSession();
+//     return null;
+//   }
 
-  const sessionData = await createSessionWithRefreshMock(oldRefreshToken);
+//   const sessionData = await createSessionWithRefreshMock(oldRefreshToken);
 
-  if (!sessionData.success) {
-    return null;
-  }
+//   if (!sessionData.success) {
+//     return null;
+//   }
 
-  const result = sessionData.data;
+//   const result = sessionData.data;
 
-  return {
-    accessToken: result.AccessToken,
-    refreshToken: result.RefreshToken,
-    accessExpiresAt: result.AccessExpiresAt,
-    refreshExpiresAt: result.RefreshExpiresAt,
-  };
-}
+//   return {
+//     accessToken: result.AccessToken,
+//     refreshToken: result.RefreshToken,
+//     accessExpiresAt: result.AccessExpiresAt,
+//     refreshExpiresAt: result.RefreshExpiresAt,
+//   };
+// }

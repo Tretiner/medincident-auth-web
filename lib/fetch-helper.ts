@@ -1,5 +1,29 @@
 import { Result } from "@/domain/error";
 import z from "zod";
+import { tokenManager } from "./services/access-token-manager";
+
+export async function authorizedFetch<T>(
+  url: string,
+  options: RequestInit = {},
+  schema: z.Schema<T>
+): Promise<Result<T>> {
+  const token = tokenManager.getToken();
+  
+  const headers = new Headers(options.headers);
+  headers.set("Content-Type", "application/json");
+  
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  // Optional: Handle case where token is missing but required
+  // if (!token) { return { success: false, error: { ... } } }
+
+  return handleFetch(
+    () => fetch(url, { ...options, headers }),
+    schema
+  );
+}
 
 export async function handleFetch<T>(
   request: () => Promise<Response>,

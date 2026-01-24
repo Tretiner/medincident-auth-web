@@ -30,7 +30,7 @@ export function TelegramWidget({ botName, onAuth }: Props) {
         // TODO: Обработка ошибок
         return;
       }
-        console.error("Telegram прислал крутые данные:", JSON.stringify(result.data));
+        console.log("Telegram прислал крутые данные:", JSON.stringify(result.data));
 
       onAuth(result.data);
     };

@@ -2,7 +2,7 @@
 
 import { ProfileForm } from "./_components/profile-form";
 import { UserHeaderCard } from "./_components/user-header-card";
-import { useProfileData, useProfileDetails } from "./profile.hooks";
+import { useProfileData, useFormProfileDetails } from "./profile.hooks";
 import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -34,7 +34,7 @@ export function ProfileHeaderView() {
 
 export function ProfileDetailsView() {
   const { user, isLoading } = useProfileData();
-  const { state, actions } = useProfileDetails(user);
+  const { state: formState, actions } = useFormProfileDetails(user);
 
   if (isLoading) return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -56,9 +56,9 @@ export function ProfileDetailsView() {
 
   return (
     <ProfileForm 
-      form={state.form} 
-      isSaving={state.isSaving} 
-      message={state.message}
+      form={formState.form} 
+      isSaving={formState.isSaving} 
+      message={formState.message}
       onSubmit={actions.onSubmit} 
     />
   );
