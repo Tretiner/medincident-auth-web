@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/mock-db';
-import { requireUserFromSession } from '@/services/session/session-service';
+import { requireUserFromSession } from '@/lib/services/legacy-session-service';
 
 export async function GET() {
   await requireUserFromSession();
