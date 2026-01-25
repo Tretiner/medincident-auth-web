@@ -2,57 +2,72 @@ import { Result } from "@/domain/error";
 import z from "zod";
 import { tokenManager } from "./services/access-token-manager";
 
+const ServerErrorSchema = z.object({
+  domain: z.string().optional(),
+  message: z.string(),
+  traceId: z.string().optional(),
+});
+
 export async function authorizedFetch<T>(
   url: string,
   options: RequestInit = {},
-  schema: z.Schema<T>
+  schema: z.Schema<T>,
 ): Promise<Result<T>> {
   const token = tokenManager.getToken();
-  
   const headers = new Headers(options.headers);
   headers.set("Content-Type", "application/json");
-  
+
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  // Optional: Handle case where token is missing but required
-  // if (!token) { return { success: false, error: { ... } } }
-
-  return handleFetch(
-    () => fetch(url, { ...options, headers }),
-    schema
-  );
+  return handleFetch(() => fetch(url, { ...options, headers }), schema);
 }
 
 export async function handleFetch<T>(
   request: () => Promise<Response>,
-  schema: z.Schema<T>
+  schema: z.Schema<T>,
 ): Promise<Result<T>> {
   try {
     const response = await request();
 
-    // 1. Обработка HTTP ошибок (4xx, 5xx)
+    // Обработка ошибок (4xx, 5xx)
     if (!response.ok) {
       let errorMessage = "Ошибка сервера";
+      let errorCode: string | number = response.status;
+
       try {
-        const errorBody = await response.text();
-        errorMessage = errorBody || response.statusText;
+        const rawBody = await response.json();
+        const parsedError = ServerErrorSchema.safeParse(rawBody);
+
+        if (parsedError.success) {
+          errorMessage = parsedError.data.message;
+          errorCode = parsedError.data.domain || response.status;
+          if (parsedError.data.traceId) {
+            console.error(`[API Error] TraceID: ${parsedError.data.traceId}`);
+          }
+        } else {
+          errorMessage = (rawBody as any).message || JSON.stringify(rawBody);
+        }
       } catch {
-        /* игнорируем, если тело не читается */
+        try {
+          const textBody = await response.text();
+          if (textBody) errorMessage = textBody;
+        } catch {
+          errorMessage = response.statusText;
+        }
       }
 
       return {
         success: false,
         error: {
           type: "API_ERROR",
-          code: response.status,
+          code: errorCode,
           message: errorMessage,
         },
       };
     }
 
-    // 2. Парсинг успешного ответа
     const rawData = await response.json();
     const parseResult = schema.safeParse(rawData);
 
@@ -62,7 +77,7 @@ export async function handleFetch<T>(
         success: false,
         error: {
           type: "VALIDATION_ERROR",
-          message: "Некорректный ответ от сервера авторизации",
+          message: "Некорректный ответ от сервера",
         },
       };
     }
