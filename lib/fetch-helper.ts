@@ -3,6 +3,7 @@ import z from "zod";
 import { tokenManager } from "./services/access-token-manager";
 import { refreshToken } from "./services/server-http-client";
 import { showErrorMessage } from "./ui-error-handler";
+import { getAccessToken } from "./services/access-token";
 
 const ServerErrorSchema = z.object({
   domain: z.string().optional(),
@@ -15,7 +16,7 @@ export async function authorizedFetch<T>(
   options: RequestInit = {},
   schema: z.Schema<T>,
 ): Promise<Result<T>> {
-  let token = tokenManager.getToken;
+  let token = getAccessToken();
 
   if (!token) {
     const refreshTokenResult = await refreshToken();
@@ -25,9 +26,12 @@ export async function authorizedFetch<T>(
         token: accessToken.token,
         expiresIn: accessToken.expiresIn,
       });
-      token = tokenManager.getToken;
+      token = getAccessToken();
     } else {
-      showErrorMessage(refreshTokenResult.error)
+      return {
+        success: false,
+        error: refreshTokenResult.error,
+      };
     }
   }
 

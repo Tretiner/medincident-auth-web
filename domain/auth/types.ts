@@ -10,7 +10,7 @@ export interface TelegramUser {
   hash: string;
 }
 
-export interface ExternalAuthResponse {
+export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   expiresInSeconds: number;

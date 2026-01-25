@@ -1,10 +1,14 @@
 import z from "zod";
 
+export const AccessTokenSchema = z.object({
+  token: z.string(),
+  expiresIn: z.number().int(),
+});
+
+export type AccessTokenResponse = z.infer<typeof AccessTokenSchema>;
+
 export const LoginByTelegramWidgetResponseSchema = z.object({
-  accessToken: z.object({
-    token: z.string(),
-    expiresIn: z.number().int(),
-  }),
+  accessToken: AccessTokenSchema,
 
   profile: z.object({
     id: z.uuid(),
@@ -15,3 +19,5 @@ export const LoginByTelegramWidgetResponseSchema = z.object({
 });
 
 export type LoginByTelegramWidgetResponse = z.infer<typeof LoginByTelegramWidgetResponseSchema>;
+
+export const EmptyBody = z.any(); 
