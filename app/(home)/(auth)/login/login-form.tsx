@@ -17,17 +17,31 @@ function QrAuthSection() {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting));
+    const observer = new IntersectionObserver(([entry]) =>
+      setIsVisible(entry.isIntersecting),
+    );
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div ref={containerRef} className="relative z-10 flex flex-col items-center w-full">
-      <QrCodeCard url={qrUrl} isLoading={isLoading} isError={isError} className="mb-8 shadow-sm bg-background/60 backdrop-blur-md border border-border" />
-      <h2 className="text-2xl font-bold text-foreground mb-3 tracking-tight">Вход по QR-коду</h2>
+    <div
+      ref={containerRef}
+      className="relative z-10 flex flex-col items-center w-full"
+    >
+      <QrCodeCard
+        url={qrUrl}
+        isLoading={isLoading}
+        isError={isError}
+        className="mb-8 shadow-sm bg-background/60 backdrop-blur-md border border-border"
+      />
+      <h2 className="text-2xl font-bold text-foreground mb-3 tracking-tight">
+        Вход по QR-коду
+      </h2>
       <p className="text-muted-foreground max-w-xs text-sm leading-relaxed">
-        Наведите камеру телефона на код,<br />чтобы войти мгновенно.
+        Наведите камеру телефона на код,
+        <br />
+        чтобы войти мгновенно.
       </p>
     </div>
   );
@@ -39,7 +53,12 @@ interface AuthLinkProps {
 }
 
 const TelegramLink = ({ href }: AuthLinkProps) => (
-  <Button asChild variant="telegram" size="lg" className="w-full relative py-6 text-base group shadow-none transition-transform active:scale-[0.98]">
+  <Button
+    asChild
+    variant="telegram"
+    size="lg"
+    className="w-full relative py-6 text-base group shadow-none transition-transform active:scale-[0.98]"
+  >
     <Link href={href} prefetch={false}>
       <TelegramLogoIcon className="absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-hover:scale-110" />
       <span className="pl-4">Войти через Telegram</span>
@@ -48,7 +67,12 @@ const TelegramLink = ({ href }: AuthLinkProps) => (
 );
 
 const MaxLink = ({ href }: AuthLinkProps) => (
-  <Button asChild variant="max" size="lg" className="w-full relative py-6 text-base group shadow-none transition-transform active:scale-[0.98]">
+  <Button
+    asChild
+    variant="max"
+    size="lg"
+    className="w-full relative py-6 text-base group shadow-none transition-transform active:scale-[0.98]"
+  >
     <Link href={href} prefetch={false}>
       <MaxLogoIcon className="absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-hover:scale-110" />
       <span className="pl-4">Войти через MAX</span>
@@ -61,7 +85,7 @@ interface Props {
 }
 
 export function LoginForm({ searchParams }: Props) {
-const createLink = (provider: string) => {
+  const createLink = (provider: string) => {
     const params = new URLSearchParams(searchParams);
     const queryString = params.toString();
     return `/login/${provider}${queryString ? `?${queryString}` : ""}`;
@@ -99,11 +123,17 @@ const createLink = (provider: string) => {
 
         <p className="mt-6 md:mt-8 text-center text-xs text-muted-foreground leading-relaxed px-2 md:px-0">
           Нажимая на кнопки входа, вы принимаете{" "}
-          <Link href="#" className="text-primary hover:underline font-medium transition-colors">
+          <Link
+            href="#"
+            className="text-primary hover:underline font-medium transition-colors"
+          >
             пользовательское соглашение
           </Link>{" "}
           и{" "}
-          <Link href="#" className="text-primary hover:underline font-medium transition-colors">
+          <Link
+            href="#"
+            className="text-primary hover:underline font-medium transition-colors"
+          >
             политику конфиденциальности
           </Link>{" "}
           сервиса {APP_NAME}.

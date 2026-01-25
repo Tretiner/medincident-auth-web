@@ -1,6 +1,8 @@
 import { Result } from "@/domain/error";
 import z from "zod";
 import { tokenManager } from "./services/access-token-manager";
+import { refreshToken } from "./services/server-http-client";
+import { showErrorMessage } from "./ui-error-handler";
 
 const ServerErrorSchema = z.object({
   domain: z.string().optional(),
@@ -13,7 +15,22 @@ export async function authorizedFetch<T>(
   options: RequestInit = {},
   schema: z.Schema<T>,
 ): Promise<Result<T>> {
-  const token = tokenManager.getToken();
+  let token = tokenManager.getToken;
+
+  if (!token) {
+    const refreshTokenResult = await refreshToken();
+    if (refreshTokenResult.success) {
+      const accessToken = refreshTokenResult.data;
+      tokenManager.setToken({
+        token: accessToken.token,
+        expiresIn: accessToken.expiresIn,
+      });
+      token = tokenManager.getToken;
+    } else {
+      showErrorMessage(refreshTokenResult.error)
+    }
+  }
+
   const headers = new Headers(options.headers);
   headers.set("Content-Type", "application/json");
 
@@ -35,6 +52,8 @@ export async function handleFetch<T>(
     if (!response.ok) {
       let errorMessage = "Ошибка сервера";
       let errorCode: string | number = response.status;
+
+      console.error(`[API Error] Full body: ${await response.text()}`);
 
       try {
         const rawBody = await response.json();

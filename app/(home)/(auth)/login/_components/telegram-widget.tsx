@@ -22,7 +22,6 @@ export function TelegramWidget({ botName, onAuth }: Props) {
     const callbackName: string = `onTelegramAuth_${Math.floor(Math.random() * 10000)}`;
     // @ts-expect-error - Telegram widget requires a global function name string
     window[callbackName] = (user: string) => {
-      console.log("Got a user: " + user)
 
       const result = telegramUserSchema.safeParse(user);
       if (!result.success) {
@@ -30,7 +29,8 @@ export function TelegramWidget({ botName, onAuth }: Props) {
         // TODO: Обработка ошибок
         return;
       }
-        console.log("Telegram прислал крутые данные:", JSON.stringify(result.data));
+      const jsonUser: string = user.toString();
+      console.log("Telegram прислал крутые данные: ", jsonUser);
 
       onAuth(result.data);
     };
@@ -43,17 +43,15 @@ export function TelegramWidget({ botName, onAuth }: Props) {
     script.setAttribute("data-onauth", `${callbackName}(user)`);
     script.setAttribute("data-request-access", "write");
 
-    script.setAttribute('data-lang', 'ru');
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-radius', '6');
+    script.setAttribute("data-lang", "ru");
+    script.setAttribute("data-size", "large");
+    script.setAttribute("data-radius", "6");
 
     const currRef = ref.current;
     currRef.appendChild(script);
 
     return () => {
       currRef?.removeChild(script);
-      // @ts-expect-error - cleanup
-      delete window[callbackName];
     };
   }, [botName, onAuth]);
 
@@ -63,7 +61,7 @@ export function TelegramWidget({ botName, onAuth }: Props) {
 // --- MOCK WIDGET ---
 export function MockTelegramWidget({ botName, onAuth }: Props) {
   const handleMockLogin = () => {
-    onAuth(JSON.stringify(MockTgUser));
+    onAuth(MockTgUser);
   };
 
   return (
@@ -86,4 +84,3 @@ export function MockTelegramWidget({ botName, onAuth }: Props) {
     </div>
   );
 }
-

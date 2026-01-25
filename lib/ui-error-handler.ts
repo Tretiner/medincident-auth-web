@@ -1,5 +1,5 @@
-import { toast } from "sonner";
 import { GenericError } from "@/domain/error";
+import { toast } from "sonner";
 
 const ERROR_MESSAGES: Record<string, string> = {
   NETWORK_ERROR: "Нет связи с сервером. Проверьте интернет.",

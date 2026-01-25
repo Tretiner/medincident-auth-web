@@ -95,15 +95,14 @@ export function useTelegramAuth(redirectPath: string = "/profile") {
           expiresIn: result.data.accessToken.expiresIn,
         });
       }
-
       
-      // if (result.data.profile) {
-      //   setProfileStore({
-      //     firstName: result.data.profile.firstName || "",
-      //     lastName: result.data.profile.lastName || "",
-      //     photoUrl: result.data.profile.photoUrl || null,
-      //   });
-      // }
+      if (result.data.profile) {
+        setProfileStore({
+          firstName: result.data.profile.firstName || "",
+          lastName: result.data.profile.lastName || "",
+          photoUrl: result.data.profile.photoUrl || null,
+        });
+      }
 
       setWelcomeUser({
         photoUrl: result.data.profile.photoUrl,
@@ -126,11 +125,9 @@ export function useTelegramAuth(redirectPath: string = "/profile") {
 }
 
 export function useSocialAuth() {
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleLogin = (provider: string) => {
-    setError(null);
     startTransition(async () => {
       if (provider === "max") {
         const result = await handleFetch(
@@ -139,10 +136,11 @@ export function useSocialAuth() {
         );
 
         if (!result.success) {
-          setError(result.error.message);
+          showErrorMessage(result.error); 
           return;
         }
         
+        // router.push(...)
       }
     });
   };
@@ -150,7 +148,6 @@ export function useSocialAuth() {
   return {
     login: handleLogin,
     isLoading: isPending,
-    error,
   };
 }
 
@@ -160,15 +157,3 @@ export async function logoutClient() {
   accessTokenManager.removeToken();
   window.location.href = "/login";
 }
-
-// {
-//     "accessToken": {
-//         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJtZWRpbmNpZGVudC1hdXRoLXNlcnZpY2UiLCJzdWIiOiIwMTliZTU2Zi0yOTdmLTcxZGMtYmRlZi1lNGY4ZjU5NDJiMDIiLCJleHAiOjE3NjkwODE1MzcsIm5iZiI6MTc2OTA4MTIzNywiaWF0IjoxNzY5MDgxMjM3LCJqdGkiOiIwMTliZTU3NS03MTZhLTc5NTItOGJmMi0yMjk5MTc3ZmQyNDciLCJzaWQiOiIyZDBiMDZkMy0xYjNmLTRlM2MtYmRhMC1jZDQ2ODgyMGUzZDUifQ._Znh3xnjriZtHof9I66zdrDbwCe8gaoPo5YzUPD4D-c",
-//         "expiresIn": 292
-//     },
-//     "profile": {
-//         "id": "019be56f-297f-71dc-bdef-e4f8f5942b02",
-//         "firstName": "махмед",
-//         "photoUrl": "https://t.me/i/userpic/320/k6xaAMpd0LZltPkCRc7cm2UzdRjUMrG5NMV30g_GJKw.jpg"
-//     }
-// }
