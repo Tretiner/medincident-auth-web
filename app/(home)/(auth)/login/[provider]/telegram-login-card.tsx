@@ -1,19 +1,13 @@
 "use client";
 
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { TelegramLogoIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { useTelegramAuth } from "./login.hooks";
+import { useAuthNavigation, useTelegramAuth } from "../login.hooks";
 import { MockTelegramWidget, TelegramWidget } from "./_components/telegram-widget";
 import { LinkServiceCard } from "./_components/link-service-card";
 import { env } from "@/config/env";
 import { WelcomeDialog } from "./_components/welcome-dialog";
-import { TelegramUser } from "@/domain/auth/types";
-
-interface Props {
-  redirectPath: string;
-  backLink: string;
-}
 
 const TelegramIcon = () => (
   <div className="w-12 h-12 bg-[image:var(--telegram-gradient)] rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/10">
@@ -21,20 +15,9 @@ const TelegramIcon = () => (
   </div>
 );
 
-export function TelegramLoginCard({ redirectPath, backLink }: Props) {
+export function TelegramLoginCard() {
+  const { redirectPath, backLink } = useAuthNavigation();
   const { isLoading, onAuth, welcomeUser } = useTelegramAuth(redirectPath);
-
-  // const isLoading = false;
-  // const welcomeUser = {
-  //       id: 123,
-  //       firstName: "Michael",
-  //       lastName: "DuremanovOlegovich",
-  //       photoUrl: null, 
-  //     }
-
-  // function onAuth(user: TelegramUser): void {
-    
-  // }
 
   return (
   <>

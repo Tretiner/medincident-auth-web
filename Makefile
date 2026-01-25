@@ -6,7 +6,7 @@ release:
 	npm run start
 
 build:
-	npm run build
+	npm run build --debug-prerender
 
 invalidate:
 	powershell -Command "Remove-Item -Recurse -Force .next, node_modules, package-lock.json"

@@ -1,13 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { MaxLogoIcon } from "@/components/icons";
-import { useSocialAuth } from "./login.hooks";
+import { useAuthNavigation, useSocialAuth } from "../login.hooks";
 import { LinkServiceCard } from "./_components/link-service-card";
-
-interface Props {
-  redirectPath: string;
-  backLink: string;
-}
-
 
 const MaxIcon = () => (
   <div className="w-20 h-20 bg-[image:var(--max-gradient)] rounded-3xl flex items-center justify-center shadow-lg shadow-purple-500/20 mb-6">
@@ -15,7 +11,8 @@ const MaxIcon = () => (
   </div>
 );
 
-export function MaxLoginCard({ backLink }: Props) {
+export function MaxLoginCard() {
+  const { redirectPath, backLink } = useAuthNavigation();
   const { login, isLoading } = useSocialAuth();
 
   return (
@@ -25,8 +22,8 @@ export function MaxLoginCard({ backLink }: Props) {
       serviceIcon={MaxIcon}
       backLink={backLink}
     >
-      <Button 
-        onClick={() => login("max")} 
+      <Button
+        onClick={() => login("max")}
         disabled={isLoading}
         className="w-full bg-[image:var(--max-gradient)] text-white hover:opacity-90 transition-opacity"
       >

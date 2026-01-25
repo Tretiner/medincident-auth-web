@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { QrData, TelegramUser } from "@/domain/auth/types";
 import { handleFetch } from "@/lib/fetch-helper";
@@ -15,7 +15,6 @@ import {
   tokenManager,
 } from "@/lib/services/access-token-manager";
 import { showErrorMessage } from "@/lib/ui-error-handler";
-import { toast } from "sonner";
 import { useProfileStore } from "../../(details)/profile/profile.store";
 
 const QrDataSchema = z.object({
@@ -156,4 +155,21 @@ export async function logoutClient() {
   useProfileStore.getState().clearProfile();
   accessTokenManager.removeToken();
   window.location.href = "/login";
+}
+
+
+export function useAuthNavigation() {
+  const searchParams = useSearchParams();
+
+  const redirectPath = searchParams.get("from") || searchParams.get("redirectTo") || "/profile";
+
+  const backParams = new URLSearchParams();
+  if (searchParams.get("from")) backParams.set("from", searchParams.get("from")!);
+  
+  const backLink = `/login?${backParams.toString()}`;
+
+  return {
+    redirectPath,
+    backLink,
+  };
 }

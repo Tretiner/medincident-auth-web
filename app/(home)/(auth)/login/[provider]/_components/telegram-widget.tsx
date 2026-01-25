@@ -6,6 +6,7 @@ import { User } from "lucide-react";
 import type { TelegramUser } from "@/domain/auth/types";
 import { MockTgUser } from "@/lib/mock-db";
 import { telegramUserSchema } from "@/domain/auth/schema";
+import { showErrorMessage } from "@/lib/ui-error-handler";
 
 interface Props {
   botName: string;
@@ -22,11 +23,13 @@ export function TelegramWidget({ botName, onAuth }: Props) {
     const callbackName: string = `onTelegramAuth_${Math.floor(Math.random() * 10000)}`;
     // @ts-expect-error - Telegram widget requires a global function name string
     window[callbackName] = (user: string) => {
-
       const result = telegramUserSchema.safeParse(user);
       if (!result.success) {
         console.error("Telegram прислал некорректные данные:", result.error);
-        // TODO: Обработка ошибок
+        showErrorMessage({
+          type: "VALIDATION_ERROR",
+          message: "Ошибка авторизации: получены некорректные данные от Telegram.",
+        });
         return;
       }
       const jsonUser: string = user.toString();
