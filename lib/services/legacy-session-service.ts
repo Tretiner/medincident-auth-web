@@ -1,10 +1,10 @@
 "server only";
 
-import { tokenManager } from "@/lib/services/access-token-manager";
+import { getAccessToken } from "./access-token-manager";
 
 export async function getUserFromSession() {
   throw new Error("error all server")
-  return tokenManager.getToken();
+  return getAccessToken();
 }
 export async function requireUserFromSession(){
   return await getUserFromSession()!

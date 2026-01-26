@@ -1,6 +1,6 @@
 "use client";
 
-interface AccessTokenData {
+export interface AccessTokenData {
   token: string;
   expiresIn: number; // seconds
 }
@@ -10,63 +10,49 @@ interface StoredToken {
   expiresAtMillis: number; // millis
 }
 
-class AccessTokenManager {
-  private static instance: AccessTokenManager;
-  private readonly STORAGE_KEY = "apboba";
+const STORAGE_KEY = "apboba";
 
-  private constructor() {}
+export function setAccessToken(data: AccessTokenData): void {
+  if (typeof window === "undefined") return;
 
-  public static getInstance(): AccessTokenManager {
-    if (!AccessTokenManager.instance) {
-      AccessTokenManager.instance = new AccessTokenManager();
-    }
-    return AccessTokenManager.instance;
-  }
+  const payload: StoredToken = {
+    token: data.token,
+    expiresAtMillis: Date.now() + data.expiresIn * 1000,
+  };
 
-  public setToken(data: AccessTokenData): void {
-    if (typeof window === "undefined") return;
-    
-    const payload: StoredToken = {
-      token: data.token,
-      expiresAtMillis: Date.now() + data.expiresIn * 1000,
-    };
-
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(payload));
-    } catch (e) {
-      console.error("Failed to save access token", e);
-    }
-  }
-
-  public getToken(): string | null {
-    if (typeof window === "undefined") return null;
-
-    const raw = localStorage.getItem(this.STORAGE_KEY);
-    if (!raw) return null;
-
-    try {
-      const payload: StoredToken = JSON.parse(raw);
-      
-      if (Date.now() > payload.expiresAtMillis) {
-        this.removeToken();
-        return null;
-      }
-
-      return payload.token;
-    } catch {
-      this.removeToken();
-      return null;
-    }
-  }
-
-  public removeToken(): void {
-    if (typeof window === "undefined") return;
-    localStorage.removeItem(this.STORAGE_KEY);
-  }
-
-  public hasToken(): boolean {
-    return !!this.getToken();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.error("Failed to save access token", e);
   }
 }
 
-export const tokenManager = AccessTokenManager.getInstance();
+export function removeAccessToken(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+export function getAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+
+  try {
+    const payload: StoredToken = JSON.parse(raw);
+
+    if (Date.now() > payload.expiresAtMillis) {
+      removeAccessToken();
+      return null;
+    }
+
+    return payload.token;
+  } catch {
+    removeAccessToken();
+    return null;
+  }
+}
+
+export function hasAccessToken(): boolean {
+  return !!getAccessToken();
+}

@@ -18,8 +18,8 @@ import {
   CheckConsentResponse,
   checkConsentResponseSchema,
 } from "@/domain/consent/schema";
-import { getAccessToken } from "./access-token";
 import { delay } from "../utils";
+import { getAccessToken } from "./access-token-manager";
 
 const BASE_URL = env.NEXT_PUBLIC_AUTH_URL;
 

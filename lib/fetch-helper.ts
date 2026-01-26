@@ -1,9 +1,7 @@
 import { Result } from "@/domain/error";
 import z from "zod";
-import { tokenManager } from "./services/access-token-manager";
 import { refreshToken } from "./services/server-http-client";
-import { showErrorMessage } from "./ui-error-handler";
-import { getAccessToken } from "./services/access-token";
+import { getAccessToken, setAccessToken } from "./services/access-token-manager";
 
 const ServerErrorSchema = z.object({
   domain: z.string().optional(),
@@ -22,7 +20,7 @@ export async function authorizedFetch<T>(
     const refreshTokenResult = await refreshToken();
     if (refreshTokenResult.success) {
       const accessToken = refreshTokenResult.data;
-      tokenManager.setToken({
+      setAccessToken({
         token: accessToken.token,
         expiresIn: accessToken.expiresIn,
       });

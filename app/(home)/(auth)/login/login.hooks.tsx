@@ -10,12 +10,9 @@ import {
   loginWithTelegramMock,
 } from "@/lib/services/server-http-client";
 import z from "zod";
-import {
-  tokenManager as accessTokenManager,
-  tokenManager,
-} from "@/lib/services/access-token-manager";
 import { showErrorMessage } from "@/lib/ui-error-handler";
 import { useProfileStore } from "../../(details)/profile/profile.store";
+import { removeAccessToken, setAccessToken } from "@/lib/services/access-token-manager";
 
 const QrDataSchema = z.object({
   url: z.string(),
@@ -89,7 +86,7 @@ export function useTelegramAuth(redirectPath: string = "/profile") {
       }
 
       if (result.data.accessToken) {
-        tokenManager.setToken({
+        setAccessToken({
           token: result.data.accessToken.token,
           expiresIn: result.data.accessToken.expiresIn,
         });
@@ -153,7 +150,7 @@ export function useSocialAuth() {
 export async function logoutClient() {
   await fetch("/api/auth/logout", { method: "POST" });
   useProfileStore.getState().clearProfile();
-  accessTokenManager.removeToken();
+  removeAccessToken();
   window.location.href = "/login";
 }
 
