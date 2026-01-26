@@ -34,7 +34,7 @@ export function ConsentPage({ params }: ConsentPageProps) {
   if (params.state) url.searchParams.set("state", params.state);
   const denyUrl = url.toString();
 
-  const allowUrl = `${env.NEXT_PUBLIC_AUTH_URL}/oauth/authorize?${params}`;
+  const allowUrl = `${env.NEXT_PUBLIC_AUTH_URL}/oauth/authorize?${params.toString()}`;
 
   if (isLoading) {
     return (

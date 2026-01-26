@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import { fetchConsentMock } from "@/lib/services/server-http-client";
+import { fetchConsent, fetchConsentMock } from "@/lib/services/server-http-client";
 
 export function useConsentData(
   clientId: string, 
@@ -14,8 +14,8 @@ export function useConsentData(
     clientId ? key : null,
     async () => {
       const result =
-        await fetchConsentMock(clientId, scopes, redirectUri)
-        // : await fetchConsent(clientId, scopes, redirectUri);
+        // await fetchConsentMock(clientId, scopes, redirectUri)
+        await fetchConsent(clientId, scopes, redirectUri)
 
       if (!result.success) throw new Error(result.error.message);
       
