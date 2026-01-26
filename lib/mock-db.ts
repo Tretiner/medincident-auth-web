@@ -55,6 +55,33 @@ let SESSIONS: UserSession[] = [
   },
 ];
 
+import { CheckConsentResponse } from "@/domain/consent/schema";
+
+export const SCOPE_DESCRIPTIONS: Record<string, string> = {
+  profile: "Доступ к вашему имени, фамилии и аватару",
+  email: "Доступ к вашему адресу электронной почты",
+  offline_access: "Возможность обновлять данные без вашего участия",
+  phone: "Доступ к номеру телефона",
+};
+
+export const MockOAuthApps: Record<string, Pick<CheckConsentResponse, 'name' | 'hostname' | 'photoUrl'>> = {
+  "client_123": {
+    name: "Health Keeper",
+    hostname: "health-keeper.app",
+    photoUrl: "https://api.dicebear.com/9.x/initials/svg?seed=HK&backgroundColor=0ea5e9",
+  },
+  "client_456": {
+    name: "Smart Fitness",
+    hostname: "smart-fitness.io",
+    photoUrl: "https://api.dicebear.com/9.x/initials/svg?seed=SF&backgroundColor=8b5cf6",
+  },
+  "client_bad": {
+    name: "Malicious App",
+    hostname: "steal-data.com",
+    photoUrl: "", // Нет логотипа
+  }
+};
+
 // Методы для работы с БД
 export const db = {
   user: {

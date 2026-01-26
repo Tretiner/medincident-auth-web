@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import useSWR from "swr";
-import { fetchConsent } from "@/lib/services/server-http-client";
-import { useRouter } from "next/router";
+import { fetchConsentMock } from "@/lib/services/server-http-client";
 
 export function useConsentData(
   clientId: string, 
@@ -15,11 +13,14 @@ export function useConsentData(
   const { data, error, isLoading } = useSWR(
     clientId ? key : null,
     async () => {
-      const result = await fetchConsent(clientId, scopes, redirectUri);
+      const result =
+        await fetchConsentMock(clientId, scopes, redirectUri)
+        // : await fetchConsent(clientId, scopes, redirectUri);
+
       if (!result.success) throw new Error(result.error.message);
       
       if (!result.data.valid) {
-        throw new Error(`Приложение "${result.data.name || clientId}" недоступно.`);
+        throw new Error(`Приложение "${result.data.name || clientId}" недоступно или заблокировано.`);
       }
       
       return result.data;

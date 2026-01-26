@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { ConsentCard, ConsentErrorCard } from "./consent-card";
 import { useConsentData } from "./oauth.hooks";
 import { env } from "@/config/env";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface ConsentPageProps {
   params: {

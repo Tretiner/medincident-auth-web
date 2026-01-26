@@ -3,7 +3,7 @@
 import { JwtUser, TelegramUser } from "@/domain/auth/types";
 import { Result } from "@/domain/error";
 import { env } from "@/config/env";
-import { MockFullUser } from "@/lib/mock-db";
+import { MockFullUser, MockOAuthApps, SCOPE_DESCRIPTIONS } from "@/lib/mock-db";
 import { randomInt } from "crypto";
 import { SignJWT } from "jose/jwt/sign";
 import { authorizedFetch, handleFetch } from "@/lib/fetch-helper";
@@ -19,6 +19,7 @@ import {
   checkConsentResponseSchema,
 } from "@/domain/consent/schema";
 import { getAccessToken } from "./access-token";
+import { delay } from "../utils";
 
 const BASE_URL = env.NEXT_PUBLIC_AUTH_URL;
 
@@ -133,6 +134,45 @@ async function mockSession(): Promise<Result<LoginByTelegramWidgetResponse>> {
         lastName: "Ivanov",
         photoUrl: null,
       },
+    },
+  };
+}
+
+export async function fetchConsentMock(
+  clientId: string,
+  scopes: string[],
+  redirectUri: string,
+): Promise<Result<CheckConsentResponse>> {
+  await delay(800);
+
+  const app = MockOAuthApps[clientId];
+
+  if (!app) {
+    return {
+      success: true,
+      data: {
+        valid: false,
+        name: "Unknown App",
+        hostname: "unknown",
+        scopes: [],
+      },
+    };
+  }
+
+  // Формируем список запрашиваемых прав с описаниями
+  const mappedScopes = scopes.map((s) => ({
+    name: s,
+    description: SCOPE_DESCRIPTIONS[s] || null,
+  }));
+
+  return {
+    success: true,
+    data: {
+      valid: true,
+      name: app.name,
+      hostname: app.hostname,
+      photoUrl: app.photoUrl,
+      scopes: mappedScopes,
     },
   };
 }

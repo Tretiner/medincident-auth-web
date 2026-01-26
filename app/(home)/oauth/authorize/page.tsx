@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Разрешение доступа стороннему приложению",
 };
 
-export default async function OAuthAuthorizePage({
+export default async function AuthorizeConsentPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
