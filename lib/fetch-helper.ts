@@ -19,7 +19,7 @@ export async function authorizedFetch<T>(
   if (!token) {
     const refreshTokenResult = await refreshToken();
     if (refreshTokenResult.success) {
-      const accessToken = refreshTokenResult.data;
+      const accessToken = refreshTokenResult.data.accessToken;
       setAccessToken({
         token: accessToken.token,
         expiresIn: accessToken.expiresIn,
@@ -34,11 +34,7 @@ export async function authorizedFetch<T>(
   }
 
   const headers = new Headers(options.headers);
-  headers.set("Content-Type", "application/json");
-
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
+  headers.set("Authorization", `Bearer ${token!}`);
 
   return handleFetch(() => fetch(url, { ...options, headers }), schema);
 }
@@ -90,6 +86,7 @@ export async function handleFetch<T>(
     }
 
     const rawData = await response.json();
+    console.log("RESPONSE:" + "\n" + JSON.stringify(rawData).toString());
     const parseResult = schema.safeParse(rawData);
 
     if (!parseResult.success) {

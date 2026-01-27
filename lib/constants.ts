@@ -1,1 +1,1 @@
-export const APP_NAME = "Medsafety";
+export const APP_NAME = "MedIncident";

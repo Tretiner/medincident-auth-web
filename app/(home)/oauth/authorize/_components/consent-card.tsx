@@ -35,31 +35,93 @@ interface ConsentCardProps {
   onDeny: () => void;
 }
 
-// Хелпер для выбора иконки на основе названия scope
 const getScopeIcon = (scopeName: string) => {
   const name = scopeName.toLowerCase();
 
-  if (name.includes("email")) return Mail;
-  if (name.includes("phone") || name.includes("mobile")) return Phone;
+  // Почта (Email)
   if (
-    name.includes("profile") ||
-    name.includes("user") ||
-    name.includes("name")
+    name.includes("почта") || 
+    name.includes("email") || 
+    name.includes("mail") ||
+    name.includes("электронн")
+  ) return Mail;
+
+  // Телефон (Phone)
+  if (
+    name.includes("телефон") || 
+    name.includes("номер") || 
+    name.includes("связь") 
+  ) return Phone;
+
+  // Профиль / Пользователь (Profile)
+  if (
+    name.includes("профил") ||
+    name.includes("пользователь") ||
+    name.includes("имя") ||
+    name.includes("фио") ||
+    name.includes("личные")
   )
     return User;
-  if (name.includes("offline") || name.includes("access")) return Database;
-  if (name.includes("address") || name.includes("location")) return MapPin;
+
+  // Доступ к данным / Оффлайн (Database)
   if (
+    name.includes("оффлайн") || 
+    name.includes("доступ") || 
+    name.includes("база") || 
+    name.includes("хранилище")
+  ) return Database;
+
+  // Адрес / Локация (Address)
+  if (
+    name.includes("адрес") || 
+    name.includes("локация") || 
+    name.includes("место") || 
+    name.includes("город") ||
+    name.includes("address") || 
+    name.includes("location")
+  ) return MapPin;
+
+  // Финансы / Оплата (Payment)
+  if (
+    name.includes("оплата") ||
+    name.includes("платеж") ||
+    name.includes("кошелек") ||
+    name.includes("карта") ||
+    name.includes("счет") ||
+    name.includes("финанс") ||
     name.includes("payment") ||
     name.includes("wallet") ||
     name.includes("card")
   )
     return CreditCard;
-  if (name.includes("file") || name.includes("doc")) return FileText;
-  if (name.includes("device")) return Smartphone;
-  if (name.includes("openid") || name.includes("id")) return Lock;
 
-  return Check; // Дефолтная иконка
+  // Документы / Файлы (Files)
+  if (
+    name.includes("файл") || 
+    name.includes("документ") || 
+    name.includes("справк") || 
+    name.includes("file") || 
+    name.includes("doc")
+  ) return FileText;
+
+  // Устройство (Device)
+  if (
+    name.includes("устройство") || 
+    name.includes("девайс") || 
+    name.includes("гаджет") ||
+    name.includes("device")
+  ) return Smartphone;
+
+  // ID / OpenID (Identity)
+  if (
+    name.includes("openid") || 
+    name.includes("id") || 
+    name.includes("айди") ||
+    name.includes("идентифика")
+  ) return Lock;
+
+  // Дефолтная иконка
+  return Check; 
 };
 
 export function ConsentCard({
@@ -98,8 +160,11 @@ export function ConsentCard({
         <p className="text-muted-foreground text-sm mt-2 max-w-[280px]">
           Приложение{" "}
           <span className="font-semibold text-foreground">{clientName}</span>{" "}
-          запрашивает доступ к вашим данным на {hostname}.
+          запрашивает авторизацию на сайте {hostname}.
+          После подтверждения приложение получит доступ к следующим данным:
         </p>
+          <p className="text-muted-foreground text-sm mt-2 max-w-[280px]">
+          </p>
       </CardHeader>
 
       <CardContent className="p-6 pb-2">
@@ -163,7 +228,7 @@ export function ConsentCard({
       {/* FOOTER */}
       <CardFooter className="p-6 pt-4 flex flex-col sm:flex-row-reverse gap-3">
         <Button
-          className="w-full bg-primary text-primary-foreground font-semibold text-base shadow-sm hover:shadow-lg hover:shadow-primary/20 transition-all"
+          className="w-full bg-primary text-primary-foreground font-semibold text-base hover:shadow-sm hover:shadow-primary/20 transition-all"
           onClick={onAllow}
           disabled={isConsenting}
         >

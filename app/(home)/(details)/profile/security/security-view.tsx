@@ -52,7 +52,7 @@ export function SecurityView() {
             <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
               Текущая сессия
             </h4>
-            <Skeleton className="h-20 w-full rounded-xl border border-primary/10" />
+            <Skeleton className="h-20 w-full rounded-xl" />
           </div>
           
           <div className="space-y-4">

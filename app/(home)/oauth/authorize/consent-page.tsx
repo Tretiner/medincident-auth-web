@@ -1,8 +1,8 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { ConsentCard, ConsentErrorCard } from "./consent-card";
-import { useConsentData } from "./oauth.hooks";
+import { ConsentCard, ConsentErrorCard } from "./_components/consent-card";
+import { createDenyUrlFromParams, useConsentData } from "./oauth.hooks";
 import { env } from "@/config/env";
 import { useRouter } from "next/navigation";
 
@@ -11,9 +11,9 @@ interface ConsentPageProps {
     client_id: string;
     redirect_uri: string;
     scope: string;
-    state?: string;
-    code_challenge?: string;
-    code_challenge_method?: string;
+    state: string;
+    code_challenge: string;
+    code_challenge_method: string;
   };
 }
 
@@ -23,18 +23,18 @@ export function ConsentPage({ params }: ConsentPageProps) {
   const scopesArray =
     params.scope ? params.scope.split(/[\s,]+/).filter(Boolean) : [];
 
+  const denyUrl = createDenyUrlFromParams(params, "access_denied");
+
   const { consentData, isLoading, error } = useConsentData(
     params.client_id,
     scopesArray,
     params.redirect_uri,
+    (errorType) => {
+      // router.push(createDenyUrlFromParams(params, errorType));
+    }
   );
 
-  const url = new URL(params.redirect_uri);
-  url.searchParams.set("error", "access_denied");
-  if (params.state) url.searchParams.set("state", params.state);
-  const denyUrl = url.toString();
-
-  const allowUrl = `${env.NEXT_PUBLIC_AUTH_URL}/oauth/authorize?${params.toString()}`;
+  const allowUrl = `${env.NEXT_PUBLIC_AUTH_URL}/oauth/authorize?${new URLSearchParams(params).toString()}`;
 
   if (isLoading) {
     return (

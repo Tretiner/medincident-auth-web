@@ -8,18 +8,30 @@ import { randomInt } from "crypto";
 import { SignJWT } from "jose/jwt/sign";
 import { authorizedFetch, handleFetch } from "@/lib/fetch-helper";
 import {
-  AccessTokenResponse,
-  AccessTokenSchema,
+  RefreshTokenResponse,
+  RefreshTokenResponseSchema,
   EmptyBody,
   LoginByTelegramWidgetResponse,
   LoginByTelegramWidgetResponseSchema,
 } from "@/domain/external-api";
 import {
+  CheckConsentRequest,
   CheckConsentResponse,
   checkConsentResponseSchema,
 } from "@/domain/consent/schema";
 import { delay } from "../utils";
 import { getAccessToken } from "./access-token-manager";
+
+const Method = {
+  Get: "GET",
+  Post: "POST",
+}
+
+const Headers = {
+  Content: {
+    Json: {"Content-Type": "application/json",}
+  }
+}
 
 const BASE_URL = env.NEXT_PUBLIC_AUTH_URL;
 
@@ -27,16 +39,14 @@ export async function loginWithTelegram(
   body: TelegramUser,
 ): Promise<Result<LoginByTelegramWidgetResponse>> {
   console.log(
-    `\nPOST ${BASE_URL}/telegram/widget:\nBODY: ${JSON.stringify(body).toString()}`, 'background: #222; color: #bada55'
+    `\nPOST ${BASE_URL}/telegram/widget:\nBODY: ${JSON.stringify(body).toString()}`
   );
   return handleFetch(
     () =>
       fetch(`${BASE_URL}/telegram/widget`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body).toString(),
+        method: Method.Post,
+        headers: Headers.Content.Json,
+        body: JSON.stringify(body),
         cache: "no-store",
       }),
     LoginByTelegramWidgetResponseSchema,
@@ -44,48 +54,47 @@ export async function loginWithTelegram(
 }
 
 export async function fetchConsent(
-  clientId: string,
-  scopes: string[],
-  redirectUri: string,
+  body: CheckConsentRequest
 ): Promise<Result<CheckConsentResponse>> {
-  const body = {
-    ClientID: clientId,
-    Scopes: scopes,
-    RedirectURI: redirectUri,
-  };
   console.log(
-    `\n(SECURE) POST ${BASE_URL}/oauth/consent/check\nTOKEN: ${getAccessToken()}\nBODY: ${JSON.stringify(body).toString()}\n`, 'background: #222; color: #bada55'
+    `\n(SECURE) POST ${BASE_URL}/oauth/consent/check\nTOKEN: ${getAccessToken()}\nBODY: ${JSON.stringify(body).toString()}\n`
   );
   return authorizedFetch(
     `${BASE_URL}/oauth/consent/check`,
     {
-      body: JSON.stringify(body).toString(),
+      method: Method.Post,
+      headers: Headers.Content.Json,
+      body: JSON.stringify(body),
+      credentials: 'include',
+      cache: "no-store",
     },
     checkConsentResponseSchema,
   );
 }
 
-export async function refreshToken(): Promise<Result<AccessTokenResponse>> {
-  console.log(`\nPOST ${BASE_URL}/oauth/token/refresh:\n`, 'background: #222; color: #bada55');
+export async function refreshToken(): Promise<Result<RefreshTokenResponse>> {
+  console.log(`\nPOST ${BASE_URL}/oauth/token/refresh:\n`);
   return handleFetch(
     () =>
       fetch(`${BASE_URL}/oauth/token/refresh`, {
-        method: "POST",
+        method: Method.Post,
+        credentials: 'include',
         cache: "no-store",
       }),
-    AccessTokenSchema,
+    RefreshTokenResponseSchema,
   );
 }
 
 export async function logout(): Promise<Result<void>> {
   console.log(
-    `\nPOST ${BASE_URL}/oauth/logout\n`, 'background: #222; color: #bada55'
+    `\nPOST ${BASE_URL}/oauth/logout\n`
   );
 
   return authorizedFetch(
     `${BASE_URL}/oauth/logout`,
     {
-      method: "POST",
+      method: Method.Post,
+      credentials: 'include',
       cache: "no-store",
     },
     EmptyBody,

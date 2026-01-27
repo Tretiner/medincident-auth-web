@@ -7,17 +7,17 @@ export interface AccessTokenData {
 
 interface StoredToken {
   token: string;
-  expiresAtMillis: number; // millis
+  expiresAt: number; // millis
 }
 
-const STORAGE_KEY = "apboba";
+const STORAGE_KEY = "cookie-clicker";
 
 export function setAccessToken(data: AccessTokenData): void {
   if (typeof window === "undefined") return;
 
   const payload: StoredToken = {
     token: data.token,
-    expiresAtMillis: Date.now() + data.expiresIn * 1000,
+    expiresAt: Date.now() + data.expiresIn * 1000,
   };
 
   try {
@@ -41,7 +41,7 @@ export function getAccessToken(): string | null {
   try {
     const payload: StoredToken = JSON.parse(raw);
 
-    if (Date.now() > payload.expiresAtMillis) {
+    if (Date.now() > payload.expiresAt) {
       removeAccessToken();
       return null;
     }

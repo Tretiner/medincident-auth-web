@@ -8,6 +8,7 @@ import { handleFetch } from "@/lib/fetch-helper";
 import {
   loginWithTelegram,
   loginWithTelegramMock,
+  logout,
 } from "@/lib/services/server-http-client";
 import z from "zod";
 import { showErrorMessage } from "@/lib/ui-error-handler";
@@ -148,10 +149,10 @@ export function useSocialAuth() {
 }
 
 export async function logoutClient() {
-  await fetch("/api/auth/logout", { method: "POST" });
-  useProfileStore.getState().clearProfile();
+  await logout();
   removeAccessToken();
   window.location.href = "/login";
+  useProfileStore.getState().clearProfile();
 }
 
 

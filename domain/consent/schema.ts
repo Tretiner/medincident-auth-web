@@ -15,6 +15,12 @@ const consentScopeItemSchema = z.object({
   description: z.string().nullable().optional(),
 });
 
+export interface CheckConsentRequest {
+    clientId: string;
+    scopes: string[];
+    redirectUri: string;
+}
+
 // Ответ от POST /consent/check
 export const checkConsentResponseSchema = z.object({
   name: z.string(),

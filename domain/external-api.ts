@@ -5,7 +5,11 @@ export const AccessTokenSchema = z.object({
   expiresIn: z.number().int(),
 });
 
-export type AccessTokenResponse = z.infer<typeof AccessTokenSchema>;
+export const RefreshTokenResponseSchema = z.object({
+  accessToken: AccessTokenSchema,
+});
+
+export type RefreshTokenResponse = z.infer<typeof RefreshTokenResponseSchema>;
 
 export const LoginByTelegramWidgetResponseSchema = z.object({
   accessToken: AccessTokenSchema,
