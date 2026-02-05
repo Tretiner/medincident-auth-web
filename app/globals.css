@@ -210,6 +210,11 @@
 }
 
 @layer base {
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -219,28 +224,25 @@
 }
 
 @layer utilities {
-  .scrollbar-app {
+.scrollbar-app {
+    overflow-y: auto;
+    scrollbar-gutter: stable; 
+    
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
     
     &::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
     }
     &::-webkit-scrollbar-thumb {
       background-color: var(--border);
       border-radius: 9999px;
-      &:hover {
-        background-color: var(--muted-foreground);
-      }
     }
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    &::-webkit-scrollbar {
-      display: none;
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: var(--muted-foreground);
     }
   }
 }

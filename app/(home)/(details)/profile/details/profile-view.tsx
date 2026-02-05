@@ -6,7 +6,7 @@ import { useProfileData, useFormProfileDetails } from "./profile.hooks";
 import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ProfileHeaderView() {
+export function ProfileUserHeaderView() {
   const { user, isLoading, isError } = useProfileData();
 
   if (isLoading) return (

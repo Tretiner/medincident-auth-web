@@ -3,7 +3,8 @@
 import { getAccessToken } from "./access-token-manager";
 
 export async function getUserFromSession() {
-  throw new Error("error all server")
+  return "123"
+  // throw new Error("error all server")
   return getAccessToken();
 }
 export async function requireUserFromSession(){

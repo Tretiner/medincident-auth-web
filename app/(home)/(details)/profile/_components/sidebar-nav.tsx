@@ -53,11 +53,11 @@ export function SidebarNav() {
           <Button
             variant="ghost"
             asChild
-            className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground hover:bg-primary/10 hover:text-primary rounded-xl font-medium"
+            className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground rounded-xl font-medium hover:bg-muted hover:text-primary"
           >
             <Link href={from}>
               <ArrowLeft className="h-5 w-5" />
-              Вернуться в приложение
+              Вернуться
             </Link>
           </Button>
         )}

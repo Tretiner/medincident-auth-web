@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useProfileStore } from "../profile.store";
 import { useProfileData } from "../details/profile.hooks";
+import { useShallow } from 'zustand/react/shallow'
 
 export interface Props {
   isActive: boolean;
@@ -13,13 +14,19 @@ export interface Props {
 export function SidebarUserCard({ isActive }: Props) {
   // 1. Запрос SWR
   const { isLoading: isApiLoading } = useProfileData();
-  const user = useProfileStore();
+  const user = useProfileStore(
+    useShallow((state) => ({
+      firstName: state.firstName,
+      lastName: state.lastName,
+      photoUrl: state.photoUrl
+    }))
+  );
+
+  console.log("User card render:", user)
 
   // Логика отображения:
   const hasData = user.firstName || user.lastName;
   const showSkeleton = !hasData || isApiLoading;
-
-  console.log(user);
 
   return (
     <div

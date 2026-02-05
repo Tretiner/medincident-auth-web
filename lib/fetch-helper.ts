@@ -22,7 +22,7 @@ export async function authorizedFetch<T>(
       const accessToken = refreshTokenResult.data.accessToken;
       setAccessToken({
         token: accessToken.token,
-        expiresIn: accessToken.expiresIn,
+        expiresInMillis: accessToken.expiresInMillis,
       });
       token = getAccessToken();
     } else {

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { PageHeader } from "../_components/page-header";
 import { UserRound } from "lucide-react";
-import { ProfileDetailsView, ProfileHeaderView } from "./profile-view";
+import { ProfileDetailsView, ProfileUserHeaderView } from "./profile-view";
 
 export const metadata: Metadata = {
   title: "Мои данные",
@@ -16,7 +16,7 @@ export default function PersonalDataPage() {
         icon={UserRound}
       />
       
-      <ProfileHeaderView />
+      <ProfileUserHeaderView />
 
       <ProfileDetailsView />
     </div>

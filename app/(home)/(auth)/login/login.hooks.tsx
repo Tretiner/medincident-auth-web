@@ -89,7 +89,7 @@ export function useTelegramAuth(redirectPath: string = "/profile") {
       if (result.data.accessToken) {
         setAccessToken({
           token: result.data.accessToken.token,
-          expiresIn: result.data.accessToken.expiresIn,
+          expiresInMillis: result.data.accessToken.expiresInMillis,
         });
       }
       

@@ -275,7 +275,7 @@ export function SessionsList({
 
                 <SessionInfoModal session={currentSession}>
                     <button 
-                      className="text-primary/40 hover:text-primary transition-colors cursor-pointer outline-none ml-1 p-0.5 rounded-sm"
+                      className="text-primary/40 hover:text-primary transition-colors cursor-pointer outline-none p-0.5 rounded-sm"
                       title="Показать технические данные"
                     >
                       <Info className="w-3.5 h-3.5" />
@@ -298,8 +298,8 @@ export function SessionsList({
                         size="sm" 
                         className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 gap-2"
                     >
+                        Выйти
                         <LogOut className="w-4 h-4" />
-                        <span className="hidden sm:inline">Выйти</span>
                     </Button>
                 </LogoutConfirmDialog>
             </div>

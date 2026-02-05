@@ -4,10 +4,10 @@ export const consentUrlParamsSchema = z.object({
   client_id: z.string().min(1),
   response_type: z.string().min(1),
   redirect_uri: z.string(),
-  scope: z.string().optional().default(""),
-  state: z.string().optional(),
-  code_challenge: z.string().optional(),
-  code_challenge_method: z.string().optional(),
+  scope: z.string(),
+  state: z.string(),
+  code_challenge: z.string(),
+  code_challenge_method: z.string(),
 });
 
 const consentScopeItemSchema = z.object({

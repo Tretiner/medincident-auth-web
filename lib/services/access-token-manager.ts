@@ -2,7 +2,7 @@
 
 export interface AccessTokenData {
   token: string;
-  expiresIn: number; // seconds
+  expiresInMillis: number;
 }
 
 interface StoredToken {
@@ -17,7 +17,7 @@ export function setAccessToken(data: AccessTokenData): void {
 
   const payload: StoredToken = {
     token: data.token,
-    expiresAt: Date.now() + data.expiresIn * 1000,
+    expiresAt: Date.now() + data.expiresInMillis,
   };
 
   try {
@@ -55,4 +55,28 @@ export function getAccessToken(): string | null {
 
 export function hasAccessToken(): boolean {
   return !!getAccessToken();
+}
+
+export function getAccessTokenWithExpiration(): AccessTokenData | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+
+  try {
+    const payload: StoredToken = JSON.parse(raw);
+
+    if (Date.now() > payload.expiresAt) {
+      removeAccessToken();
+      return null;
+    }
+
+    return {
+      token: payload.token,
+      expiresInMillis: (Date.now() - payload.expiresAt) / 1000,
+    };
+  } catch {
+    removeAccessToken();
+    return null;
+  }
 }
