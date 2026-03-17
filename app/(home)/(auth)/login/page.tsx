@@ -4,14 +4,17 @@ import { AppLogoIcon } from "@/components/icons";
 import { APP_NAME } from "@/lib/constants";
 import { QrAuthSection } from "./_components/qr-auth-section";
 import { Suspense } from "react";
-import { SocialLinks } from "./_components/social-links";
+import { ExternalIdentityProviders } from "./_components/social-links";
+import { fetchProvidersAction } from "./actions";
 
 export const metadata: Metadata = {
   title: "Вход",
   description: "Авторизация в системе",
 };
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: any }) {
+  const providers = await fetchProvidersAction();
+
   return (
     <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
       <div className="w-full flex justify-center max-w-full">
@@ -41,9 +44,7 @@ export default async function LoginPage() {
 
             <div className="space-y-4 md:space-y-6 w-full">
               <div className="grid gap-2 md:gap-3">
-                <Suspense>
-                  <SocialLinks />
-                </Suspense>
+                <ExternalIdentityProviders providers={providers} />
               </div>
             </div>
 

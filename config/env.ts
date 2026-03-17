@@ -6,6 +6,10 @@ const envConfig = createEnv({
     // Secrets
     SESSION_SECRET: z.string().min(32),
     TELEGRAM_BOT_TOKEN: z.string().min(1),
+    APP_URL:   z.url(),
+
+    ZITADEL_API_URL:   z.url(),
+    ZITADEL_API_TOKEN: z.string().min(32),
 
     // Default
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -20,8 +24,11 @@ const envConfig = createEnv({
   runtimeEnv: {
     SESSION_SECRET: process.env.SESSION_SECRET,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    APP_URL: process.env.APP_URL,
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
+    ZITADEL_API_URL: process.env.ZITADEL_API_URL,
+    ZITADEL_API_TOKEN: process.env.ZITADEL_API_TOKEN,
     NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
     NEXT_PUBLIC_TELEGRAM_BOT_NAME: process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME,
   },

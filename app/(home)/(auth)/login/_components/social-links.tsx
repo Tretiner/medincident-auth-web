@@ -1,54 +1,91 @@
+// app/login/_components/social-links.tsx
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MaxLogoIcon, TelegramLogoIcon } from "@/components/icons";
-import { useSearchParams } from "next/navigation";
+import { ZitadelIdp } from "@/lib/zitadel/zitadel-api";
+import { loginWithProviderAction } from "../actions"; // Импортируем Action
 
-interface AuthLinkProps {
-  href: string;
+interface AuthButtonProps {
+  idpId: string;
 }
 
-const TelegramLink = ({ href }: AuthLinkProps) => (
-  <Button
-    asChild
-    variant="telegram"
-    size="lg"
-    className="w-full relative py-6 text-base group shadow-none transition-transform active:scale-[0.98]"
-  >
-    <Link href={href} prefetch={false}>
+interface GenericButtonProps extends AuthButtonProps {
+  name: string;
+}
+
+// Заметьте: убрали asChild и <Link>, добавили type="submit"
+export const GenericButton = ({ idpId, name }: GenericButtonProps) => (
+  <form action={loginWithProviderAction.bind(null, idpId)} className="w-full">
+    <Button
+      type="submit"
+      variant="outline"
+      size="lg"
+      className="w-full relative py-6 text-base group shadow-none transition-all active:scale-[0.98]"
+    >
+      <span>{name}</span>
+    </Button>
+  </form>
+);
+
+const TelegramButton = ({ idpId }: AuthButtonProps) => (
+  <form action={loginWithProviderAction.bind(null, idpId)} className="w-full">
+    <Button
+      type="submit"
+      variant="telegram"
+      size="lg"
+      className="w-full relative py-6 text-base group shadow-none transition-all active:scale-[0.98]"
+    >
       <TelegramLogoIcon className="absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-hover:scale-110" />
-      <span className="pl-4">Войти через Telegram</span>
-    </Link>
-  </Button>
+      <span className="pl-4">Telegram</span>
+    </Button>
+  </form>
 );
 
-const MaxLink = ({ href }: AuthLinkProps) => (
-  <Button
-    asChild
-    variant="max"
-    size="lg"
-    className="w-full relative py-6 text-base group shadow-none transition-transform active:scale-[0.98]"
-  >
-    <Link href={href} prefetch={false}>
+const MaxButton = ({ idpId }: AuthButtonProps) => (
+  <form action={loginWithProviderAction.bind(null, idpId)} className="w-full">
+    <Button
+      type="submit"
+      variant="max"
+      size="lg"
+      className="w-full relative py-6 text-base group shadow-none transition-all active:scale-[0.98]"
+    >
       <MaxLogoIcon className="absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-hover:scale-110" />
-      <span className="pl-4">Войти через MAX</span>
-    </Link>
-  </Button>
+      <span className="pl-4">MAX</span>
+    </Button>
+  </form>
 );
 
-export function SocialLinks() {
-  const searchParams = useSearchParams();
+const STYLED_PROVIDERS: Record<string, React.FC<AuthButtonProps>> = {
+  telegram: TelegramButton,
+  max: MaxButton,
+};
 
-  const createLink = (provider: string) => {
-    const queryString = searchParams.toString();
-    return `/login/${provider}${queryString ? `?${queryString}` : ""}`;
-  };
+interface ExternalIdentityProvidersProps {
+  providers: ZitadelIdp[];
+}
+
+export function ExternalIdentityProviders({ providers }: ExternalIdentityProvidersProps) {
+  if (!providers || providers.length === 0) return null;
 
   return (
     <div className="grid gap-2 md:gap-3">
-      <TelegramLink href={createLink("telegram")} />
-      <MaxLink href={createLink("max")} />
+      {providers.map((provider) => {
+        const lowerCaseName = provider.name.toLowerCase();
+        const StyledProvider = STYLED_PROVIDERS[lowerCaseName];
+        
+        if (StyledProvider) {
+          return <StyledProvider key={provider.id} idpId={provider.id} />;
+        }
+
+        return (
+          <GenericButton 
+            key={provider.id} 
+            idpId={provider.id} 
+            name={provider.name} 
+          />
+        );
+      })}
     </div>
   );
 }
