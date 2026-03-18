@@ -5,10 +5,10 @@ import { AuthFlowSelector } from "./_components/auth-flow-selector"; // Импо
 export default async function CallbackSuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ id?: string; token?: string; userId?: string; user?: string }>;
+  searchParams: Promise<{ requestId?: string; id?: string; token?: string; userId?: string; user?: string }>;
 }) {
   // Достаем также userId из URL
-  const { id, token, userId: queryUserId, user } = await searchParams;
+  const { requestId, id, token, userId: queryUserId, user } = await searchParams;
   const userId = queryUserId || user;
 
   // 1. Проверяем, что параметры на месте
@@ -66,6 +66,7 @@ export default async function CallbackSuccessPage({
               {/* БЛОК КНОПОК */}
               <div className="p-6">
                 <AuthFlowSelector 
+                  requestId={requestId}
                   intentId={id}
                   intentToken={token}
                   userId={userId} // Передаем userId из URL (если он есть)

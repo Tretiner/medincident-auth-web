@@ -294,3 +294,80 @@ export async function createSession(
     ZitadelCreateSessionResponseSchema,
   );
 }
+
+
+// --- Схемы для Поиска Сессий ---
+
+export const ZitadelSessionUserFactorSchema = z.object({
+  verifiedAt: z.string().optional(),
+  id: z.string().optional(),
+  loginName: z.string().optional(),
+  displayName: z.string().optional(),
+  organizationId: z.string().optional(),
+}).catchall(z.any());
+
+export const ZitadelSessionFactorsSchema = z.object({
+  user: ZitadelSessionUserFactorSchema.optional(),
+  password: z.any().optional(),
+}).catchall(z.any());
+
+export const ZitadelSessionSchema = z.object({
+  id: z.string(),
+  creationDate: z.string().optional(),
+  changeDate: z.string().optional(),
+  factors: ZitadelSessionFactorsSchema.optional(),
+}).catchall(z.any());
+
+export const ZitadelSearchSessionsResponseSchema = z.object({
+  details: z.any().optional(),
+  sessions: z.array(ZitadelSessionSchema).optional(),
+}).catchall(z.any());
+
+// --- API Метод ---
+
+/**
+ * Ищет информацию о сессиях по их ID.
+ * Используется для отображения экрана "Выбор аккаунта".
+ */
+export async function searchSessions(
+  sessionIds: string[]
+): Promise<Result<z.infer<typeof ZitadelSearchSessionsResponseSchema>>> {
+  const url = `${BASE_URL}/v2/sessions/search`;
+
+  // Если список ID пуст, нет смысла делать запрос
+  if (!sessionIds || sessionIds.length === 0) {
+    return { success: true, data: { sessions: [] } };
+  }
+
+  const body = {
+    query: {
+      offset: "0",
+      limit: 100,
+      asc: true
+    },
+    queries: [
+      {
+        idsQuery: {
+          ids: sessionIds
+        }
+      }
+    ]
+  };
+
+  console.log(`\nPOST ${url}\nBODY: ${JSON.stringify(body)}`);
+
+  return handleFetch(
+    () =>
+      fetch(url, {
+        method: Method.Post,
+        headers: {
+          ...Headers.Accept.Json,
+          ...Headers.Content.Json,
+          "Authorization": `Bearer ${TOKEN}`, // Убедитесь, что используете правильный токен
+        },
+        body: JSON.stringify(body),
+        cache: "no-store",
+      }),
+    ZitadelSearchSessionsResponseSchema,
+  );
+}

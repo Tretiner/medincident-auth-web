@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: any }) {
+  const { requestId } = await searchParams;
   const providers = await fetchProvidersAction();
 
   return (
@@ -44,7 +45,7 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
 
             <div className="space-y-4 md:space-y-6 w-full">
               <div className="grid gap-2 md:gap-3">
-                <ExternalIdentityProviders providers={providers} />
+                <ExternalIdentityProviders providers={providers} requestId={requestId} />
               </div>
             </div>
 

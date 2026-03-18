@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface AuthFlowSelectorProps {
+  requestId?: string;
   intentId: string;
   intentToken: string;
   userId?: string;
@@ -14,6 +15,7 @@ interface AuthFlowSelectorProps {
 }
 
 export function AuthFlowSelector({
+  requestId,
   intentId,
   intentToken,
   userId,
@@ -34,7 +36,7 @@ export function AuthFlowSelector({
     setLoading("login");
     setError(null);
     try {
-      await handleLoginAction(userId, intentId, intentToken);
+      await handleLoginAction(userId, intentId, intentToken, requestId);
     } catch (e: any) {
       setError(e.message);
       setLoading(null);
@@ -73,7 +75,7 @@ export function AuthFlowSelector({
         ]
       };
       console.log("Request body for createHumanUser:", JSON.stringify(requestBody, null, 2));
-      await handleRegisterAction(intentId, intentToken, requestBody);
+      await handleRegisterAction(intentId, intentToken, requestBody, requestId);
     } catch (e: any) {
       setError(e.message);
       setLoading(null);
@@ -88,7 +90,7 @@ export function AuthFlowSelector({
     setLoading("link");
     setError(null);
     try {
-      await handleLinkAction(targetUserId, intentId, intentToken, idpInformation);
+      await handleLinkAction(targetUserId, intentId, intentToken, idpInformation, requestId);
     } catch (e: any) {
       setError(e.message);
       setLoading(null);

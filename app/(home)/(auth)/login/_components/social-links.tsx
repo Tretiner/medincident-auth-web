@@ -7,6 +7,7 @@ import { ZitadelIdp } from "@/lib/zitadel/zitadel-api";
 import { loginWithProviderAction } from "../actions"; // Импортируем Action
 
 interface AuthButtonProps {
+  requestId: string;
   idpId: string;
 }
 
@@ -15,8 +16,8 @@ interface GenericButtonProps extends AuthButtonProps {
 }
 
 // Заметьте: убрали asChild и <Link>, добавили type="submit"
-export const GenericButton = ({ idpId, name }: GenericButtonProps) => (
-  <form action={loginWithProviderAction.bind(null, idpId)} className="w-full">
+export const GenericButton = ({ requestId, idpId, name }: GenericButtonProps) => (
+  <form action={loginWithProviderAction.bind(null, idpId, requestId)} className="w-full">
     <Button
       type="submit"
       variant="outline"
@@ -28,8 +29,8 @@ export const GenericButton = ({ idpId, name }: GenericButtonProps) => (
   </form>
 );
 
-const TelegramButton = ({ idpId }: AuthButtonProps) => (
-  <form action={loginWithProviderAction.bind(null, idpId)} className="w-full">
+const TelegramButton = ({ requestId, idpId }: AuthButtonProps) => (
+  <form action={loginWithProviderAction.bind(null, idpId, requestId)} className="w-full">
     <Button
       type="submit"
       variant="telegram"
@@ -42,8 +43,8 @@ const TelegramButton = ({ idpId }: AuthButtonProps) => (
   </form>
 );
 
-const MaxButton = ({ idpId }: AuthButtonProps) => (
-  <form action={loginWithProviderAction.bind(null, idpId)} className="w-full">
+const MaxButton = ({ requestId, idpId }: AuthButtonProps) => (
+  <form action={loginWithProviderAction.bind(null, idpId, requestId)} className="w-full">
     <Button
       type="submit"
       variant="max"
@@ -62,10 +63,11 @@ const STYLED_PROVIDERS: Record<string, React.FC<AuthButtonProps>> = {
 };
 
 interface ExternalIdentityProvidersProps {
+  requestId: string;
   providers: ZitadelIdp[];
 }
 
-export function ExternalIdentityProviders({ providers }: ExternalIdentityProvidersProps) {
+export function ExternalIdentityProviders({ requestId, providers }: ExternalIdentityProvidersProps) {
   if (!providers || providers.length === 0) return null;
 
   return (
@@ -75,12 +77,13 @@ export function ExternalIdentityProviders({ providers }: ExternalIdentityProvide
         const StyledProvider = STYLED_PROVIDERS[lowerCaseName];
         
         if (StyledProvider) {
-          return <StyledProvider key={provider.id} idpId={provider.id} />;
+          return <StyledProvider key={provider.id} requestId={requestId} idpId={provider.id} />;
         }
 
         return (
           <GenericButton 
             key={provider.id} 
+            requestId={requestId}
             idpId={provider.id} 
             name={provider.name} 
           />

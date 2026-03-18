@@ -16,18 +16,22 @@ export async function fetchProvidersAction() {
   return response.data.identityProviders || [];
 }
 
-export async function loginWithProviderAction(idpId: string) {
+export async function loginWithProviderAction(idpId: string, requestId?: string) {
+  const baseUrl = env.APP_URL;
+
+  const successUrl = requestId 
+    ? `${baseUrl}/login/callback/success?requestId=${requestId}` 
+    : `${baseUrl}/login/callback/success`;
+
   const response = await startIdpIntent({
     idpId,
     urls: {
-      successUrl: `${env.APP_URL}/login/callback/success`,
-      failureUrl: `${env.APP_URL}/login/callback/failure`,
+      successUrl: successUrl,
+      failureUrl: `${baseUrl}/login/callback/failure`,
     },
   });
-  console.log("СТАРТ ПРОВАЙДЕРА:", JSON.stringify(response));
 
-  if (!response.success) {
-    console.error("Ошибка при инициализации IDP Intent:", response.error);
+  if (!response.success || !response.data?.authUrl) {
     throw new Error("Не удалось запустить авторизацию");
   }
 
