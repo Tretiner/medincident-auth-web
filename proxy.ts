@@ -1,122 +1,71 @@
-"server only";
-
 import { NextRequest, NextResponse } from "next/server";
 
-// import { NextResponse } from "next/server";
-// import { NextRequest } from "next/server";
-// import { rotateTokens, verifyAccessToken } from "@/services/session/session-service";
-// import { env } from "@/config/env";
+// Пути, требующие обязательной авторизации
+const SECURE_PATHS = ["/profile", "/api/profile"];
 
-// // Пути, требующие обязательной авторизации
-// const SECURE_PATHS = ["/profile", "/api/profile"];
-
-// // Пути, доступные всем
-// const PUBLIC_PATHS = [
-//   "/_next",
-//   "/static",
-//   "/api/auth",
-//   "/api/callback",
-//   "/login/telegram",
-//   "/login/max",
-//   "/login",
-//   "/favicon.ico",
-//   "/sitemap.xml",
-//   "/robots.txt"
-// ];
+// Функция, которая имитирует вашу timestampDate для Edge runtime (если нужно)
+const isExpired = (expirationTs: string | undefined) => {
+  if (!expirationTs) return false;
+  return new Date(Number(expirationTs)) < new Date();
+};
 
 export async function proxy(request: NextRequest) {
-//   const { pathname, search } = request.nextUrl;
+  const { pathname } = request.nextUrl;
 
-//   console.info(`PROXY: Incoming request: ${pathname}`);
+  // 1. Проверяем, является ли путь защищенным
+  const isSecurePath = SECURE_PATHS.some((path) => pathname.startsWith(path));
 
-//   // 1. Пропускаем публичные пути
-//   if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
-//     console.info(`PROXY: Public path`);
-//     return NextResponse.next();
-//   }
+  if (!isSecurePath) {
+    return NextResponse.next();
+  }
 
-//   const accessToken = request.cookies.get("auth_access")?.value;
-//   const refreshToken = request.cookies.get("auth_refresh")?.value;
+  // 2. Ищем куку текущей сессии
+  const currentSessionId = request.cookies.get("zitadel_current_session")?.value;
+  const sessionsCookie = request.cookies.get("sessions")?.value;
 
-//   console.log(`tokens: a:${accessToken} r:${refreshToken}`)
+  let isAuthenticated = false;
 
-//   // 2. Попытка верификации Access Token
-//   if (accessToken) {
-//     const isVerified = await verifyAccessToken(accessToken);
-//     if (isVerified) {
-//       console.info(`PROXY: ✅ Access Token verified. User authenticated.`);
-//       return NextResponse.next();
-//     }
-//   }
+  // 3. Валидация кук (без похода в сторонние API)
+  if (currentSessionId && sessionsCookie) {
+    try {
+      const sessions = JSON.parse(sessionsCookie);
+      
+      // Ищем текущую сессию в массиве всех сессий
+      const activeSession = sessions.find((s: any) => s.id === currentSessionId);
 
-//   console.info(`PROXY: ⚠️ Access Token missing or invalid. Checking Refresh Token...`);
+      // Если сессия найдена и не протухла
+      if (activeSession && !isExpired(activeSession.expirationTs)) {
+        isAuthenticated = true;
+      }
+    } catch (error) {
+      console.error("Middleware: Ошибка парсинга кук", error);
+    }
+  }
 
-//   // 3. Логика ротации (Раскомментировано)
-//   if (refreshToken) {
-//     console.info(`PROXY: 🔄 Attempting to rotate tokens using Refresh Token.`);
+  // 4. Если проверка провалилась - выбрасываем на главную
+  if (!isAuthenticated) {
+    console.info(`🔒 Запрещен доступ к ${pathname}. Редирект на /.`);
     
-//     try {
-//       const newSession = await rotateTokens(refreshToken);
-
-//       if (newSession) {
-//         console.info(`PROXY: ✨ Rotation SUCCESS. Updating session cookies.`);
-        
-//         const response = NextResponse.next();
-
-//         // Access Token
-//         response.cookies.set("auth_access", newSession.accessToken, {
-//           path: "/",
-//           httpOnly: true,
-//           secure: env.isProd,
-//           sameSite: "lax",
-//           expires: newSession.accessExpiresAt, 
-//         });
-
-//         // Refresh Token (Rotation)
-//         response.cookies.set("auth_refresh", newSession.refreshToken, {
-//           path: "/",
-//           httpOnly: true,
-//           secure: env.isProd,
-//           sameSite: "lax",
-//           expires: newSession.refreshExpiresAt, 
-//         });
-
-//         return response;
-//       } else {
-//         console.info(`PROXY: ❌ Rotation returned no session (invalid refresh token).`);
-//       }
-//     } catch (error) {
-//       console.error("PROXY: 💥 ROTATION FAILED (Error)", error);
-//       // Если ротация упала, продолжаем выполнение, чтобы сработал редирект или 401
-//     }
-//   } else {
-//     console.info(`PROXY: 🤷‍♂️ No Refresh Token found.`);
-//   }
-
-//   // 4. Если это API запрос — возвращаем 401 вместо редиректа
-//   if (pathname.startsWith("/api")) {
-//     console.info(`PROXY: ⛔ Unauthorized API request to ${pathname}. Returning 401.`);
-//     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//   }
-
-//   // 5. Редирект на логин, если доступа нет и путь защищен
-//   if (SECURE_PATHS.some((path) => pathname.startsWith(path))) {
-//     console.info(`PROXY: 🔒 Access denied to secure path: ${pathname}. Redirecting to /login.`);
+    const loginUrl = new URL("/", request.url);
+    // Опционально: можно передать путь, куда человек пытался зайти, 
+    // чтобы вернуть его туда после логина
+    loginUrl.searchParams.set("redirect", pathname); 
     
-//     const loginUrl = new URL("/login", request.url);
-//     if (pathname !== "/") {
-//       loginUrl.searchParams.set("from", pathname + search);
-//     }
-//     return NextResponse.redirect(loginUrl);
-//   }
+    return NextResponse.redirect(loginUrl);
+  }
 
-//   // По умолчанию пропускаем остальные запросы
-//   console.info(`PROXY: 🏳️ Path is not explicitly secure. Allowing access.`);
+  // 5. Все ок - пропускаем!
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
     "/((?!_next/static|_next/image|favicon.ico|api/auth/qr).*)",
   ],
 };

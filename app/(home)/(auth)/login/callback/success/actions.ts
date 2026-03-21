@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 // Импортируем ваши методы для работы с пользователями и сессиями
-import { createHumanUser, createSession, addIdpLinkToUser } from "@/lib/zitadel/zitadel-api"; 
+import { createHumanUser, createSession, addIdpLinkToUser } from "@/lib/zitadel/zitadel-api";
 
 // Подтягиваем переменные окружения (используйте ваш способ из env)
 const BASE_URL = process.env.ZITADEL_API_URL || process.env.NEXT_PUBLIC_AUTH_URL;
@@ -17,7 +17,7 @@ const TOKEN = process.env.ZITADEL_API_TOKEN;
  */
 async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
   let endpoint = "";
-  
+
   // Определяем, какой это запрос: OIDC или SAML
   if (requestId.startsWith("oidc_")) {
     endpoint = `/v2/oidc/auth_requests/${requestId}`;
@@ -52,7 +52,7 @@ async function completeAuthFlow(sessionId: string, sessionToken: string, request
   }
 
   const data = await response.json();
-  
+
   // ZITADEL возвращает { "redirectUri": "..." } для OIDC
   // Для SAML может возвращаться samlData.url, поэтому берем то, что есть
   const redirectUrl = data.redirectUri || data.url;
@@ -67,28 +67,44 @@ async function completeAuthFlow(sessionId: string, sessionToken: string, request
 /**
  * Универсальная функция финализации авторизации
  */
-async function finishAuth(sessionId: string, sessionToken: string, requestId?: string) {
-  console.log("Завершаем авторизацию. Session ID:", sessionId, "Request ID:", requestId);
 
+async function finishAuth(sessionId: string, sessionToken: string, requestId?: string) {
+  // 1. Сохраняем сессию в общий массив ВСЕХ известных сессий (как делали раньше)
+  const cookieStore = await cookies();
+  const existingCookie = cookieStore.get("zitadel_sessions")?.value;
+  let sessions: Array<{ id: string; token: string }> = [];
+
+  if (existingCookie) {
+    try { sessions = JSON.parse(existingCookie); } catch (e) {}
+  }
+
+  sessions = sessions.filter((s) => s.id !== sessionId);
+  sessions.push({ id: sessionId, token: sessionToken });
+
+  cookieStore.set("zitadel_sessions", JSON.stringify(sessions), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30, // 30 дней
+  });
+
+  // 2. РАЗВИЛКА ЛОГИНА
   if (requestId) {
-    // === СЦЕНАРИЙ 1: SSO / OIDC FLOW (Вход для других приложений/Консоли) ===
-    // Получаем финальную ссылку от ZITADEL
+    // === СЦЕНАРИЙ 1: Вход для стороннего приложения (Console и др.) ===
     const redirectUrl = await completeAuthFlow(sessionId, sessionToken, requestId);
-    
-    // Перенаправляем пользователя (ZITADEL сам поставит нужные глобальные SSO-куки)
     redirect(redirectUrl);
   } else {
-    // === СЦЕНАРИЙ 2: ПРЯМОЙ ВХОД (Локальная сессия) ===
-    // Если пользователь зашел по прямой ссылке /login (без requestId от других приложений)
-    (await cookies()).set("zitadel_session", sessionToken, {
+    // === СЦЕНАРИЙ 2: Вход в локальный профиль ===
+    // Записываем ID выбранной сессии в отдельную куку "текущего пользователя"
+    cookieStore.set("zitadel_current_session", sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 дней
     });
 
-    redirect("/dashboard");
+    // Перенаправляем прямо в профиль (вместо /dashboard [cite: 114])
+    redirect("/profile/details"); 
   }
 }
 
@@ -99,7 +115,7 @@ async function finishAuth(sessionId: string, sessionToken: string, requestId?: s
 export async function handleLoginAction(userId: string, intentId: string, intentToken: string, requestId?: string) {
   const sessionRes = await createSession(userId, intentId, intentToken);
   console.log("Ответ от createSession:", JSON.stringify(sessionRes));
-  
+
   if (!sessionRes.success || !sessionRes.data?.sessionToken || !sessionRes.data?.sessionId) {
     throw new Error("Ошибка при создании сессии. Ответ ZITADEL: " + JSON.stringify(sessionRes.error));
   }
@@ -110,14 +126,14 @@ export async function handleLoginAction(userId: string, intentId: string, intent
 export async function handleRegisterAction(intentId: string, intentToken: string, payload: any, requestId?: string) {
   const userRes = await createHumanUser(payload);
   console.log("Ответ от createHumanUser:", JSON.stringify(userRes));
-  
+
   if (!userRes.success || !userRes.data?.userId) {
     throw new Error("Ошибка при регистрации: " + JSON.stringify(userRes.error));
   }
 
   const sessionRes = await createSession(userRes.data.userId, intentId, intentToken);
   console.log("Ответ от createSession:", JSON.stringify(sessionRes));
-  
+
   if (!sessionRes.success || !sessionRes.data?.sessionToken || !sessionRes.data?.sessionId) {
     throw new Error("Пользователь создан, но не удалось создать сессию");
   }
@@ -134,17 +150,27 @@ export async function handleLinkAction(targetUserId: string, intentId: string, i
 
   const linkRes = await addIdpLinkToUser(targetUserId, idpLink);
   console.log("Ответ от addIdpLinkToUser:", JSON.stringify(linkRes));
-  
+
   if (!linkRes.success) {
     throw new Error("Ошибка при привязке аккаунта: " + JSON.stringify(linkRes.error));
   }
 
   const sessionRes = await createSession(targetUserId, intentId, intentToken);
   console.log("Ответ от createSession:", JSON.stringify(sessionRes));
-  
+
   if (!sessionRes.success || !sessionRes.data?.sessionToken || !sessionRes.data?.sessionId) {
     throw new Error("Аккаунт привязан, но не удалось создать сессию");
   }
 
   await finishAuth(sessionRes.data.sessionId, sessionRes.data.sessionToken, requestId);
+}
+
+export async function selectAccountAction(sessionId: string, sessionToken: string, requestId?: string) {
+  try {
+    return await completeAuthFlow(sessionId, sessionToken, requestId ?? "");
+  } catch (error: any) {
+    // Если сессия протухла в момент клика, возвращаем ошибку, 
+    // чтобы UI мог обработать её и предложить войти заново
+    return { success: false, error: error.message };
+  }
 }

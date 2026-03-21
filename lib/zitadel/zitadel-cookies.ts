@@ -1,11 +1,20 @@
 "use server";
 
-import { timestampDate, timestampFromMs } from "@zitadel/client";
 import { cookies } from "next/headers";
 
 // TODO: improve this to handle overflow
 const MAX_COOKIE_SIZE = 2048;
 const LANGUAGE_COOKIE_NAME = "NEXT_LOCALE";
+
+/**
+ * Просто прокидываем миллисекунды дальше
+ */
+export const timestampFromMs = (ms: number): number => ms;
+
+/**
+ * Превращаем миллисекунды в Date
+ */
+export const timestampDate = (ms: number): Date => new Date(ms);
 
 export type Cookie = {
   id: string;
