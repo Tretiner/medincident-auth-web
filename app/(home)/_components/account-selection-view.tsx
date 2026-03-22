@@ -1,132 +1,178 @@
-// app/_components/account-selection-view.tsx
 "use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Loader2, Plus, UserRound } from "lucide-react";
+import { AlertCircle, Loader2, Plus, Check } from "lucide-react";
+import { AppLogoIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { selectAccountAction } from "../(auth)/login/callback/success/actions";
+import { setCurrentSessionId } from "@/lib/zitadel/zitadel-current-session";
 
-interface SessionItem {
+export interface AccountDisplayItem {
   id: string;
   token: string;
-  user?: {
-    displayName?: string;
-    loginName?: string;
-    avatarUrl?: string;
-  };
+  title: string;
+  subtitle: string;
+  avatarUrl?: string;
+  initials: string;
 }
 
-interface Props {
-  sessions: SessionItem[];
+interface AccountSelectionViewProps {
+  accounts: AccountDisplayItem[];
   requestId?: string;
+  defaultSelectedId?: string;
+  addAccountLink: string,
+  localContinueLink: string;
 }
 
-export function AccountSelectionView({ sessions, requestId }: Props) {
+export function AccountSelectionView({ accounts, requestId, defaultSelectedId, addAccountLink, localContinueLink }: AccountSelectionViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSelectAccount = (sessionId: string, sessionToken: string) => {
-    setActiveSessionId(sessionId);
-    setError(null);
+  const [selectedId, setSelectedId] = useState<string | undefined>(defaultSelectedId);
 
+  const handleAddAccount = () => router.push(addAccountLink);
+  
+  const handleContinue = () => {
+    if (!selectedId) return;
+    const account = accounts.find(a => a.id === selectedId);
+    if (!account) return;
+
+    setError(null);
     startTransition(async () => {
-      const result = await selectAccountAction(sessionId, sessionToken, requestId);
-      
-      // Если вернулась ошибка (сессия невалидна в момент сабмита)
+      if (!requestId) {
+        try {
+          await setCurrentSessionId(account.id);
+          router.push(localContinueLink);
+        } catch (e) {
+          setError("Ошибка при сохранении сессии.");
+        }
+        return;
+      }
+
+      const result = await selectAccountAction(account.id, account.token, requestId);
       if (result && !result.success) {
-        setError("Сессия устарела. Пожалуйста, войдите заново.");
-        setActiveSessionId(null);
+        setError("Сессия устарела. Пожалуйста, войдите заново.\n" + JSON.stringify(result.error));
       }
     });
   };
 
-  const handleAddAccount = () => {
-    router.push(`/login${requestId ? `?requestId=${requestId}` : ""}`);
-  };
-
   return (
-    <Card className="w-full max-w-md shadow-lg border-border animate-in fade-in zoom-in-95 duration-500">
-      <CardHeader className="border-b border-border bg-card pb-6 text-center">
-        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
-          <UserRound className="w-6 h-6" />
-        </div>
-        <CardTitle className="text-2xl font-bold text-primary tracking-tight">
-          Выберите аккаунт
-        </CardTitle>
-        <p className="text-muted-foreground text-sm mt-2">
-          Для продолжения работы в системе
-        </p>
-      </CardHeader>
+    <div className="w-full max-w-md relative animate-in fade-in zoom-in-95 duration-500 mx-auto min-h-[500px] flex flex-col justify-between">
+      {/* Декоративные шары */}
+      <div className="absolute -top-[80%] -left-[80%] w-[80%] h-[80%] rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-[60%] -right-[60%] w-[80%] h-[80%] rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
 
-      <CardContent className="p-0 bg-secondary/10">
-        <div className="flex flex-col">
-          {error && (
-            <div className="p-4 bg-destructive/10 text-destructive text-sm font-medium flex items-center gap-2 border-b border-destructive/20">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              {error}
-            </div>
-          )}
-
-          <div className="divide-y divide-border">
-            {sessions.map((session) => {
-              const displayName = session.user?.displayName || "Пользователь";
-              const loginName = session.user?.loginName || "Неизвестный email";
-              const initials = displayName.substring(0, 2).toUpperCase();
-              const isLoadingThis = activeSessionId === session.id;
-
-              return (
-                <button
-                  key={session.id}
-                  onClick={() => handleSelectAccount(session.id, session.token)}
-                  disabled={isPending}
-                  className={cn(
-                    "w-full flex items-center gap-4 p-4 transition-all text-left group",
-                    isPending && !isLoadingThis ? "opacity-50 grayscale-[50%]" : "hover:bg-secondary/50"
-                  )}
-                >
-                  <Avatar className="h-12 w-12 shrink-0 border border-primary/10 shadow-sm transition-transform group-hover:scale-105">
-                    <AvatarImage src={session.user?.avatarUrl} alt={displayName} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex-1 overflow-hidden flex flex-col gap-0.5">
-                    <p className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                      {displayName}
-                    </p>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {loginName}
-                    </p>
-                  </div>
-
-                  {isLoadingThis && (
-                    <Loader2 className="w-5 h-5 text-primary animate-spin shrink-0" />
-                  )}
-                </button>
-              );
-            })}
+      <div className="flex flex-col relative z-10 py-6 sm:py-8 flex-1">
+        
+        {/* HEADER */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-primary shadow-none border border-primary/20">
+            <AppLogoIcon className="w-6 h-6 md:w-8 md:h-8" />
           </div>
-
-          <div className="p-4 border-t border-border bg-card">
-            <Button
-              variant="outline"
-              onClick={handleAddAccount}
-              disabled={isPending}
-              className="w-full flex items-center justify-center gap-2 shadow-none hover:bg-muted"
-            >
-              <Plus className="w-4 h-4" />
-              Сменить / Добавить аккаунт
-            </Button>
-          </div>
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-center">
+            Выберите аккаунт
+          </h1>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* УЗКИЙ СПИСОК (Аккаунты + Добавить) */}
+        <div className="flex flex-col rounded-xl border border-border bg-card backdrop-blur-sm divide-y divide-border overflow-hidden shadow-none max-w-[480px] mx-auto w-full">
+          {accounts.map((account) => {
+            const isSelected = selectedId === account.id;
+
+            return (
+              <button
+                key={account.id}
+                onClick={() => setSelectedId(account.id)}
+                disabled={isPending}
+                className={cn(
+                  "w-full flex items-center gap-3 p-3 transition-all text-left",
+                  "hover:bg-secondary/20",
+                  isPending && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                <Avatar className={cn(
+                    "h-12 w-12 shrink-0 border transition-transform",
+                    isSelected ? "border-primary/30 scale-105" : "border-primary/10"
+                )}>
+                  <AvatarImage src={account.avatarUrl} alt={account.title} />
+                  <AvatarFallback className={cn(
+                      "font-bold text-sm",
+                      isSelected ? "bg-primary/20 text-primary" : "bg-primary/10 text-primary"
+                  )}>
+                    {account.initials}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="flex-1 overflow-hidden flex flex-col">
+                  <p className={cn(
+                      "font-semibold text-md truncate transition-colors",
+                      isSelected ? "text-primary" : "text-foreground"
+                  )}>
+                    {account.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {account.subtitle}
+                  </p>
+                </div>
+
+                {/* КАСТОМНАЯ РАДИО-КНОПКА */}
+                <div className={cn(
+                    "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors duration-200",
+                    isSelected ? "border-primary bg-primary" : "border-muted-foreground/30 bg-transparent"
+                )}>
+                    <div className={cn(
+                        "w-1.5 h-1.5 rounded-full bg-card transition-transform duration-200",
+                        isSelected ? "scale-100" : "scale-0"
+                    )} />
+                </div>
+              </button>
+            );
+          })}
+
+          {/* КНОПКА "ДОБАВИТЬ АККАУНТ" ВНУТРИ ТОГО ЖЕ СПИСКА */}
+          <button
+            onClick={handleAddAccount}
+            disabled={isPending}
+            className={cn(
+              "w-full flex items-center ml-1.5 gap-3 pl-3 pr-3 pt-2 pb-2 transition-all text-left hover:bg-secondary/50",
+              isPending && "opacity-50 cursor-not-allowed"
+            )}
+          >
+             <div className="h-8 w-8 shrink-0 rounded-full border border-dashed border-primary/30 flex items-center justify-center bg-primary/5 text-primary transition-colors">
+                <Plus className="w-4 h-4" />
+             </div>
+             <div className="flex-1 ml-2 font-medium text-sm text-foreground">
+                Добавить другой аккаунт
+             </div>
+          </button>
+        </div>
+
+        {error && (
+          <div className="p-4 mt-12 rounded-xl bg-destructive/10 text-destructive text-sm font-medium flex items-center gap-2 border border-destructive/20 max-w-[320px] mx-auto w-full">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {error}
+          </div>
+        )}
+
+        {/* НИЖНИЙ БЛОК С КНОПКОЙ ПРОДОЛЖИТЬ ОТДЕЛЕН БОЛЬШИМ МАРДЖИНОМ */}
+        <div className="flex justify-center mt-6 mb-4">
+          <Button
+            onClick={handleContinue}
+            disabled={isPending || !selectedId}
+            className="w-full max-w-[200px] shadow-none"
+          >
+            {isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : null}
+            Продолжить
+          </Button>
+        </div>
+        
+      </div>
+    </div>
   );
 }

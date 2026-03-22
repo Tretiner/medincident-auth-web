@@ -51,6 +51,24 @@ const Headers = {
 const BASE_URL = env.ZITADEL_API_URL;
 const TOKEN = env.ZITADEL_API_TOKEN;
 
+export async function fetchZitadel(path: string, options: RequestInit = {}) {
+  const url = `${BASE_URL}${path}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      ...Headers.Accept.Json,
+      ...Headers.Content.Json,
+      "Authorization": `Bearer ${TOKEN}`,
+      ...options.headers,
+    },
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Zitadel API error (${res.status}): ${err}`);
+  }
+  return res.json();
+}
+
 
 
 // --- API Client Methods ---

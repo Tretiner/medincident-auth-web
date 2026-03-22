@@ -1,9 +1,9 @@
-// app/page.tsx
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { searchSessions } from "@/lib/zitadel/zitadel-api";
-import { AccountSelectionView } from "./_components/account-selection-view";
-import { QuickLoginPrompt } from "./_components/quick-login-prompt";
+import { fetchZitadel, searchSessions } from "@/lib/zitadel/zitadel-api";
+import { getAllSessions } from "@/lib/zitadel/zitadel-cookies";
+import { getCurrentSessionId } from "@/lib/zitadel/zitadel-current-session";
+import { AccountSelectionView, AccountDisplayItem } from "./_components/account-selection-view";
+import { Suspense } from "react";
 
 export default async function AccountSelectionPage({
   searchParams,
@@ -12,73 +12,88 @@ export default async function AccountSelectionPage({
 }) {
   const { requestId } = await searchParams;
 
-  const cookieStore = await cookies();
-  const knownSessionsCookie = cookieStore.get("sessions")?.value;
-  const currentSessionId = cookieStore.get("zitadel_current_session")?.value;
+  const loginLink = `/login${requestId ? `?requestId=${requestId}` : ""}`;
+  const localContinueLink = `/profile`;
 
-  let knownSessions: Array<{ id: string; token: string }> = [];
-  try {
-    if (knownSessionsCookie) knownSessions = JSON.parse(knownSessionsCookie);
-  } catch (e) {}
+  const knownSessions = await getAllSessions(true);
 
-  // Если локальных сессий нет — отправляем на форму входа
-  if (knownSessions.length === 0) {
-    redirect(`/login${requestId ? `?requestId=${requestId}` : ""}`);
+  if (!knownSessions || knownSessions.length === 0) {
+  console.log('CUSTOM-UI: REDIRECT NO KNOWN SESSIONS: %s', JSON.stringify(knownSessions))
+    redirect(loginLink);
   }
 
-  // Запрашиваем актуальный статус в ZITADEL
-  const sessionIds = knownSessions.map((s) => s.id);
-  const response = await searchSessions(sessionIds);
+  const response = await searchSessions(knownSessions.map((s) => s.id));
+  console.log('RESPONSE SESSIONS: %s', JSON.stringify(response))
   const activeSessions = response.success ? response.data?.sessions || [] : [];
 
-  // Фильтруем только живые сессии
-  const validSessions = activeSessions
-    .filter((session) => session.factors?.user)
-    .map((session) => {
+  const validActiveSessions = activeSessions.filter((session) => {
+    const localSession = knownSessions.find((s) => s.id === session.id);
+    return localSession?.token && session.factors?.user;
+});
+
+  if (validActiveSessions.length === 0) {
+  console.log('CUSTOM-UI: REDIRECT NO VALID SESSIONS: %s', JSON.stringify(activeSessions))
+    redirect(loginLink);
+  }
+  
+  // Если локальный вход и уже есть текущая сессия
+  const currentSessionId = await getCurrentSessionId();
+  const currentAccount = validActiveSessions.find((a) => a.id === currentSessionId);
+  if (!requestId && currentAccount) {
+    redirect(localContinueLink);
+  }
+
+  // === МАППИНГ БЕКЕНД-МОДЕЛЕЙ В UI-МОДЕЛИ ===
+  const displayAccountsRaw = await Promise.all(
+    validActiveSessions.map(async (session) => {
+      const user = session?.factors?.user;
+      const userId = user?.id;
+      
+      if (!userId) return null;
+
+      // 1. Ищем локальную сессию для токена (ты забыл эту строку)
       const localSession = knownSessions.find((s) => s.id === session.id);
-      return {
-        id: session.id,
-        token: localSession?.token as string,
-        user: session.factors?.user,
-      };
+
+      try {
+        // 2. Делаем запрос за пользователем
+        const userData = await fetchZitadel(`/v2/users/${userId}`);
+        const human = userData.user?.human;
+
+        // 3. Безопасно формируем имя (fallback на случай, если displayName пустой)
+        const displayName = human?.profile?.displayName || human?.profile?.givenName || "Пользователь";
+
+        return {
+          id: session.id, // ВАЖНО: Должен быть session.id для работы selectAccountAction!
+          token: localSession?.token as string,
+          title: displayName,
+          // В ZITADEL v2 email обычно лежит в preferredLoginName или human.email.email
+          subtitle: userData.user?.preferredLoginName || human?.username || "", 
+          avatarUrl: human?.profile?.avatarUrl || "",
+          initials: displayName.substring(0, 2).toUpperCase(), // Теперь это безопасно
+        };
+      } catch (error) {
+        console.error(`Ошибка получения данных юзера ${userId}:`, error);
+        return null; // Возвращаем null при ошибке сети, чтобы не сломать весь список
+      }
     })
-    .filter((s) => s.token);
+  );
 
-  if (validSessions.length === 0) {
-    redirect(`/login/new${requestId ? `?requestId=${requestId}` : ""}`);
-  }
+  // 4. Очищаем массив от возможных null (если юзер не найден или произошла ошибка)
+  const displayAccounts: AccountDisplayItem[] = displayAccountsRaw.filter(
+    (acc): acc is AccountDisplayItem => acc !== null
+  );
 
-  // Проверяем, жива ли "текущая" (последняя выбранная) сессия
-  const currentSession = validSessions.find((s) => s.id === currentSessionId);
-
-  // === СЦЕНАРИЙ БЕЗ AUTH REQUEST (Локальный профиль) ===
-  if (!requestId) {
-    if (currentSession) {
-      // Если есть валидная текущая сессия - сразу пускаем в профиль!
-      redirect("/profile");
-    }
-    // Если сессий много, но ни одна не выбрана как "текущая" - показываем список
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background/50 font-sans">
-        <AccountSelectionView sessions={validSessions} />
-      </div>
-    );
-  }
-
-  // === СЦЕНАРИЙ С AUTH REQUEST (OIDC Flow) ===
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background/50 font-sans">
-      {currentSession ? (
-        // Показываем: "Продолжить как Иван?"
-        <QuickLoginPrompt 
-          currentSession={currentSession} 
-          sessions={validSessions} 
-          requestId={requestId} 
+      <Suspense>
+        <AccountSelectionView 
+          accounts={displayAccounts} 
+          requestId={requestId}
+          defaultSelectedId={currentAccount?.id}
+          addAccountLink={loginLink}
+          localContinueLink={localContinueLink}
         />
-      ) : (
-        // Показываем весь список
-        <AccountSelectionView sessions={validSessions} requestId={requestId} />
-      )}
+      </Suspense>
     </div>
   );
 }
