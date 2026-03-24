@@ -3,73 +3,102 @@
 import { requireValidSession } from "@/lib/zitadel/session";
 import { PersonalInfo } from "@/domain/profile/types";
 import { ProfileFormData } from "./profile.hooks";
-import { fetchZitadel } from "@/lib/zitadel/zitadel-api";
 
-const ZITADEL_API_URL = process.env.ZITADEL_API_URL || process.env.NEXT_PUBLIC_AUTH_URL;
-const ZITADEL_TOKEN = process.env.ZITADEL_API_TOKEN;
+import { getUserById, updateHumanProfile, updateHumanEmail, updateUserMetadata, searchUserMetadata } from "@/lib/zitadel/api";
+import { updateHumanAvatar } from "@/lib/zitadel/api";
+import { revalidatePath } from "next/cache";
 
-// GET: Получить данные текущего пользователя
-export async function getProfileDataAction(): Promise<PersonalInfo> {
+export async function getProfileDataAction() {
   const { userId } = await requireValidSession();
-
-  // 1. Получаем основного юзера (v2)
-  const userData = await fetchZitadel(`/v2/users/${userId}`);
-
-  console.log(JSON.stringify(userData))
   
-  // Достаем объект human из ответа, согласно твоей схеме
-  const human = userData.user?.human;
+  const [userResult, metadataResult] = await Promise.all([
+    getUserById(userId),
+    searchUserMetadata(userId, {
+      query: { offset: 0, limit: 1, asc: true },
+      queries: [
+        {
+          keyQuery: {
+            key: "middleName",
+            method: "TEXT_FILTER_METHOD_EQUALS"
+          }
+        }
+      ]
+    })
+  ]);
+  
+  if (!userResult.success) {
+    throw new Error("Не удалось получить данные пользователя");
+  }
+
+  // --- ДОСТАЕМ И ДЕКОДИРУЕМ ОТЧЕСТВО ---
+  let middleName = "";
+  if (metadataResult.success && metadataResult.data.result) {
+    // Находим нужный элемент (хотя фильтр должен был вернуть только его)
+    const encodedKey = Buffer.from("middleName").toString("base64");
+    const mnMeta = metadataResult.data.result.find(m => m.key === encodedKey);
+    
+    if (mnMeta?.value) {
+      // ZITADEL возвращает value в Base64, декодируем обратно в UTF-8
+      middleName = Buffer.from(mnMeta.value, "base64").toString("utf-8");
+    }
+  }
+
+  const human = userResult.data.user?.human;
+  const isEmailVerified = human?.email?.isEmailVerified || false;
 
   return {
     id: userId,
     firstName: human?.profile?.givenName || "",
     lastName: human?.profile?.familyName || "",
-    middleName: "", 
-    email: human?.email?.email || "", // Изменили на .email согласно твоей схеме
+    middleName: middleName, // Передаем найденное отчество
+    email: human?.email?.email || "",
+    isEmailVerified, 
     avatarUrl: human?.profile?.avatarUrl || "",
-    position: "",     
   };
 }
 
-// PATCH: Обновить данные пользователя
+// PATCH
 export async function updateProfileDataAction(data: ProfileFormData) {
   const { userId } = await requireValidSession();
-
   try {
-    // 1. Обновляем базовый профиль (имя, фамилия)
-    await fetchZitadel(`/v2/users/${userId}/human/profile`, {
-      method: "PUT",
-      body: JSON.stringify({
-        givenName: data.firstName,
-        familyName: data.lastName,
-      }),
-    });
+    // 1. Обновляем базовый профиль
+    await updateHumanProfile(userId, data.firstName, data.lastName);
 
     // 2. Обновляем Email
     if (data.email) {
-      // Примечание: В PUT запросе ZITADEL может по-прежнему ожидать emailAddress.
-      // Если будет выдавать ошибку 400, поменяй ключ email на emailAddress.
-      await fetchZitadel(`/v2/users/${userId}/human/email`, {
-        method: "PUT",
-        body: JSON.stringify({
-          email: data.email, 
-          sendCode: false, 
-        }),
-      });
+      await updateHumanEmail(userId, data.email);
     }
 
     // 3. Обновляем кастомные поля в Metadata (Отчество)
     if (data.middleName !== undefined) {
-      await fetchZitadel(`/v2/users/${userId}/metadata/${btoa('middleName')}`, {
-        method: "POST", 
-        body: JSON.stringify({
-          value: Buffer.from(data.middleName).toString('base64')
-        })
-      });
+      await updateUserMetadata(userId, 'middleName', data.middleName);
     }
 
-    // Возвращаем обновленные данные, чтобы обновить кэш на клиенте
     return { success: true, data: await getProfileDataAction() };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function uploadAvatarAction(formData: FormData) {
+  const { userId } = await requireValidSession();
+  
+  const file = formData.get("avatar") as File | null;
+  if (!file) {
+    return { success: false, error: "Файл не выбран" };
+  }
+
+  try {
+    const result = await updateHumanAvatar(userId, file);
+    
+    if (!result.success) {
+      return { success: false, error: "Ошибка загрузки аватара" };
+    }
+
+    // Сбрасываем кэш страницы профиля, чтобы данные обновились при перезагрузке
+    revalidatePath("/profile"); 
+    
+    return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
   }

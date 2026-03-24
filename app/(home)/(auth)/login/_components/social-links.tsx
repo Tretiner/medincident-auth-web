@@ -3,7 +3,7 @@
 
 import { Button } from "@/components/ui/button";
 import { MaxLogoIcon, TelegramLogoIcon } from "@/components/icons";
-import { ZitadelIdp } from "@/lib/zitadel/zitadel-api";
+import { ZitadelIdp } from "@/lib/zitadel/api";
 import { loginWithProviderAction } from "../actions"; // Импортируем Action
 
 interface AuthButtonProps {

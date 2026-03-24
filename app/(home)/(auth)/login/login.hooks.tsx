@@ -14,6 +14,7 @@ import z from "zod";
 import { showErrorMessage } from "@/lib/ui-error-handler";
 import { useProfileStore } from "../../(details)/profile/profile.store";
 import { removeAccessToken, setAccessToken } from "@/lib/services/access-token-manager";
+import { logoutAction } from "./actions";
 
 const QrDataSchema = z.object({
   url: z.string(),
@@ -149,10 +150,10 @@ export function useSocialAuth() {
 }
 
 export async function logoutClient() {
-  await logout();
   removeAccessToken();
   window.location.href = "/login";
   useProfileStore.getState().clearProfile();
+  await logoutAction();
 }
 
 

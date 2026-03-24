@@ -2,9 +2,9 @@
 "use client";
 
 import { useState } from "react";
-import { handleLoginAction, handleLinkAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { handleLinkAction, handleLoginAction } from "../actions";
 
 interface AuthFlowSelectorProps {
   requestId?: string;

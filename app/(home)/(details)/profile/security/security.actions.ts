@@ -3,32 +3,20 @@
 import { cookies } from "next/headers";
 import { UserSession, LinkedAccountsStatus } from "@/domain/profile/types";
 import { requireValidSession } from "@/lib/zitadel/session";
-import { fetchZitadel, getActiveIdps as getActiveIdps, startIdpIntent } from "@/lib/zitadel/zitadel-api";
+import { deleteSession, deleteUserLink, fetchZitadel, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent } from "@/lib/zitadel/api";
 import { env } from "@/config/env";
 import { redirect } from "next/navigation";
-import UAParser from "ua-parser-js";
 import { parseUserAgent } from "@/lib/utils/user-agent";
+import { getAllSessions } from "@/lib/zitadel/zitadel-cookies";
 
 // GET: Получить все активные сессии пользователя
 export async function getSessionsAction(): Promise<UserSession[]> {
-  // 1. Проверяем валидность текущей куки и достаем userId и ID текущей сессии
   const { userId, currentSessionId } = await requireValidSession();
 
-  // 2. Ищем все сессии, принадлежащие этому пользователю
-  const response = await fetchZitadel(`/v2/sessions/search`, {
-    method: "POST",
-    body: JSON.stringify({
-      queries: [
-        {
-          userIdQuery: {
-            id: userId,
-          },
-        },
-      ],
-    }),
-  });
+  const response = await searchUserSessions(userId);
+  if (!response.success) return [];
 
-  const rawSessions = response.sessions || [];
+  const rawSessions = response.data.sessions || [];
 
   // 3. Форматируем данные под интерфейс твоего компонента SessionsList
   const formattedSessions: UserSession[] = rawSessions.map((sess: any) => {
@@ -58,100 +46,72 @@ export async function getSessionsAction(): Promise<UserSession[]> {
   });
 }
 
-// ==========================================
-// ACTIONS ДЛЯ СЕССИЙ
-// ==========================================
-
+// REVOKE SESSION (Отзыв конкретной сессии)
 export async function revokeSessionAction(targetSessionId: string) {
-  await fetchZitadel(`/v2/sessions/${targetSessionId}`, {
-    method: "DELETE",
-    body: JSON.stringify(
-      {
-        token: env.ZITADEL_API_TOKEN
-      }
-    )
-  }
-  );
+  // Пытаемся найти токен этой сессии в локальном браузере
+  const knownSessions = await getAllSessions();
+  const localSession = knownSessions.find(s => s.id === targetSessionId);
+  const token = localSession ? localSession.token : ""; // Передаем токен, если он есть
+
+  await deleteSession(targetSessionId, token);
   return { success: true };
 }
 
+// REVOKE ALL OTHERS (Отзыв всех остальных сессий)
 export async function revokeAllOthersAction() {
   const { userId, currentSessionId } = await requireValidSession();
-
-  const data = await fetchZitadel(`/v2/sessions/search`, {
-    method: "POST",
-    body: JSON.stringify({ queries: [{ userIdQuery: { id: userId } }] })
-  });
-
-  const sessionsToDelete = data.sessions.filter((s: any) => s.id !== currentSessionId);
+  const response = await searchUserSessions(userId);
+  const knownSessions = await getAllSessions();
+  
+  if (!response.success) return { success: false };
+  
+  const sessionsToDelete = (response.data.sessions || []).filter((s: any) => s.id !== currentSessionId);
 
   await Promise.all(
-    sessionsToDelete.map((s: any) =>
-      fetchZitadel(`/v2/sessions/${s.id}`, { method: "DELETE" })
-    )
+    sessionsToDelete.map((s: any) => {
+      // Ищем токен в локальных куках (вдруг у нас открыто 2 аккаунта в одном браузере)
+      const localToken = knownSessions.find(ls => ls.id === s.id)?.token || "";
+      return deleteSession(s.id, localToken);
+    })
   );
-
+  
   return { success: true };
 }
 
-// ==========================================
-// ACTIONS ДЛЯ ПРИВЯЗОК (IDP LINKS)
-// ==========================================
+// GET LINKED ACCOUNTS
 export async function getLinkedAccountsAction() {
   const { userId } = await requireValidSession();
 
-  // 1. Получаем список всех активных IDP
   const activeIdspResp = await getActiveIdps();
-  console.log("CUSTOM-UI active idps: " + JSON.stringify(activeIdspResp))
-
-  if (!activeIdspResp.success || !activeIdspResp.data?.identityProviders) {
-    return [];
-  }
-
+  if (!activeIdspResp.success || !activeIdspResp.data?.identityProviders) return [];
   const activeIdps = activeIdspResp.data.identityProviders;
 
-  // 2. Получаем текущие привязки пользователя
-  const data = await fetchZitadel(`/v2/users/${userId}/links/_search`, {
-    method: "POST",
-    body: JSON.stringify({})
-  });
+  const linksResp = await searchUserLinks(userId);
+  const linkedIdps = linksResp.success ? (linksResp.data.result || []) : [];
 
-  console.log("CUSTOM-UI linked idps: " + JSON.stringify(data))
-
-  const linkedIdps = data.result || [];
-
-  // 3. Динамически собираем ответ: маппим активные провайдеры со статусом привязки
-  return activeIdps.map((idp: any) => {
-    return {
-      id: idp.id,
-      name: idp.name,
-      isConnected: linkedIdps.some((link: any) => link.idpId === idp.id),
-    };
-  });
+  return activeIdps.map((idp: any) => ({
+    id: idp.id,
+    name: idp.name,
+    isConnected: linkedIdps.some((link: any) => link.idpId === idp.id),
+  }));
 }
 
+// TOGGLE LINK
 export async function toggleLinkedAccountAction(idpId: string, isCurrentlyConnected: boolean) {
   const { userId } = await requireValidSession();
 
   if (isCurrentlyConnected) {
-    const data = await fetchZitadel(`/v2/users/${userId}/links/_search`, {
-      method: "POST",
-      body: JSON.stringify({})
-    });
+    const linksResp = await searchUserLinks(userId);
+    if (!linksResp.success) return { success: false, error: "Не удалось получить привязки" };
 
-    const existingLink = (data.result || []).find((link: any) => link.idpId === idpId);
-
+    const existingLink = (linksResp.data.result || []).find((link: any) => link.idpId === idpId);
     if (existingLink) {
       const linkedUserId = existingLink.linkedUserId || existingLink.externalUserId;
-      await fetchZitadel(`/v2/users/${userId}/links/${idpId}/${linkedUserId}`, {
-        method: "DELETE"
-      });
+      await deleteUserLink(userId, idpId, linkedUserId);
     }
-
     return { success: true, action: "unlinked" };
-
   } else {
-    linkProvider(idpId)
+    return linkProvider(idpId);
   }
 }
 

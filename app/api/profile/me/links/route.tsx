@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { fetchZitadel } from "@/lib/zitadel/zitadel-api";
+import { fetchZitadel } from "@/lib/zitadel/api";
 
 // Маппинг твоих ключей на реальные IDP ID в Zitadel. 
 // ВАЖНО: Замени эти ID на реальные ID твоих провайдеров из консоли Zitadel!

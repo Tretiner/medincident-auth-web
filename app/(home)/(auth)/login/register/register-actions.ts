@@ -1,7 +1,9 @@
 "use server";
 
-import { createHumanUser, createSession } from "@/lib/zitadel/zitadel-api";
+import { createHumanUser, createSession } from "@/lib/zitadel/api";
 import { finishAuth } from "../callback/success/actions";
+import { getAllSessions, removeSessionFromCookie } from "@/lib/zitadel/zitadel-cookies";
+import { deleteSession, searchUserSessions } from "@/lib/zitadel/api";
 
 // --- ТИПЫ ИЗ СГЕНЕРИРОВАННОГО PROTO (nice-grpc) ---
 interface PersonName {

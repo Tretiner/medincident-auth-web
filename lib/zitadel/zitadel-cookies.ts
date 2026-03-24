@@ -18,7 +18,7 @@ export type Cookie = {
   requestId?: string; // if its linked to an OIDC flow
 };
 
-type SessionCookie<T> = Cookie & T;
+export type SessionCookie<T = any> = Cookie & T;
 
 async function setSessionHttpOnlyCookie<T>(sessions: SessionCookie<T>[], iFrameEnabled: boolean = false) {
   const cookiesList = await cookies();
@@ -137,21 +137,23 @@ export async function updateSessionCookie<T>({
   }
 }
 
-export async function removeSessionFromCookie<T>({
-  session,
-  cleanup,
-  iFrameEnabled,
-}: {
-  session: SessionCookie<T>;
-  cleanup?: boolean;
-  iFrameEnabled?: boolean;
-}) {
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ
+export async function removeSessionFromCookie(
+  sessionId: string,
+  cleanup?: boolean,
+  iFrameEnabled?: boolean,
+) {
   const cookiesList = await cookies();
   const stringifiedCookie = cookiesList.get("sessions");
 
-  const sessions: SessionCookie<T>[] = stringifiedCookie?.value ? JSON.parse(stringifiedCookie?.value) : [session];
+  // Если куки пустые, нам нечего удалять
+  if (!stringifiedCookie?.value) {
+    return;
+  }
 
-  const reducedSessions = sessions.filter((s) => s.id !== session.id);
+  const sessions: SessionCookie[] = JSON.parse(stringifiedCookie.value);
+  const reducedSessions = sessions.filter((s) => s.id !== sessionId);
+
   if (cleanup) {
     const now = new Date();
     const filteredSessions = reducedSessions.filter((session) =>

@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation";
-import { getCurrentSessionId, clearCurrentSessionId } from "./zitadel-current-session";
+import { getCurrentSessionId, removeCurrentSessionId } from "./zitadel-current-session";
 
 const ZITADEL_API_URL = process.env.ZITADEL_API_URL || process.env.NEXT_PUBLIC_AUTH_URL;
 const ZITADEL_TOKEN = process.env.ZITADEL_API_TOKEN;
 
 export async function requireValidSession() {
-  // 1. Используем твой новый менеджер
   const currentSessionId = await getCurrentSessionId();
 
   if (!currentSessionId) {
@@ -33,8 +32,7 @@ export async function requireValidSession() {
   }
 
   if (!isAlive || !data?.session?.factors?.user?.id) {
-    // 2. Очищаем куку через новый менеджер
-    await clearCurrentSessionId();
+    await removeCurrentSessionId();
     redirect("/");
   }
 

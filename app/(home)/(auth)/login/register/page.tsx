@@ -1,5 +1,5 @@
 // app/login/register/page.tsx
-import { retrieveIdpIntent } from "@/lib/zitadel/zitadel-api";
+import { retrieveIdpIntent } from "@/lib/zitadel/api";
 import { RegisterView } from "./_components/register-view";
 import { AppLogoIcon } from "@/components/icons";
 import { registerUserSubmit } from "./register-actions";

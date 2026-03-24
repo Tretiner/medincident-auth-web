@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { fetchZitadel, searchSessions } from "@/lib/zitadel/zitadel-api";
 import { getAllSessions } from "@/lib/zitadel/zitadel-cookies";
 import { getCurrentSessionId } from "@/lib/zitadel/zitadel-current-session";
 import { AccountSelectionView, AccountDisplayItem } from "./_components/account-selection-view";
 import { Suspense } from "react";
+import { getUserById, searchSessions } from "@/lib/zitadel/api";
 
 export default async function AccountSelectionPage({
   searchParams,
@@ -55,21 +55,22 @@ export default async function AccountSelectionPage({
       const localSession = knownSessions.find((s) => s.id === session.id);
 
       try {
-        // 2. Делаем запрос за пользователем
-        const userData = await fetchZitadel(`/v2/users/${userId}`);
-        const human = userData.user?.human;
+        // Делаем запрос за пользователем
+        const userResult = await getUserById(userId);
+        if (!userResult.success || !userResult.data.user) return null;
+        
+        const userData = userResult.data.user;
+        const human = userData.human;
 
-        // 3. Безопасно формируем имя (fallback на случай, если displayName пустой)
         const displayName = human?.profile?.displayName || human?.profile?.givenName || "Пользователь";
 
         return {
-          id: session.id, // ВАЖНО: Должен быть session.id для работы selectAccountAction!
+          id: session.id,
           token: localSession?.token as string,
           title: displayName,
-          // В ZITADEL v2 email обычно лежит в preferredLoginName или human.email.email
-          subtitle: userData.user?.preferredLoginName || human?.username || "", 
+          subtitle: userData.preferredLoginName || human?.username || "", 
           avatarUrl: human?.profile?.avatarUrl || "",
-          initials: displayName.substring(0, 2).toUpperCase(), // Теперь это безопасно
+          initials: displayName.substring(0, 2).toUpperCase(),
         };
       } catch (error) {
         console.error(`Ошибка получения данных юзера ${userId}:`, error);

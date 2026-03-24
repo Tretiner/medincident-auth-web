@@ -5,7 +5,7 @@ import { PersonalInfoFormData } from "@/domain/profile/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface FormMessage {
@@ -17,6 +17,7 @@ interface ProfileFormProps {
   form: UseFormReturn<PersonalInfoFormData>;
   isSaving: boolean;
   message: FormMessage | null;
+  isEmailVerified?: boolean; // Добавили пропс для статуса email
   onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -24,12 +25,16 @@ export function ProfileForm({
   form,
   isSaving,
   message,
+  isEmailVerified = false,
   onSubmit,
 }: ProfileFormProps) {
   const {
     register,
-    formState: { errors, isDirty, isValid },
+    formState: { errors, isDirty, isValid, dirtyFields }, // Достали dirtyFields
   } = form;
+
+  // Если поле email было изменено пользователем, оно точно потребует подтверждения
+  const willRequireVerification = dirtyFields.email || !isEmailVerified;
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -97,12 +102,41 @@ export function ProfileForm({
 
         {/* КОНТАКТЫ (GRID) */}
         <div className="space-y-2">
-          <Label
-            htmlFor="email"
-            className={cn(errors.email && "text-destructive")}
-          >
-            Email
-          </Label>
+          {/* Флекс-контейнер для лейбла и статуса */}
+          <div className="flex items-center justify-between">
+            <Label
+              htmlFor="email"
+              className={cn(errors.email && "text-destructive")}
+            >
+              Email
+            </Label>
+            
+            {/* Вывод статуса верификации с цветом */}
+            <span
+              className={cn(
+                "text-xs font-medium flex items-center gap-1.5 transition-colors duration-200",
+                willRequireVerification ? "text-amber-500" : "text-emerald-500"
+              )}
+            >
+              {dirtyFields.email ? (
+                <>
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  Потребует подтверждения
+                </>
+              ) : isEmailVerified ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Подтвержден
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Не подтвержден
+                </>
+              )}
+            </span>
+          </div>
+
           <Input
             id="email"
             type="email"

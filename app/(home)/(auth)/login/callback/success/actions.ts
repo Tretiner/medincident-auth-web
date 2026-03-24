@@ -5,58 +5,19 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 // Импортируем ваши методы для работы с пользователями и сессиями
-import { createHumanUser, createSession, addIdpLinkToUser } from "@/lib/zitadel/zitadel-api";
-import { addSessionToCookie } from "@/lib/zitadel/zitadel-cookies";
+import { createHumanUser, createSession, addIdpLinkToUser, completeAuthRequest, deleteSession, searchUserSessions } from "@/lib/zitadel/api";
+import { addSessionToCookie, getAllSessions, removeSessionFromCookie } from "@/lib/zitadel/zitadel-cookies";
 
-// Подтягиваем переменные окружения (используйте ваш способ из env)
-const BASE_URL = process.env.ZITADEL_API_URL || process.env.NEXT_PUBLIC_AUTH_URL;
-const TOKEN = process.env.ZITADEL_API_TOKEN;
-
-/**
- * Имплементация завершения OIDC / SAML флоу.
- * Делает POST запрос в ZITADEL, привязывая сессию к requestId, и получает ссылку для редиректа.
- */
 export async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
-  let endpoint = "";
+  const result = await completeAuthRequest(requestId, sessionId, sessionToken);
 
-  // Определяем, какой это запрос: OIDC или SAML
-  if (requestId.startsWith("oidc_")) {
-    endpoint = `/v2/oidc/auth_requests/${requestId}`;
-  } else if (requestId.startsWith("saml_")) {
-    endpoint = `/v2/saml/auth_requests/${requestId}`;
-  } else {
-    throw new Error("Неизвестный тип requestId. Ожидается префикс oidc_ или saml_");
-  }
-
-  const url = `${BASE_URL}${endpoint}`;
-  console.log(`\nPOST ${url} \nBODY: { session: { sessionId, sessionToken } }`);
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${TOKEN}`,
-    },
-    body: JSON.stringify({
-      session: {
-        sessionId: sessionId,
-        sessionToken: sessionToken,
-      },
-    }),
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    const errorData = await response.text();
-    console.error("Ошибка завершения Auth Request в ZITADEL:", errorData);
+  if (!result.success) {
+    console.error("Ошибка завершения Auth Request в ZITADEL:", result.error);
     throw new Error("Не удалось завершить OIDC-запрос. Возможно, requestId устарел.");
   }
 
-  const data = await response.json();
-
-  // ZITADEL возвращает { "redirectUri": "..." } для OIDC
-  // Для SAML может возвращаться samlData.url, поэтому берем то, что есть
-  const redirectUrl = data.redirectUri || data.url;
+  // ZITADEL возвращает { "redirectUri": "..." } для OIDC или { "url": "..." } для SAML
+  const redirectUrl = result.data.redirectUri || result.data.url;
 
   if (!redirectUrl) {
     throw new Error("ZITADEL не вернул redirectUri");
@@ -64,7 +25,6 @@ export async function completeAuthFlow(sessionId: string, sessionToken: string, 
 
   return redirectUrl;
 }
-
 /**
  * Универсальная функция финализации авторизации
  * Теперь принимает полный объект data, возвращаемый API Zitadel.
@@ -115,6 +75,25 @@ export async function finishAuth(sessionResData: any, requestId?: string) {
 // ==========================================
 
 export async function handleLoginAction(userId: string, intentId: string, intentToken: string, requestId?: string) {
+  // --- НАЧАЛО БОРЬБЫ С ДУБЛИКАТАМИ ---
+  const knownSessions = await getAllSessions(true);
+  
+  const userSessionsRes = await searchUserSessions(userId);
+  if (userSessionsRes.success && userSessionsRes.data.sessions) {
+    const activeSessions = userSessionsRes.data.sessions;
+    
+    // Ищем, есть ли среди активных сессий юзера те, что лежат у нас в браузере
+    for (const activeSess of activeSessions) {
+      const localSess = knownSessions.find(ks => ks.id === activeSess.id);
+      if (localSess) {
+        // Нашли старую сессию этого юзера в этом же браузере! Удаляем ее.
+        await deleteSession(localSess.id, localSess.token);
+        await removeSessionFromCookie(localSess.id);
+      }
+    }
+  }
+  // --- КОНЕЦ БОРЬБЫ С ДУБЛИКАТАМИ ---
+
   const sessionRes = await createSession(userId, intentId, intentToken);
   console.log("Ответ от createSession:", JSON.stringify(sessionRes));
 

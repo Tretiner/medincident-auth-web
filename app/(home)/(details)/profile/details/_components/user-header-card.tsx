@@ -1,5 +1,5 @@
 import { PersonalInfo } from "@/domain/profile/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EditableAvatar } from "./editable-avatar";
 
 export function UserHeaderCard({ user }: { user: PersonalInfo }) {
   const initials = `${user.firstName[0]}${user.lastName[0]}`;
@@ -7,12 +7,10 @@ export function UserHeaderCard({ user }: { user: PersonalInfo }) {
   return (
     <div className="flex items-center gap-4 p-4 rounded-xl bg-primary/10 border border-primary/20 shadow-none">
 
-      <Avatar className="h-16 w-16 shadow-md">
-        <AvatarImage src={user.avatarUrl} alt={user.lastName} />
-        <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
-          {initials}
-        </AvatarFallback>
-      </Avatar>
+      <EditableAvatar 
+        currentAvatarUrl={user.avatarUrl} 
+        initials={initials} 
+      />
 
       <div className="flex flex-col gap-0.5">
 
