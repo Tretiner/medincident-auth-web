@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { handleLoginAction, handleRegisterAction, handleLinkAction } from "../actions";
+import { handleLoginAction, handleLinkAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -43,45 +43,6 @@ export function AuthFlowSelector({
     }
   };
 
-  const onRegister = async () => {
-    if (!email || !email.includes("@")) {
-      setError("Укажите корректный email для регистрации");
-      return;
-    }
-    setLoading("register");
-    setError(null);
-    try {
-      const nameString = rawInformation?.name?.trim() || idpInformation?.userName?.trim() || "Пользователь";
-      const [givenName, ...familyNames] = nameString.split(/\s+/);
-      const familyName = familyNames.join(" ") || "Господин Абрамович";
-    
-      const requestBody = rawInformation.User ? rawInformation.User : {
-        username: rawInformation.preferred_username,
-        profile: {
-          givenName: givenName,
-          familyName: familyName,
-          preferredLanguage: rawInformation.preferredLanguage === "und" ? "ru" : (rawInformation.preferredLanguage || "ru"),
-        },
-        email: { 
-          email: email, 
-          isVerified: false 
-        },
-        idpLinks: [
-          {
-            idpId: idpInformation.idpId,
-            userId: idpInformation.userId,
-            userName: idpInformation.userName,
-          }
-        ]
-      };
-      console.log("Request body for createHumanUser:", JSON.stringify(requestBody, null, 2));
-      await handleRegisterAction(intentId, intentToken, requestBody, requestId);
-    } catch (e: any) {
-      setError(e.message);
-      setLoading(null);
-    }
-  };
-
   const onLink = async () => {
     if (!targetUserId) {
       setError("Укажите ID существующего пользователя");
@@ -115,25 +76,6 @@ export function AuthFlowSelector({
         </div>
         <Button className="w-full" onClick={onLogin} disabled={!!loading || !userId}>
           {loading === "login" ? "Вход..." : "Выполнить вход"}
-        </Button>
-      </div>
-
-      {/* 2. РЕГИСТРАЦИЯ */}
-      <div className="p-4 border border-border rounded-xl bg-card space-y-3">
-        <div>
-          <h3 className="font-bold">2. Регистрация (Register)</h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Создает нового пользователя. Укажите email (если провайдер его не передал).
-          </p>
-        </div>
-        <Input 
-          type="email" 
-          placeholder="your@email.com" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Button className="w-full" variant="secondary" onClick={onRegister} disabled={!!loading}>
-          {loading === "register" ? "Регистрация..." : "Зарегистрировать и войти"}
         </Button>
       </div>
 

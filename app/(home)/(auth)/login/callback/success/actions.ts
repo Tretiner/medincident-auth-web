@@ -16,7 +16,7 @@ const TOKEN = process.env.ZITADEL_API_TOKEN;
  * Имплементация завершения OIDC / SAML флоу.
  * Делает POST запрос в ZITADEL, привязывая сессию к requestId, и получает ссылку для редиректа.
  */
-async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
+export async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
   let endpoint = "";
 
   // Определяем, какой это запрос: OIDC или SAML
@@ -69,7 +69,7 @@ async function completeAuthFlow(sessionId: string, sessionToken: string, request
  * Универсальная функция финализации авторизации
  * Теперь принимает полный объект data, возвращаемый API Zitadel.
  */
-async function finishAuth(sessionResData: any, requestId?: string) {
+export async function finishAuth(sessionResData: any, requestId?: string) {
   // 1. Извлекаем детальную информацию о сессии из ответа ZITADEL 
   // (В ответе createSession обычно есть поля sessionId, sessionToken и объект session)
   const sessionDetails = sessionResData.session || {};
@@ -120,24 +120,6 @@ export async function handleLoginAction(userId: string, intentId: string, intent
 
   if (!sessionRes.success || !sessionRes.data?.sessionToken || !sessionRes.data?.sessionId) {
     throw new Error("Ошибка при создании сессии. Ответ ZITADEL: " + JSON.stringify(sessionRes.error));
-  }
-
-  await finishAuth(sessionRes.data, requestId);
-}
-
-export async function handleRegisterAction(intentId: string, intentToken: string, payload: any, requestId?: string) {
-  const userRes = await createHumanUser(payload);
-  console.log("Ответ от createHumanUser:", JSON.stringify(userRes));
-
-  if (!userRes.success || !userRes.data?.userId) {
-    throw new Error("Ошибка при регистрации: " + JSON.stringify(userRes.error));
-  }
-
-  const sessionRes = await createSession(userRes.data.userId, intentId, intentToken);
-  console.log("Ответ от createSession:", JSON.stringify(sessionRes));
-
-  if (!sessionRes.success || !sessionRes.data?.sessionToken || !sessionRes.data?.sessionId) {
-    throw new Error("Пользователь создан, но не удалось создать сессию");
   }
 
   await finishAuth(sessionRes.data, requestId);

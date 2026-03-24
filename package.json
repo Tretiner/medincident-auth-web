@@ -6,7 +6,8 @@
     "dev": "env-cmd -f .env next dev -p 80",
     "build": "env-cmd -f .env next build",
     "start": "env-cmd -f .env next start -p 80",
-    "lint": "next lint"
+    "lint": "next lint",
+    "proto:generate": "mkdir -p lib/generated/proto && protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./lib/generated/proto --ts_proto_opt=outputServices=nice-grpc,outputServices=generic-definitions,useExactTypes=false,esModuleInterop=true -I=./proto $(find ./proto -name '*.proto')"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -24,6 +25,8 @@
     "lucide-react": "^0.561.0",
     "next": "^16.1.6",
     "next-themes": "^0.4.6",
+    "nice-grpc": "^2.1.14",
+    "nice-grpc-common": "^2.0.2",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hook-form": "^7.69.0",
@@ -46,6 +49,7 @@
     "eslint-config-next": "16.0.10",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.7",
+    "ts-proto": "^2.11.6",
     "typescript": "^5"
   }
 }

@@ -1,0 +1,135 @@
+"use client";
+
+import { useActionState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface RegisterViewProps {
+  action: any; // Сюда приходит забинженный Server Action
+  initialData: {
+    givenName: string;
+    familyName: string;
+    middleName: string;
+    email: string;
+  };
+}
+
+export function RegisterView({ action, initialData }: RegisterViewProps) {
+  const [state, formAction, isPending] = useActionState(action, { 
+    success: false, 
+    errors: {},
+    values: initialData // Кладем начальные данные в стейт
+  });
+
+  return (
+    <form action={formAction} className="w-full space-y-5 animate-in fade-in duration-300">
+
+      {state.errors?.form && (
+        <div className="p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-md text-sm text-center">
+          {state.errors.form}
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="givenName" className={cn(state.errors?.givenName && "text-destructive")}>
+            Имя
+          </Label>
+          <Input 
+            id="givenName" 
+            name="givenName" 
+            // Берем значение из стейта: если была ошибка, оно восстановится
+            defaultValue={state.values?.givenName} 
+            disabled={isPending}
+            placeholder="Иван"
+            className={cn(state.errors?.givenName && "border-destructive focus-visible:ring-destructive", "bg-card")}
+          />
+          {state.errors?.givenName && (
+            <span className="text-[11px] font-medium text-destructive mt-1 block leading-tight">
+              {state.errors.givenName}
+            </span>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="familyName" className={cn(state.errors?.familyName && "text-destructive")}>
+            Фамилия
+          </Label>
+          <Input 
+            id="familyName" 
+            name="familyName" 
+            defaultValue={state.values?.familyName} 
+            disabled={isPending}
+            placeholder="Иванов"
+            className={cn(state.errors?.familyName && "border-destructive focus-visible:ring-destructive", "bg-card")}
+          />
+          {state.errors?.familyName && (
+            <span className="text-[11px] font-medium text-destructive mt-1 block leading-tight">
+              {state.errors.familyName}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="middleName" className={cn(state.errors?.middleName && "text-destructive")}>
+          Отчество
+        </Label>
+        <Input 
+          id="middleName" 
+          name="middleName" 
+          defaultValue={state.values?.middleName}
+          disabled={isPending}
+          placeholder="Иванович (опционально)"
+          className={cn(state.errors?.middleName && "border-destructive focus-visible:ring-destructive", "bg-card")}
+        />
+        {state.errors?.middleName && (
+          <span className="text-[11px] font-medium text-destructive mt-1 block leading-tight">
+            {state.errors.middleName}
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="email" className={cn(state.errors?.email && "text-destructive")}>
+          Email
+        </Label>
+        <Input 
+          id="email" 
+          name="email" 
+          type="email" 
+          defaultValue={state.values?.email} 
+          disabled={isPending}
+          placeholder="your@email.com"
+          className={cn(state.errors?.email && "border-destructive focus-visible:ring-destructive", "bg-card")}
+        />
+        {state.errors?.email && (
+          <span className="text-[11px] font-medium text-destructive mt-1 block leading-tight">
+            {state.errors.email}
+          </span>
+        )}
+      </div>
+
+      {/* КНОПКА ОТПРАВКИ: Узкая и по центру */}
+      <div className="flex justify-center pt-2">
+        <Button 
+          type="submit" 
+          disabled={isPending}
+          className="w-full max-w-[200px]" // Делает кнопку узкой (максимум 200px)
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Создание...
+            </>
+          ) : (
+            "Создать"
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+}

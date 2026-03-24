@@ -1,6 +1,7 @@
 import { retrieveIdpIntent } from "@/lib/zitadel/zitadel-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthFlowSelector } from "./_components/auth-flow-selector"; // Импортируем компонент с кнопками
+import { redirect } from "next/navigation";
 
 export default async function CallbackSuccessPage({
   searchParams,
@@ -16,6 +17,10 @@ export default async function CallbackSuccessPage({
         <h1 className="text-xl text-destructive font-bold">Ошибка: Отсутствуют id или token в URL</h1>
       </div>
     );
+  }
+
+  if (!userId) {
+    redirect(`/login/register?id=${id}&token=${token}${requestId ? `&requestId=${requestId}` : ""}`);
   }
 
   const response = await retrieveIdpIntent(id, token);
