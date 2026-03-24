@@ -1,60 +1,64 @@
 'use client';
 
 import { useState, useTransition } from "react";
-import useSWR, { useSWRConfig } from "swr"; // [!IMPORT]
-import { handleFetch } from "@/lib/fetch-helper";
+import useSWR, { useSWRConfig } from "swr";
 import { LinkedAccountsStatus, UserSession } from "@/domain/profile/types";
-import { z } from "zod";
+
+// Импортируем наши новые Server Actions
+import { 
+  getSessionsAction, 
+  getLinkedAccountsAction, 
+  revokeSessionAction, 
+  revokeAllOthersAction, 
+  toggleLinkedAccountAction, 
+  linkProvider
+} from "./security.actions";
 
 const KEYS = {
-  LINKS: "/api/profile/me/links",
-  SESSIONS: "/api/profile/sessions",
-};
-
-const fetchSessions = async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch");
-    const data: UserSession[] = await res.json();
-    return data.map(s => ({ ...s, lastActive: new Date(s.lastActive) }));
-};
-
-const fetchLinks = async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch");
-    return res.json() as Promise<LinkedAccountsStatus>;
+  LINKS: "profile-links", // теперь это просто ключи для SWR, а не URL
+  SESSIONS: "profile-sessions",
 };
 
 export function useLinkedAccounts() {
-  const { data, error, isLoading } = useSWR(KEYS.LINKS, fetchLinks);
+  // SWR теперь вызывает Server Action вместо fetch
+  const { data, error, isLoading } = useSWR(KEYS.LINKS, getLinkedAccountsAction);
   return { links: data, isLoading, isError: error };
 }
 
 export function useUserSessions() {
-  const { data, error, isLoading } = useSWR(KEYS.SESSIONS, fetchSessions);
+  const { data, error, isLoading } = useSWR(KEYS.SESSIONS, getSessionsAction);
   return { sessions: data, isLoading, isError: error };
 }
 
 export type SecurityActionId = "telegram" | "max" | "revoke_all" | `sess_${string}`;
-const SuccessSchema = z.object({ success: z.boolean() }).loose();
 
 export function useSecurityMutations() {
   const { mutate } = useSWRConfig();
   const [isPending, startTransition] = useTransition();
   const [activeActionId, setActiveActionId] = useState<SecurityActionId | null>(null);
 
+  // Чтобы знать текущий статус привязки (нужно для toggle-экшена)
+  const { links } = useLinkedAccounts();
+
   const runAction = (
     id: SecurityActionId, 
-    requestFn: () => Promise<any>,
+    actionFn: () => Promise<any>,
     keysToInvalidate: string[]
   ) => {
     setActiveActionId(id);
     startTransition(async () => {
       try {
-        const result = await requestFn();
-        if (!result.success) {
-            console.error("Action failed:", result.error?.message);
-        } else {
+        const result = await actionFn();
+
+        if (!result) {
+          return;
+        }
+
+        // В остальных случаях (отвязка, удаление сессий) просто обновляем UI
+        if (result.success) {
             await Promise.all(keysToInvalidate.map(key => mutate(key)));
+        } else {
+            console.error("Action failed:", result.error);
         }
       } catch (e) {
          console.error("Unexpected error:", e);
@@ -69,34 +73,20 @@ export function useSecurityMutations() {
     activeActionId,
     actions: {
       onToggleAccount: (provider: string) => {
+        const isConnected = links ? (links as any)[provider] : false;
+        
         runAction(
             provider as SecurityActionId, 
-            () => handleFetch(() => fetch(KEYS.LINKS, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ provider })
-            }), SuccessSchema),
+            () => isConnected ? toggleLinkedAccountAction(provider, isConnected) : linkProvider(provider),
             [KEYS.LINKS]
         );
       },
       
       onRevokeAllOthers: () => 
-          runAction(
-            "revoke_all", 
-            () => handleFetch(() => fetch(`${KEYS.SESSIONS}?type=revoke_all`, {
-                method: "DELETE"
-            }), SuccessSchema),
-            [KEYS.SESSIONS]
-          ),
+          runAction("revoke_all", revokeAllOthersAction, [KEYS.SESSIONS]),
 
       onRevokeSession: (id: string) => 
-          runAction(
-            `sess_${id}`, 
-            () => handleFetch(() => fetch(`${KEYS.SESSIONS}?id=${id}`, {
-                method: "DELETE"
-            }), SuccessSchema),
-            [KEYS.SESSIONS]
-          ),
+          runAction(`sess_${id}`, () => revokeSessionAction(id), [KEYS.SESSIONS]),
     }
   };
 }

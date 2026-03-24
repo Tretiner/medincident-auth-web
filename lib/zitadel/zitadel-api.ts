@@ -76,7 +76,7 @@ export async function fetchZitadel(path: string, options: RequestInit = {}) {
 /**
  * Fetches the list of active Identity Providers (IDPs) from ZITADEL.
  */
-export async function getZitadelIdps(): Promise<Result<ZitadelGetIdpsResponse>> {
+export async function getActiveIdps(): Promise<Result<ZitadelGetIdpsResponse>> {
   const url = `${BASE_URL}/v2/settings/login/idps`;
   console.log(`\nGET ${url}`);
   return handleFetch(
@@ -84,6 +84,7 @@ export async function getZitadelIdps(): Promise<Result<ZitadelGetIdpsResponse>> 
       fetch(url, {
         method: Method.Get,
         headers: {
+          ...Headers.Accept.Json,
           ...Headers.Content.Json,
           "Authorization": `Bearer ${TOKEN}`,
         },
@@ -176,8 +177,6 @@ export async function retrieveIdpIntent(
   intentToken: string
 ): Promise<Result<ZitadelRetrieveIdpIntentResponse>> {
   const url = `${BASE_URL}/v2/idp_intents/${intentId}`;
-
-  console.log(`\nPOST ${url}\nBODY: { "idpIntentToken": "***" }`);
 
   return handleFetch(
     () =>

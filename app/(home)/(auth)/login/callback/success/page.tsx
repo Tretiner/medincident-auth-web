@@ -7,11 +7,9 @@ export default async function CallbackSuccessPage({
 }: {
   searchParams: Promise<{ requestId?: string; id?: string; token?: string; userId?: string; user?: string }>;
 }) {
-  // Достаем также userId из URL
   const { requestId, id, token, userId: queryUserId, user } = await searchParams;
   const userId = queryUserId || user;
 
-  // 1. Проверяем, что параметры на месте
   if (!id || !token) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -20,7 +18,6 @@ export default async function CallbackSuccessPage({
     );
   }
 
-  // 2. Идем в ZITADEL за данными пользователя
   const response = await retrieveIdpIntent(id, token);
 
   console.log("Ответ от retrieveIdpIntent:", JSON.stringify(response));

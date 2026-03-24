@@ -2,15 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { TelegramLogoIcon, MaxLogoIcon } from "@/components/icons";
-import { Loader2, Link2, Unlink } from "lucide-react";
+import { Loader2, Link2, Unlink, KeyRound } from "lucide-react"; // Добавили KeyRound
 import { cn } from "@/lib/utils";
 
 // --- ТИПЫ И КОНФИГУРАЦИЯ ---
 
-// Интерфейс элемента, который приходит из Smart-контейнера
 export interface LinkedAccountItemProps {
   id: string;
-  provider: 'telegram' | 'max';
+  name: string; // Заменили provider на name
   isConnected: boolean;
   isLoading: boolean;
   canUnlink: boolean;
@@ -21,34 +20,51 @@ interface Props {
   onToggle: (id: string) => void;
 }
 
-const PROVIDER_CONFIG = {
+// Конфиг для известных провайдеров
+const KNOWN_PROVIDERS: Record<string, any> = {
   telegram: {
-    label: "Telegram",
     icon: TelegramLogoIcon,
     gradient: "var(--telegram-gradient)",
-    textColor: "text-brand-telegram",
-    bgColor: "bg-brand-telegram/10",
   },
   max: {
-    label: "MAX ID",
     icon: MaxLogoIcon,
     gradient: "var(--max-gradient)",
-    textColor: "text-brand-max",
-    bgColor: "bg-brand-max/10",
   }
 };
+
+// Функция определения стилей (кастомный или дженерик)
+function getProviderConfig(name: string) {
+  const lowerName = name.toLowerCase();
+  
+  if (lowerName.includes("telegram")) {
+    return { label: "Telegram", ...KNOWN_PROVIDERS.telegram };
+  }
+  
+  if (lowerName.includes("max")) {
+    return { label: "MAX ID", ...KNOWN_PROVIDERS.max };
+  }
+
+  // ДЖЕНЕРИК ПРОВАЙДЕР
+  return {
+    label: name, // Оставляем оригинальное имя из ZITADEL
+    icon: KeyRound,
+    // Используем CSS-переменную Primary для универсального градиента
+    gradient: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.6) 100%)",
+  };
+}
 
 // --- ДОЧЕРНИЙ КОМПОНЕНТ ---
 
 function LinkedAccountItem({ 
   id,
-  provider, 
+  name, 
   isConnected, 
   isLoading, 
   canUnlink, 
   onToggle 
 }: LinkedAccountItemProps & { onToggle: () => void }) {
-  const config = PROVIDER_CONFIG[provider];
+  
+  const config = getProviderConfig(name);
   const Icon = config.icon;
 
   const showButton = !isConnected || canUnlink;
@@ -61,11 +77,11 @@ function LinkedAccountItem({
         <div 
           className={cn(
             "w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all",
-            isConnected ? "text-white" : cn("bg-muted text-muted-foreground")
+            isConnected ? "text-primary-foreground" : "bg-muted text-muted-foreground"
           )}
           style={isConnected ? { background: config.gradient } : undefined}
         >
-          <Icon className={provider === 'max' ? "w-7 h-7" : "w-6 h-6"} />
+          <Icon className={name.toLowerCase().includes('max') ? "w-7 h-7" : "w-6 h-6"} />
         </div>
         
         <div className="flex flex-col">
@@ -93,7 +109,7 @@ function LinkedAccountItem({
             "h-8 px-3 font-medium shadow-none transition-all",
             isConnected 
               ? "border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 bg-transparent"
-              : "text-white border-0 hover:opacity-90"
+              : "text-primary-foreground border-0 hover:opacity-90"
           )}
           style={!isConnected ? { background: config.gradient } : undefined}
         >

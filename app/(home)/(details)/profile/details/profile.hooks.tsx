@@ -8,11 +8,11 @@ import { useRouter } from "next/navigation";
 import useSWR, { useSWRConfig } from "swr";
 
 import { PersonalInfo } from "@/domain/profile/types";
-import { handleFetch } from "@/lib/fetch-helper";
 import { personalInfoSchema } from "@/domain/profile/schema";
 import { useProfileStore } from "../profile.store";
 
-const ApiProfileSchema = z.custom<PersonalInfo>();
+// Импортируем наши новые Server Actions
+import { getProfileDataAction, updateProfileDataAction } from "./profile.actions";
 
 export type ProfileFormData = z.infer<typeof personalInfoSchema>;
 
@@ -21,18 +21,15 @@ export interface ProfileMessage {
   text: string;
 }
 
-const PROFILE_API_KEY = "/api/profile/me";
+const PROFILE_API_KEY = "profile-me"; // Локальный ключ для SWR
 
+// --- 1. HOOK FOR FETCHING ---
 export function useProfileData() {
   const setProfileStore = useProfileStore((s) => s.setProfile);
-
-  const { data, error, isLoading, isValidating, mutate } = useSWR(
+  
+  const { data, error, isLoading, isValidating, mutate } = useSWR<PersonalInfo>(
     PROFILE_API_KEY,
-    async (url) => {
-      const result = await handleFetch(() => fetch(url), ApiProfileSchema);
-      if (!result.success) throw new Error(result.error.message);
-      return result.data;
-    },
+    getProfileDataAction, // Напрямую отдаем Server Action
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
@@ -49,7 +46,7 @@ export function useProfileData() {
 
   return {
     user: data,
-    isLoading: isLoading,
+    isLoading,
     isValidating,
     isError: error,
     mutate,
@@ -89,28 +86,21 @@ export function useFormProfileDetails(user?: PersonalInfo) {
     setMessage(null);
 
     startTransition(async () => {
-      const result = await handleFetch(
-        () =>
-          fetch("/api/profile/me", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-          }),
-        ApiProfileSchema,
-      );
+      // Вызываем Server Action вместо fetch PATCH
+      const result = await updateProfileDataAction(data);
 
       if (!result.success) {
-        setMessage({ type: "error", text: result.error.message });
+        setMessage({ type: "error", text: result.error });
         return;
       }
 
-      // Обновляем локальный кэш SWR без лишнего запроса
+      // Обновляем локальный кэш SWR новыми данными из ответа
       await mutate(PROFILE_API_KEY, result.data, false);
 
       // Обновляем Server Components (например, Sidebar)
       router.refresh();
 
-      // Сбрасываем isDirty
+      // Сбрасываем isDirty, чтобы кнопка "Сохранить" задизейблилась
       form.reset({
         ...form.getValues(),
         firstName: result.data.firstName,

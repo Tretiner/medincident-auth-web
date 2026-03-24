@@ -1,19 +1,58 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { LinkedAccountsCard } from "./_components/linked-accounts-card";
 import { SessionsList } from "./_components/sessions-list";
 import { useLinkedAccounts, useUserSessions, useSecurityMutations } from "./security.hooks";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
-export function SecurityView() {
+interface SecurityViewProps {
+  linkStatus?: string;
+}
+
+export function SecurityView({ linkStatus }: SecurityViewProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  
   const { links, isLoading: loadingLinks } = useLinkedAccounts();
   const { sessions, isLoading: loadingSessions } = useUserSessions();
   
   const { isMutating, activeActionId, actions } = useSecurityMutations();
+  
+  // Локальное состояние для отображения сообщения
+  const [statusMessage, setStatusMessage] = useState<string | undefined>(linkStatus);
+
+  // Очищаем URL от query-параметров при монтировании, если они есть
+  useEffect(() => {
+    if (linkStatus) {
+      router.replace(pathname, { scroll: false });
+    }
+  }, [linkStatus, pathname, router]);
+
+  // Считаем количество подключенных аккаунтов для логики canUnlink
+  const connectedCount = links ? links.filter((l: any) => l.isConnected).length : 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       
+      {/* УВЕДОМЛЕНИЯ О ПРИВЯЗКЕ */}
+      {statusMessage === 'success' && (
+        <div className="p-4 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-xl flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 shrink-0" />
+          <p className="text-sm font-medium">Аккаунт успешно привязан</p>
+        </div>
+      )}
+      
+      {statusMessage === 'failed' && (
+        <div className="p-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <p className="text-sm font-medium">Не удалось привязать аккаунт. Возможно, он уже используется.</p>
+        </div>
+      )}
+
+      {/* СОЦИАЛЬНЫЕ СЕТИ */}
       {loadingLinks || !links ? (
         <div className="space-y-4">
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
@@ -26,26 +65,19 @@ export function SecurityView() {
         </div>
       ) : (
         <LinkedAccountsCard 
-          items={[
-            {
-              id: 'telegram',
-              provider: 'telegram',
-              isConnected: links.telegram,
-              isLoading: isMutating && activeActionId === 'telegram',
-              canUnlink: links.max
-            },
-            {
-              id: 'max',
-              provider: 'max',
-              isConnected: links.max,
-              isLoading: isMutating && activeActionId === 'max',
-              canUnlink: links.telegram
-            }
-          ]}
+          items={links.map((link: any) => ({
+            id: link.id,
+            name: link.name,
+            isConnected: link.isConnected,
+            isLoading: isMutating && activeActionId === link.id,
+            // Разрешаем отвязку, если привязано больше 1 аккаунта
+            canUnlink: connectedCount > 1 
+          }))}
           onToggle={actions.onToggleAccount}
         />
       )}
 
+      {/* СЕССИИ */}
       {loadingSessions || !sessions ? (
         <div className="space-y-8">
           <div className="space-y-3">

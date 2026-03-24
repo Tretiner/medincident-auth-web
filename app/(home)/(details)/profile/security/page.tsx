@@ -8,7 +8,13 @@ export const metadata: Metadata = {
   description: "Управление доступом и сессиями",
 };
 
-export default function SecurityPage() {
+export default async function SecurityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ link?: string }>;
+}) {
+  const { link } = await searchParams;
+
   return (
     <div className="space-y-6">
       <PageHeader 
@@ -17,7 +23,7 @@ export default function SecurityPage() {
         icon={ShieldCheck}
       />
       
-      <SecurityView />
+      <SecurityView linkStatus={link} />
     </div>
   );
 }

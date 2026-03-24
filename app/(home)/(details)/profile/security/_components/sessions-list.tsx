@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
+import UAParser from "ua-parser-js";
 
 interface Props {
   sessions: UserSession[];
@@ -31,6 +32,8 @@ interface Props {
   onRevokeAllOthers: () => void;
 }
 
+// 1. Твоя утилита копирования
+// 1. Кнопка копирования (без primary)
 function CopyButton({ text, className }: { text: string; className?: string }) {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -45,45 +48,46 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
       variant="ghost"
       size="icon"
       onClick={handleCopy}
-      className={cn("text-muted-foreground hover:text-primary transition-all", className)}
+      className={cn("text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all shadow-none border-0", className)}
       title="Скопировать"
     >
       {isCopied ? (
-        <Check className="text-green-500 animate-in zoom-in duration-300" />
+        <Check className="w-4 h-4 text-emerald-500 animate-in zoom-in duration-300" />
       ) : (
-        <Copy />
+        <Copy className="w-4 h-4" />
       )}
       <span className="sr-only">Скопировать</span>
     </Button>
   );
 }
 
+// 2. Строка деталей (серые поля)
 function DetailRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5 h-full flex flex-col">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider ml-1">
           {label}
         </span>
       </div>
-      <div className="relative group flex items-center justify-between gap-2 p-3 rounded-lg bg-secondary/50 border border-border/50 hover:bg-secondary/80 transition-colors">
-        <code className={cn("text-sm break-all pr-2", mono && "font-mono text-xs leading-relaxed")}>
+      <div className="relative group flex-1 flex items-center justify-between gap-2 p-2 pl-3 rounded-lg bg-secondary/50 border border-border/50 hover:bg-secondary/80 transition-colors">
+        <code className={cn("text-sm break-all pr-2 text-foreground", mono && "font-mono text-xs leading-relaxed")}>
           {value}
         </code>
         <div className="shrink-0">
-          <CopyButton text={value} />
+          <CopyButton text={value} className="w-8 h-8 opacity-0 group-hover:opacity-100" />
         </div>
       </div>
     </div>
   );
 }
 
-// 3. Переиспользуемая Модалка (Шаблон)
-function SessionInfoModal({ 
+// 3. Переработанная Модалка
+export function SessionInfoModal({ 
   session, 
   children 
 }: { 
-  session: UserSession; 
+  session: any; // Твой тип UserSession
   children: React.ReactNode 
 }) {
   return (
@@ -91,32 +95,54 @@ function SessionInfoModal({
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] gap-6">
+      {/* bg-card для фона
+        [&>button]:... убирает outline и ring у крестика закрытия 
+      */}
+      <DialogContent className="sm:max-w-[550px] gap-6 p-6 outline-none bg-card [&>button]:focus:ring-0 [&>button]:focus:outline-none [&>button]:focus:ring-offset-0">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-               <DeviceIcon name={session.deviceName} className="w-5 h-5" />
+          <div className="flex items-center gap-4 text-left mb-2">
+            {/* Иконка теперь на сером фоне (bg-secondary) */}
+            <div className="w-12 h-12 shrink-0 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center text-foreground">
+               <DeviceIcon name={session.deviceName} className="w-6 h-6" />
             </div>
-            <div className="flex flex-col gap-0.5">
-                <DialogTitle className="text-lg font-semibold leading-none">
+            <div className="flex flex-col gap-1">
+                <DialogTitle className="text-xl font-bold leading-none tracking-tight text-foreground">
                   {session.deviceName}
                 </DialogTitle>
-                <DialogDescription className="text-xs">
-                    Детали подключения
+                <DialogDescription className="text-sm">
+                  Детали подключения
                 </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-5">
-          <DetailRow label="IP Адрес" value={session.ip} mono />
+        <div className="flex flex-col gap-4">
           
-          <Separator />
-          
+          {/* USER AGENT (Сверху, занимает всю ширину) */}
           <DetailRow label="User Agent" value={session.userAgent} mono />
           
-          <div className="text-[10px] text-muted-foreground text-center pt-2">
-            Активность: {new Date(session.lastActive).toLocaleString("ru-RU")}
+          {/* IP и АКТИВНОСТЬ (Снизу, на одной линии) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <DetailRow label="IP Адрес" value={session.ip} mono />
+            
+            {/* Блок активности, стилизован под DetailRow (серый фон) */}
+            <div className="space-y-1.5 h-full flex flex-col">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider ml-1">
+                  Активность
+                </span>
+              </div>
+              <div className="relative flex-1 flex items-center gap-2 p-3 rounded-lg bg-secondary/50 border border-border/50">
+                <code className="text-sm leading-relaxed text-foreground">
+                  {new Date(session.lastActive).toLocaleString("ru-RU", {
+                    day: "2-digit", month: "long", year: "numeric",
+                    hour: "2-digit", minute: "2-digit"
+                  })}
+                </code>
+              </div>
+            </div>
+
           </div>
         </div>
       </DialogContent>

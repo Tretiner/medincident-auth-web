@@ -1,11 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getZitadelIdps, startIdpIntent } from "@/lib/zitadel/zitadel-api";
+import { getActiveIdps, startIdpIntent } from "@/lib/zitadel/zitadel-api";
 import { env } from "@/config/env";
 
 export async function fetchProvidersAction() {
-  const response = await getZitadelIdps();
+  const response = await getActiveIdps();
   console.log("Полученные провайдеры:", JSON.stringify(response));
   
   if (!response.success) {
