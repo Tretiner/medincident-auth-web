@@ -2,45 +2,39 @@
 
 import { z } from "zod";
 import { Result } from "@/domain/error";
-import { handleFetch } from "@/lib/fetch-helper";
-import { BASE_URL, TOKEN, Method, Headers } from "../config";
-import { ZitadelIntentDetailsSchema, ZitadelGenericUpdateResponseSchema } from "../shared";
+import { handleZitadelRequest } from "../client-helper";
+import { zitadelApi } from "../client";
+import { ZitadelDetailsSchema, ZitadelGenericUpdateResponseSchema } from "./shared";
+
+// --- Схемы ---
 
 export const ZitadelAddIdpLinkResponseSchema = z.object({
   details: z.any().optional(),
 }).catchall(z.any());
 
 export const ZitadelSearchLinksResponseSchema = z.object({
-  details: ZitadelIntentDetailsSchema.optional(),
+  details: ZitadelDetailsSchema.optional(),
   result: z.array(z.any()).optional()
 }).catchall(z.any());
+
+// --- Запросы ---
 
 export async function addIdpLinkToUser(
   systemUserId: string,
   idpLink: { idpId: string; userId: string; userName: string; }
 ): Promise<Result<z.infer<typeof ZitadelAddIdpLinkResponseSchema>>> {
-  const url = `${BASE_URL}/v2/users/${systemUserId}/links`;
-  console.log(url);
-  return handleFetch(
-    () => fetch(url, {
-      method: Method.Post,
-      headers: { ...Headers.Content.Json, "Authorization": `Bearer ${TOKEN}` },
-      body: JSON.stringify({ idpLink }),
-      cache: "no-store",
-    }),
-    ZitadelAddIdpLinkResponseSchema,
+  return handleZitadelRequest(
+    () => zitadelApi.post(`/v2/users/${systemUserId}/links`, { idpLink }),
+    ZitadelAddIdpLinkResponseSchema
   );
 }
 
-export async function searchUserLinks(userId: string): Promise<Result<z.infer<typeof ZitadelSearchLinksResponseSchema>>> {
-  const url = `${BASE_URL}/v2/users/${userId}/links/_search`;
-  console.log(url);
-  return handleFetch(
-    () => fetch(url, {
-      method: Method.Post,
-      headers: { ...Headers.Content.Json, "Authorization": `Bearer ${TOKEN}` },
-      body: JSON.stringify({})
-    }),
+export async function searchUserLinks(
+  userId: string
+): Promise<Result<z.infer<typeof ZitadelSearchLinksResponseSchema>>> {
+  return handleZitadelRequest(
+    // Отправляем пустой объект {}, так как API ожидает POST-запрос с телом
+    () => zitadelApi.post(`/v2/users/${userId}/links/_search`, {}),
     ZitadelSearchLinksResponseSchema
   );
 }
@@ -50,13 +44,8 @@ export async function deleteUserLink(
   idpId: string, 
   linkedUserId: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
-  const url = `${BASE_URL}/v2/users/${userId}/links/${idpId}/${linkedUserId}`;
-  console.log(url);
-  return handleFetch(
-    () => fetch(url, {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${TOKEN}` }
-    }),
+  return handleZitadelRequest(
+    () => zitadelApi.delete(`/v2/users/${userId}/links/${idpId}/${linkedUserId}`),
     ZitadelGenericUpdateResponseSchema
   );
 }

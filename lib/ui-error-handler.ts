@@ -1,4 +1,4 @@
-import { GenericError } from "@/domain/error";
+import { ResultError } from "@/domain/error";
 import { toast } from "sonner";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -13,7 +13,7 @@ export function getErrorMessageByName(name: string): string {
   return ERROR_MESSAGES[name];
 }
 
-export function showErrorMessage(error: GenericError | string | Error) {
+export function showErrorMessage(error: ResultError | string | Error) {
   let title = "Ошибка";
   let description = "Что-то пошло не так";
 

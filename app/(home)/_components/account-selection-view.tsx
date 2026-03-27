@@ -9,6 +9,7 @@ import { AppLogoIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { selectAccountAction } from "../(auth)/login/callback/success/actions";
 import { setCurrentSessionId } from "@/lib/zitadel/zitadel-current-session";
+import { toast } from "sonner";
 
 export interface AccountDisplayItem {
   id: string;
@@ -30,7 +31,6 @@ interface AccountSelectionViewProps {
 export function AccountSelectionView({ accounts, requestId, defaultSelectedId, addAccountLink, localContinueLink }: AccountSelectionViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
 
   const [selectedId, setSelectedId] = useState<string | undefined>(defaultSelectedId);
 
@@ -41,21 +41,28 @@ export function AccountSelectionView({ accounts, requestId, defaultSelectedId, a
     const account = accounts.find(a => a.id === selectedId);
     if (!account) return;
 
-    setError(null);
     startTransition(async () => {
-      if (!requestId) {
-        try {
+      try {
+        if (!requestId) {
           await setCurrentSessionId(account.id);
           router.push(localContinueLink);
-        } catch (e) {
-          setError("Ошибка при сохранении сессии.");
+          return;
         }
-        return;
-      }
 
-      const result = await selectAccountAction(account.id, account.token, requestId);
-      if (result && !result.success) {
-        setError("Сессия устарела. Пожалуйста, войдите заново.\n" + JSON.stringify(result.error));
+        const result = await selectAccountAction(account.id, account.token, requestId);
+        
+        if (result && !result.success) {
+          // Показываем красивый Toast с ошибкой
+          toast.error("Ошибка авторизации", {
+            description: "Сессия устарела. Пожалуйста, войдите заново.",
+          });
+          console.error("Zitadel Select Account Error:", result.error);
+        }
+      } catch (error) {
+        toast.error("Системная ошибка", {
+          description: "Не удалось продолжить. Попробуйте обновить страницу.",
+        });
+        console.error("Account selection error:", error);
       }
     });
   };
@@ -150,13 +157,6 @@ export function AccountSelectionView({ accounts, requestId, defaultSelectedId, a
              </div>
           </button>
         </div>
-
-        {error && (
-          <div className="p-4 mt-12 rounded-xl bg-destructive/10 text-destructive text-sm font-medium flex items-center gap-2 border border-destructive/20 max-w-[320px] mx-auto w-full">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            {error}
-          </div>
-        )}
 
         {/* НИЖНИЙ БЛОК С КНОПКОЙ ПРОДОЛЖИТЬ ОТДЕЛЕН БОЛЬШИМ МАРДЖИНОМ */}
         <div className="flex justify-center mt-6 mb-4">

@@ -2,9 +2,11 @@
 
 import { z } from "zod";
 import { Result } from "@/domain/error";
-import { handleFetch } from "@/lib/fetch-helper";
-import { BASE_URL, TOKEN, Method, Headers } from "../config";
-import { ZitadelGenericUpdateResponseSchema } from "../shared";
+import { handleZitadelRequest } from "../client-helper";
+import { zitadelApi } from "../client";
+import { ZitadelGenericUpdateResponseSchema } from "./shared";
+
+// --- Схемы ---
 
 export const ZitadelSessionUserFactorSchema = z.object({
   verifiedAt: z.string().optional(),
@@ -42,35 +44,35 @@ export const ZitadelCreateSessionResponseSchema = z.object({
   sessionToken: z.string(),
 }).catchall(z.any());
 
-export async function searchSessions(sessionIds: string[]): Promise<Result<z.infer<typeof ZitadelSearchSessionsResponseSchema>>> {
-  const url = `${BASE_URL}/v2/sessions/search`;
-  console.log(url);
+// --- Запросы ---
+
+export async function searchSessions(
+  sessionIds: string[]
+): Promise<Result<z.infer<typeof ZitadelSearchSessionsResponseSchema>>> {
   if (!sessionIds || sessionIds.length === 0) {
     return { success: true, data: { sessions: [] } };
   }
-  const body = { query: { offset: "0", limit: 100, asc: true }, queries: [{ idsQuery: { ids: sessionIds } }] };
 
-  return handleFetch(
-    () => fetch(url, {
-      method: Method.Post,
-      headers: { ...Headers.Accept.Json, ...Headers.Content.Json, "Authorization": `Bearer ${TOKEN}` },
-      body: JSON.stringify(body),
-      cache: "no-store",
-    }),
-    ZitadelSearchSessionsResponseSchema,
+  const body = {
+    query: { offset: "0", limit: 100, asc: true },
+    queries: [{ idsQuery: { ids: sessionIds } }]
+  };
+
+  return handleZitadelRequest(
+    () => zitadelApi.post("/v2/sessions/search", body),
+    ZitadelSearchSessionsResponseSchema
   );
 }
 
-export async function searchUserSessions(userId: string): Promise<Result<z.infer<typeof ZitadelSearchSessionsResponseSchema>>> {
-  const url = `${BASE_URL}/v2/sessions/search`;
-  console.log(url);
-  return handleFetch(
-    () => fetch(url, {
-      method: Method.Post,
-      headers: { ...Headers.Accept.Json, ...Headers.Content.Json, "Authorization": `Bearer ${TOKEN}` },
-      body: JSON.stringify({ queries: [{ userIdQuery: { id: userId } }] }),
-      cache: "no-store",
-    }),
+export async function searchUserSessions(
+  userId: string
+): Promise<Result<z.infer<typeof ZitadelSearchSessionsResponseSchema>>> {
+  const body = { 
+    queries: [{ userIdQuery: { id: userId } }] 
+  };
+
+  return handleZitadelRequest(
+    () => zitadelApi.post("/v2/sessions/search", body),
     ZitadelSearchSessionsResponseSchema
   );
 }
@@ -80,43 +82,39 @@ export async function createSession(
   idpIntentId: string,
   idpIntentToken: string
 ): Promise<Result<z.infer<typeof ZitadelCreateSessionResponseSchema>>> {
-  const url = `${BASE_URL}/v2/sessions`;
-  console.log(url);
-  const body = { checks: { user: { userId }, idpIntent: { idpIntentId, idpIntentToken } } };
+  const body = { 
+    checks: { 
+      user: { userId }, 
+      idpIntent: { idpIntentId, idpIntentToken } 
+    } 
+  };
 
-  return handleFetch(
-    () => fetch(url, {
-      method: Method.Post,
-      headers: { ...Headers.Content.Json, "Authorization": `Bearer ${TOKEN}` },
-      body: JSON.stringify(body),
-      cache: "no-store",
-    }),
-    ZitadelCreateSessionResponseSchema,
+  return handleZitadelRequest(
+    () => zitadelApi.post("/v2/sessions", body),
+    ZitadelCreateSessionResponseSchema
   );
 }
 
-export async function updateSession(sessionId: string, sessionToken: string, checks: any): Promise<Result<z.infer<typeof ZitadelSessionResponseSchema>>> {
-  const url = `${BASE_URL}/v2/sessions/${sessionId}`;
-  console.log(url);
-  return handleFetch(
-    () => fetch(url, {
-      method: "PATCH",
-      headers: { ...Headers.Content.Json, "Authorization": `Bearer ${TOKEN}` },
-      body: JSON.stringify({ sessionToken, checks }),
-      cache: "no-store",
-    }),
+export async function updateSession(
+  sessionId: string, 
+  sessionToken: string, 
+  checks: any
+): Promise<Result<z.infer<typeof ZitadelSessionResponseSchema>>> {
+  const body = { sessionToken, checks };
+
+  return handleZitadelRequest(
+    () => zitadelApi.patch(`/v2/sessions/${sessionId}`, body),
     ZitadelSessionResponseSchema
   );
 }
 
-export async function deleteSession(sessionId: string, sessionToken: string): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
-  const url = `${BASE_URL}/v2/sessions/${sessionId}`;
-  console.log(url);
-  return handleFetch(
-    () => fetch(url, {
-      method: "DELETE",
-      headers: { ...Headers.Content.Json, "Authorization": `Bearer ${TOKEN}` },
-      body: JSON.stringify({ sessionToken }),
+export async function deleteSession(
+  sessionId: string, 
+  sessionToken: string
+): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.delete(`/v2/sessions/${sessionId}`, {
+      data: { sessionToken }
     }),
     ZitadelGenericUpdateResponseSchema
   );

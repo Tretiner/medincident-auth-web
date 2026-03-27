@@ -23,7 +23,7 @@ export default async function CallbackSuccessPage({
     redirect(`/login/register?id=${id}&token=${token}${requestId ? `&requestId=${requestId}` : ""}`);
   }
 
-  const response = await retrieveIdpIntent(id, token);
+  const response = await retrieveIdpIntent(id, { idpIntentToken: token});
 
   console.log("Ответ от retrieveIdpIntent:", JSON.stringify(response));
 

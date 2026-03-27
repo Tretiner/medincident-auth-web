@@ -1,32 +1,19 @@
 "server only";
 
 import { env } from "@/config/env";
-
-export const Method = {
-  Get: "GET",
-  Post: "POST",
-};
-
-export const Headers = {
-  Accept: {
-    Json: { "Accept": "application/json" },
-  },
-  Content: {
-    Json: { "Content-Type": "application/json" },
-  },
-};
+import { getZitadelAccessToken } from "./access-token";
 
 export const BASE_URL = env.ZITADEL_API_URL;
-export const TOKEN = env.ZITADEL_API_TOKEN;
 
 export async function fetchZitadel(path: string, options: RequestInit = {}) {
+  const token = await getZitadelAccessToken();
   const url = `${BASE_URL}${path}`;
   const res = await fetch(url, {
     ...options,
     headers: {
-      ...Headers.Accept.Json,
-      ...Headers.Content.Json,
-      "Authorization": `Bearer ${TOKEN}`,
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
       ...options.headers,
     },
   });

@@ -1,7 +1,7 @@
 "server only";
 
 export * from "./config";
-export * from "./shared";
+export * from "./requests/shared";
 export * from "./requests/idps";
 export * from "./requests/auth";
 export * from "./requests/users";

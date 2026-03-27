@@ -21,7 +21,7 @@ export default async function RegisterPage({
 
   // Получаем данные провайдера по интенту (Telegram, MAX и т.д.)
   console.log("RETRIEVE IDP INTENT")
-  const response = await retrieveIdpIntent(id, token);
+  const response = await retrieveIdpIntent(id, { idpIntentToken: token});
 
   if (!response.success) {
     return (

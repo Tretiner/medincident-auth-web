@@ -10,7 +10,7 @@ const envConfig = createEnv({
 
     BACKEND_API_URL:   z.string(),
     ZITADEL_API_URL:   z.url(),
-    ZITADEL_API_TOKEN: z.string().min(32),
+    ZITADEL_MACHINE_KEY_PATH: z.string(),
 
     // Default
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -30,7 +30,7 @@ const envConfig = createEnv({
     PORT: process.env.PORT,
     BACKEND_API_URL: process.env.BACKEND_API_URL,
     ZITADEL_API_URL: process.env.ZITADEL_API_URL,
-    ZITADEL_API_TOKEN: process.env.ZITADEL_API_TOKEN,
+    ZITADEL_MACHINE_KEY_PATH: process.env.ZITADEL_MACHINE_KEY_PATH,
     NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
     NEXT_PUBLIC_TELEGRAM_BOT_NAME: process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME,
   },
