@@ -30,7 +30,7 @@ export async function completeAuthFlow(sessionId: string, sessionToken: string, 
  * Теперь принимает полный объект data, возвращаемый API Zitadel.
  */
 export async function finishAuth(sessionResData: any, requestId?: string) {
-  // 1. Извлекаем детальную информацию о сессии из ответа ZITADEL 
+  // 1. Извлекаем детальную информацию о сессии из ответа ZITADEL
   // (В ответе createSession обычно есть поля sessionId, sessionToken и объект session)
   const sessionDetails = sessionResData.session || {};
   const userFactors = sessionDetails.factors?.user || {};
@@ -57,9 +57,11 @@ export async function finishAuth(sessionResData: any, requestId?: string) {
 
   // 2. РАЗВИЛКА ЛОГИНА
   if (requestId) {
+    console.log("OIDC/SAML ROUTE:")
     const redirectUrl = await completeAuthFlow(sessionResData.sessionId, sessionResData.sessionToken, requestId);
     redirect(redirectUrl);
   } else {
+    console.log("PROFILE ROUTE:")
     // Записываем ID выбранной сессии в отдельную куку "текущего пользователя"
     cookieStore.set("zitadel_current_session", sessionResData.sessionId, {
       httpOnly: true,
@@ -67,7 +69,7 @@ export async function finishAuth(sessionResData: any, requestId?: string) {
       path: "/",
       sameSite: "lax",
     });
-    redirect("/profile/details");
+    redirect("/profile");
   }
 }
 // ==========================================

@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+package medincident.v1;
+
+option go_package = "github.com/ulbwa/medincident-command-service/pkg/medincident/v1";
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+
+service ClassificationService {
+  // Create category
+  //
+  // Creates a new incident category within the specified organization.
+  // If parent_id is set, the parent must belong to the same organization (cycle prevention enforced).
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
+    option (google.api.http) = {
+      post: "/v1/organizations/{organization_id}/categories"
+      body: "*"
+    };
+  }
+
+  // Update category
+  //
+  // Updates a category's name, description, or parent.
+  // To move a category to root level, omit parent_id. Parent changes are validated for cycles.
+  rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse) {
+    option (google.api.http) = {
+      put: "/v1/categories/{category_id}"
+      body: "*"
+    };
+  }
+
+  // Create incident type
+  //
+  // Creates a new incident type within the specified category.
+  rpc CreateIncidentType(CreateIncidentTypeRequest) returns (CreateIncidentTypeResponse) {
+    option (google.api.http) = {
+      post: "/v1/categories/{category_id}/incident-types"
+      body: "*"
+    };
+  }
+
+  // Update incident type
+  rpc UpdateIncidentType(UpdateIncidentTypeRequest) returns (UpdateIncidentTypeResponse) {
+    option (google.api.http) = {
+      put: "/v1/incident-types/{incident_type_id}"
+      body: "*"
+    };
+  }
+
+  // Assign category responsible role
+  rpc AssignCategoryResponsible(AssignCategoryResponsibleRequest) returns (AssignCategoryResponsibleResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/category-responsible"
+      body: "*"
+    };
+  }
+
+  // Revoke category responsible role
+  rpc RevokeCategoryResponsible(RevokeCategoryResponsibleRequest) returns (RevokeCategoryResponsibleResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/category-responsible"
+    };
+  }
+
+  // Assign category responsible deputy
+  rpc AssignCategoryResponsibleDeputy(AssignCategoryResponsibleDeputyRequest) returns (AssignCategoryResponsibleDeputyResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/category-responsible/deputy"
+      body: "*"
+    };
+  }
+
+  // Remove category responsible deputy
+  rpc RemoveCategoryResponsibleDeputy(RemoveCategoryResponsibleDeputyRequest) returns (RemoveCategoryResponsibleDeputyResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/category-responsible/deputy"
+    };
+  }
+}
+
+// Category
+
+message CreateCategoryRequest {
+  string organization_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 3;
+  optional string parent_id = 4;
+}
+
+message CreateCategoryResponse {
+  string category_id = 1;
+}
+
+message UpdateCategoryRequest {
+  string category_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 3;
+  optional string parent_id = 4;
+}
+
+message UpdateCategoryResponse {
+  string category_id = 1;
+}
+
+// Incident Type
+
+message CreateIncidentTypeRequest {
+  string category_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 3;
+  bool patient_can_register = 4 [(google.api.field_behavior) = REQUIRED];
+}
+
+message CreateIncidentTypeResponse {
+  string incident_type_id = 1;
+}
+
+message UpdateIncidentTypeRequest {
+  string incident_type_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 3;
+  bool patient_can_register = 4 [(google.api.field_behavior) = REQUIRED];
+}
+
+message UpdateIncidentTypeResponse {
+  string incident_type_id = 1;
+}
+
+// Category responsible
+
+message AssignCategoryResponsibleRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string category_id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignCategoryResponsibleResponse {}
+
+message RevokeCategoryResponsibleRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RevokeCategoryResponsibleResponse {}
+
+// Category responsible deputy
+
+message AssignCategoryResponsibleDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string deputy_employee_id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignCategoryResponsibleDeputyResponse {}
+
+message RemoveCategoryResponsibleDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RemoveCategoryResponsibleDeputyResponse {}

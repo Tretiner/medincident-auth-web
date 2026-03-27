@@ -1,0 +1,218 @@
+syntax = "proto3";
+
+package medincident.v1;
+
+option go_package = "github.com/ulbwa/medincident-command-service/pkg/medincident/v1";
+
+import "google/protobuf/timestamp.proto";
+import "medincident/v1/incident.proto";
+import "medincident/v1/user.proto";
+import "medincident/v1/organization.proto";
+
+// User events
+
+message UserCreatedEvent {
+  string user_id = 1;
+  string zitadel_id = 2;
+  PersonName person_name = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}
+
+// Organization events
+
+message OrganizationCreatedEvent {
+  string organization_id = 1;
+  string name = 2;
+  PhysicalAddress legal_address = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}
+
+message OrganizationUpdatedEvent {
+  string organization_id = 1;
+  optional string name = 2;
+  PhysicalAddress legal_address = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}
+
+// Clinic events
+
+message ClinicCreatedEvent {
+  string clinic_id = 1;
+  string organization_id = 2;
+  string name = 3;
+  PhysicalAddress physical_address = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+message ClinicUpdatedEvent {
+  string clinic_id = 1;
+  string organization_id = 2;
+  optional string name = 3;
+  PhysicalAddress physical_address = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+// Department events
+
+message DepartmentCreatedEvent {
+  string department_id = 1;
+  string clinic_id = 2;
+  string name = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}
+
+message DepartmentUpdatedEvent {
+  string department_id = 1;
+  string clinic_id = 2;
+  optional string name = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}
+
+// Employee events
+
+message EmployeeCreatedEvent {
+  string employee_id = 1;
+  string user_id = 2;
+  string organization_id = 3;
+  string department_id = 4;
+  optional string position = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+message EmployeeTerminatedEvent {
+  string employee_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}
+
+// Role events
+
+message RoleAssignedEvent {
+  string role_assignment_id = 1;
+  string employee_id = 2;
+  string role_type = 3;
+  string parent_aggregate_id = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+message RoleRevokedEvent {
+  string role_assignment_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}
+
+message DeputyAssignedEvent {
+  string role_assignment_id = 1;
+  string deputy_employee_id = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+}
+
+message DeputyRemovedEvent {
+  string role_assignment_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}
+
+// Leave events
+
+message LeaveStartedEvent {
+  string leave_id = 1;
+  string employee_id = 2;
+  google.protobuf.Timestamp starts_at = 3;
+  optional google.protobuf.Timestamp ends_at = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+message LeaveEndedEvent {
+  string leave_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}
+
+message LeaveScheduledEvent {
+  string leave_id = 1;
+  string employee_id = 2;
+  google.protobuf.Timestamp starts_at = 3;
+  optional google.protobuf.Timestamp ends_at = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+message LeaveCancelledEvent {
+  string leave_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}
+
+// Classification events
+
+message CategoryCreatedEvent {
+  string category_id = 1;
+  string organization_id = 2;
+  string name = 3;
+  optional string description = 4;
+  optional string parent_id = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+message CategoryUpdatedEvent {
+  string category_id = 1;
+  string organization_id = 2;
+  optional string name = 3;
+  optional string description = 4;
+  optional string parent_id = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+message IncidentTypeCreatedEvent {
+  string incident_type_id = 1;
+  string category_id = 2;
+  string name = 3;
+  optional string description = 4;
+  bool patient_can_register = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+message IncidentTypeUpdatedEvent {
+  string incident_type_id = 1;
+  string category_id = 2;
+  optional string name = 3;
+  optional string description = 4;
+  optional bool patient_can_register = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+// Incident events
+
+message IncidentCreatedEvent {
+  string incident_id = 1;
+  string incident_type_id = 2;
+  string organization_id = 3;
+  optional string department_id = 4;
+  string description = 5;
+  IncidentStatus status = 6;
+  string registrar_user_id = 7;
+  string registrar_type = 8;
+  google.protobuf.Timestamp incident_occurred_at = 9;
+  google.protobuf.Timestamp occurred_at = 10;
+}
+
+message IncidentDescriptionUpdatedEvent {
+  string incident_id = 1;
+  string description = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+}
+
+message IncidentAcceptedEvent {
+  string incident_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}
+
+message IncidentCompletedEvent {
+  string incident_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}
+
+message IncidentRejectedEvent {
+  string incident_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}
+
+message IncidentCancelledEvent {
+  string incident_id = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+}

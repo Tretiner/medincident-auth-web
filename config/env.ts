@@ -8,6 +8,7 @@ const envConfig = createEnv({
     TELEGRAM_BOT_TOKEN: z.string().min(1),
     APP_URL:   z.url(),
 
+    BACKEND_API_URL:   z.string(),
     ZITADEL_API_URL:   z.url(),
     ZITADEL_API_TOKEN: z.string().min(32),
 
@@ -27,6 +28,7 @@ const envConfig = createEnv({
     APP_URL: process.env.APP_URL,
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
+    BACKEND_API_URL: process.env.BACKEND_API_URL,
     ZITADEL_API_URL: process.env.ZITADEL_API_URL,
     ZITADEL_API_TOKEN: process.env.ZITADEL_API_TOKEN,
     NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,

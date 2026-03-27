@@ -5,6 +5,7 @@ import { Result } from "@/domain/error";
 import { handleFetch } from "@/lib/fetch-helper";
 import { BASE_URL, TOKEN, Method, Headers } from "../config";
 import { PaginationRequest, TextFilterMethod, ZitadelGenericUpdateResponseSchema } from "../shared";
+import { UserRoundIcon } from "lucide-react";
 
 export const ZitadelCreateHumanUserResponseSchema = z.object({
   userId: z.string(),
@@ -21,6 +22,7 @@ export const ZitadelGetUserResponseSchema = z.object({
 
 export async function createHumanUser(body: any): Promise<Result<z.infer<typeof ZitadelCreateHumanUserResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/human`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: Method.Post,
@@ -34,6 +36,7 @@ export async function createHumanUser(body: any): Promise<Result<z.infer<typeof 
 
 export async function getUserById(userId: string): Promise<Result<z.infer<typeof ZitadelGetUserResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/${userId}`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: Method.Get,
@@ -54,12 +57,13 @@ export async function updateHumanProfile(
   gender?: number
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/human/${userId}`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: "PUT",
-      headers: { 
-        ...Headers.Content.Json, 
-        "Authorization": `Bearer ${TOKEN}` 
+      headers: {
+        ...Headers.Content.Json,
+        "Authorization": `Bearer ${TOKEN}`
       },
       body: JSON.stringify({
         profile: { givenName, familyName, nickName, displayName, preferredLanguage, gender }
@@ -75,6 +79,7 @@ export async function updateHumanEmail(
   isVerified: boolean = false
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/${userId}/email`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: "POST",
@@ -90,6 +95,7 @@ export async function updateHumanAvatar(
   file: File | Blob
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/${userId}/human/profile/avatar`;
+  console.log(url);
   const formData = new FormData();
   formData.append("file", file);
 
@@ -103,28 +109,62 @@ export async function updateHumanAvatar(
   );
 }
 
-export async function updateUserMetadata(userId: string, key: string, value: string): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
+export async function updateUserMiddleName(userId: string, value: string) {
+  console.log(JSON.stringify(await updateUserMetadata(userId, "middleName", Buffer.from(value).toString('base64'))));
+}
+
+export async function getUserMiddleName(userId: string): Promise<string | undefined> {
+  const response = await searchUserMetadata(userId, {
+    query: { offset: 0, limit: 1, asc: true },
+    queries: [{ keyQuery: { key: "middleName" } }] 
+  });
+
+  if (!response.success || !response.data) {
+    return undefined;
+  }
+
+  const metadataArray = response.data.metadata;
+  if (!metadataArray || metadataArray.length === 0) {
+    return undefined;
+  }
+
+  const field = metadataArray[0];
+  return field.value ? Buffer.from(field.value, "base64").toString("utf-8") : undefined;
+}
+
+export async function updateUserMetadata(
+  userId: string, 
+  key: string, 
+  value: string
+): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/${userId}/metadata`;
+  
+  // Значение обязательно должно быть закодировано в base64
+  const base64Value = Buffer.from(value).toString('base64');
+  
   return handleFetch(
     () => fetch(url, {
       method: Method.Post,
       headers: { ...Headers.Content.Json, "Authorization": `Bearer ${TOKEN}` },
-      body: JSON.stringify( 
-        [{
-          key: value
-        }]
-       ),
+      body: JSON.stringify({
+        metadata: [
+          {
+            key: key,
+            value: value
+          }
+        ]
+      }),
     }),
     ZitadelGenericUpdateResponseSchema
   );
 }
 
-export interface MetadataKeyFilter { 
-  key?: string; 
+export interface MetadataKeyFilter {
+  key?: string;
   method?: TextFilterMethod;
 }
 
-export interface MetadataSearchFilter { 
+export interface MetadataSearchFilter {
   keyQuery?: MetadataKeyFilter; // В REST API ZITADEL это обычно называется keyQuery 
 }
 
@@ -151,11 +191,11 @@ export const ZitadelSearchMetadataResponseSchema = z.object({
  * Ищет метаданные пользователя по фильтрам.
  */
 export async function searchUserMetadata(
-  userId: string, 
+  userId: string,
   body: ZitadelSearchMetadataRequest
 ): Promise<Result<z.infer<typeof ZitadelSearchMetadataResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/${userId}/metadata/search`;
-  
+
   return handleFetch(
     () => fetch(url, {
       method: Method.Post,
@@ -166,3 +206,4 @@ export async function searchUserMetadata(
     ZitadelSearchMetadataResponseSchema
   );
 }
+

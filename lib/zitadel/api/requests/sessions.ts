@@ -44,6 +44,7 @@ export const ZitadelCreateSessionResponseSchema = z.object({
 
 export async function searchSessions(sessionIds: string[]): Promise<Result<z.infer<typeof ZitadelSearchSessionsResponseSchema>>> {
   const url = `${BASE_URL}/v2/sessions/search`;
+  console.log(url);
   if (!sessionIds || sessionIds.length === 0) {
     return { success: true, data: { sessions: [] } };
   }
@@ -62,6 +63,7 @@ export async function searchSessions(sessionIds: string[]): Promise<Result<z.inf
 
 export async function searchUserSessions(userId: string): Promise<Result<z.infer<typeof ZitadelSearchSessionsResponseSchema>>> {
   const url = `${BASE_URL}/v2/sessions/search`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: Method.Post,
@@ -79,6 +81,7 @@ export async function createSession(
   idpIntentToken: string
 ): Promise<Result<z.infer<typeof ZitadelCreateSessionResponseSchema>>> {
   const url = `${BASE_URL}/v2/sessions`;
+  console.log(url);
   const body = { checks: { user: { userId }, idpIntent: { idpIntentId, idpIntentToken } } };
 
   return handleFetch(
@@ -94,6 +97,7 @@ export async function createSession(
 
 export async function updateSession(sessionId: string, sessionToken: string, checks: any): Promise<Result<z.infer<typeof ZitadelSessionResponseSchema>>> {
   const url = `${BASE_URL}/v2/sessions/${sessionId}`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: "PATCH",
@@ -107,6 +111,7 @@ export async function updateSession(sessionId: string, sessionToken: string, che
 
 export async function deleteSession(sessionId: string, sessionToken: string): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   const url = `${BASE_URL}/v2/sessions/${sessionId}`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: "DELETE",

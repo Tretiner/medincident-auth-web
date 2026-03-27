@@ -62,6 +62,7 @@ export type ZitadelRetrieveIdpIntentResponse = z.infer<typeof ZitadelRetrieveIdp
 
 export async function getActiveIdps(): Promise<Result<ZitadelGetIdpsResponse>> {
   const url = `${BASE_URL}/v2/settings/login/idps`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: Method.Get,
@@ -74,6 +75,7 @@ export async function getActiveIdps(): Promise<Result<ZitadelGetIdpsResponse>> {
 
 export async function startIdpIntent(body: ZitadelStartIdpIntentRequest): Promise<Result<ZitadelStartIdpIntentResponse>> {
   const url = `${BASE_URL}/v2/idp_intents`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: Method.Post,
@@ -87,6 +89,7 @@ export async function startIdpIntent(body: ZitadelStartIdpIntentRequest): Promis
 
 export async function retrieveIdpIntent(intentId: string, intentToken: string): Promise<Result<ZitadelRetrieveIdpIntentResponse>> {
   const url = `${BASE_URL}/v2/idp_intents/${intentId}`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: Method.Post,

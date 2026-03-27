@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package medincident.v1;
+
+option go_package = "github.com/ulbwa/medincident-command-service/pkg/medincident/v1";
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/timestamp.proto";
+
+service LeaveService {
+  // Start leave immediately
+  //
+  // Starts an immediate leave for the specified employee (starts_at = now).
+  // The employee must not have an active overlapping leave.
+  rpc StartLeaveNow(StartLeaveNowRequest) returns (StartLeaveNowResponse) {
+    option (google.api.http) = {
+      post: "/v1/employees/{employee_id}/leaves"
+      body: "*"
+    };
+  }
+
+  // Schedule future leave
+  //
+  // Schedules a future leave for the specified employee.
+  // starts_at must be in the future and must not overlap with existing leaves.
+  rpc ScheduleLeave(ScheduleLeaveRequest) returns (ScheduleLeaveResponse) {
+    option (google.api.http) = {
+      post: "/v1/employees/{employee_id}/leaves/scheduled"
+      body: "*"
+    };
+  }
+
+  // End active leave
+  //
+  // Ends an active leave immediately (sets ends_at = now).
+  rpc EndLeave(EndLeaveRequest) returns (EndLeaveResponse) {
+    option (google.api.http) = {
+      post: "/v1/leaves/{leave_id}/end"
+    };
+  }
+
+  // Cancel scheduled leave
+  //
+  // Cancels a scheduled leave that has not yet started.
+  rpc CancelScheduledLeave(CancelScheduledLeaveRequest) returns (CancelScheduledLeaveResponse) {
+    option (google.api.http) = {
+      post: "/v1/leaves/{leave_id}/cancel"
+    };
+  }
+}
+
+message StartLeaveNowRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  optional google.protobuf.Timestamp ends_at = 2;
+}
+
+message StartLeaveNowResponse {
+  string leave_id = 1;
+}
+
+message ScheduleLeaveRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  google.protobuf.Timestamp starts_at = 2 [(google.api.field_behavior) = REQUIRED];
+  optional google.protobuf.Timestamp ends_at = 3;
+}
+
+message ScheduleLeaveResponse {
+  string leave_id = 1;
+}
+
+message EndLeaveRequest {
+  string leave_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message EndLeaveResponse {
+  string leave_id = 1;
+}
+
+message CancelScheduledLeaveRequest {
+  string leave_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message CancelScheduledLeaveResponse {
+  string leave_id = 1;
+}

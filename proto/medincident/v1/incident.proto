@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+package medincident.v1;
+
+option go_package = "github.com/ulbwa/medincident-command-service/pkg/medincident/v1";
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/timestamp.proto";
+
+enum IncidentStatus {
+  INCIDENT_STATUS_UNSPECIFIED = 0;
+  INCIDENT_STATUS_CREATED = 1;
+  INCIDENT_STATUS_ACCEPTED = 2;
+  INCIDENT_STATUS_COMPLETED = 3;
+  INCIDENT_STATUS_REJECTED = 4;
+  INCIDENT_STATUS_CANCELLED = 5;
+}
+
+service IncidentService {
+  // Register new incident
+  //
+  // Registers a new incident within the specified organization.
+  // Patients may register if the incident type allows patient_can_register.
+  rpc CreateIncident(CreateIncidentRequest) returns (CreateIncidentResponse) {
+    option (google.api.http) = {
+      post: "/v1/organizations/{organization_id}/incidents"
+      body: "*"
+    };
+  }
+
+  // Update incident description
+  //
+  // Updates the description of an incident. Only allowed while the incident is in CREATED status.
+  // Patients cannot edit.
+  rpc UpdateIncidentDescription(UpdateIncidentDescriptionRequest) returns (UpdateIncidentDescriptionResponse) {
+    option (google.api.http) = {
+      put: "/v1/incidents/{incident_id}/description"
+      body: "*"
+    };
+  }
+
+  // Accept incident
+  //
+  // Transitions an incident from CREATED to ACCEPTED status.
+  rpc AcceptIncident(AcceptIncidentRequest) returns (AcceptIncidentResponse) {
+    option (google.api.http) = {
+      post: "/v1/incidents/{incident_id}/accept"
+    };
+  }
+
+  // Complete incident
+  //
+  // Transitions an incident from ACCEPTED to COMPLETED status.
+  rpc CompleteIncident(CompleteIncidentRequest) returns (CompleteIncidentResponse) {
+    option (google.api.http) = {
+      post: "/v1/incidents/{incident_id}/complete"
+      body: "*"
+    };
+  }
+
+  // Reject incident
+  //
+  // Transitions an incident from ACCEPTED to REJECTED status.
+  rpc RejectIncident(RejectIncidentRequest) returns (RejectIncidentResponse) {
+    option (google.api.http) = {
+      post: "/v1/incidents/{incident_id}/reject"
+      body: "*"
+    };
+  }
+
+  // Cancel incident
+  //
+  // Transitions an incident from CREATED to CANCELLED status.
+  rpc CancelIncident(CancelIncidentRequest) returns (CancelIncidentResponse) {
+    option (google.api.http) = {
+      post: "/v1/incidents/{incident_id}/cancel"
+    };
+  }
+}
+
+message CreateIncidentRequest {
+  string incident_type_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string organization_id = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string department_id = 3;
+  string description = 4 [(google.api.field_behavior) = REQUIRED];
+  google.protobuf.Timestamp occurred_at = 5 [(google.api.field_behavior) = REQUIRED];
+}
+
+message CreateIncidentResponse {
+  string incident_id = 1;
+}
+
+message UpdateIncidentDescriptionRequest {
+  string incident_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string description = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message UpdateIncidentDescriptionResponse {
+  string incident_id = 1;
+}
+
+message AcceptIncidentRequest {
+  string incident_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AcceptIncidentResponse {
+  string incident_id = 1;
+}
+
+message CompleteIncidentRequest {
+  string incident_id = 1 [(google.api.field_behavior) = REQUIRED];
+  optional string reason = 2;
+}
+
+message CompleteIncidentResponse {
+  string incident_id = 1;
+}
+
+message RejectIncidentRequest {
+  string incident_id = 1 [(google.api.field_behavior) = REQUIRED];
+  optional string reason = 2;
+}
+
+message RejectIncidentResponse {
+  string incident_id = 1;
+}
+
+message CancelIncidentRequest {
+  string incident_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message CancelIncidentResponse {
+  string incident_id = 1;
+}

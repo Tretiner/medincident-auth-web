@@ -1,0 +1,454 @@
+syntax = "proto3";
+
+package medincident.v1;
+
+option go_package = "github.com/ulbwa/medincident-command-service/pkg/medincident/v1";
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+
+service OrganizationService {
+  // Create new organization
+  rpc CreateOrganization(CreateOrganizationRequest) returns (CreateOrganizationResponse) {
+    option (google.api.http) = {
+      post: "/v1/organizations"
+      body: "*"
+    };
+  }
+
+  // Update organization
+  rpc UpdateOrganization(UpdateOrganizationRequest) returns (UpdateOrganizationResponse) {
+    option (google.api.http) = {
+      put: "/v1/organizations/{organization_id}"
+      body: "*"
+    };
+  }
+
+  // Create clinic
+  //
+  // Creates a new clinic within the specified organization.
+  rpc CreateClinic(CreateClinicRequest) returns (CreateClinicResponse) {
+    option (google.api.http) = {
+      post: "/v1/organizations/{organization_id}/clinics"
+      body: "*"
+    };
+  }
+
+  // Update clinic
+  rpc UpdateClinic(UpdateClinicRequest) returns (UpdateClinicResponse) {
+    option (google.api.http) = {
+      put: "/v1/clinics/{clinic_id}"
+      body: "*"
+    };
+  }
+
+  // Create department
+  //
+  // Creates a new department within the specified clinic.
+  rpc CreateDepartment(CreateDepartmentRequest) returns (CreateDepartmentResponse) {
+    option (google.api.http) = {
+      post: "/v1/clinics/{clinic_id}/departments"
+      body: "*"
+    };
+  }
+
+  // Update department
+  rpc UpdateDepartment(UpdateDepartmentRequest) returns (UpdateDepartmentResponse) {
+    option (google.api.http) = {
+      put: "/v1/departments/{department_id}"
+      body: "*"
+    };
+  }
+
+  // Create employee
+  //
+  // Registers a user as an employee within the specified organization and department.
+  rpc CreateEmployee(CreateEmployeeRequest) returns (CreateEmployeeResponse) {
+    option (google.api.http) = {
+      post: "/v1/organizations/{organization_id}/employees"
+      body: "*"
+    };
+  }
+
+  // Terminate employee
+  //
+  // Hard-deletes the employee and all associated roles, leaves, and deputies.
+  rpc TerminateEmployee(TerminateEmployeeRequest) returns (TerminateEmployeeResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}"
+    };
+  }
+
+  // Assign org admin role
+  rpc AssignOrgAdmin(AssignOrgAdminRequest) returns (AssignOrgAdminResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/org-admin"
+    };
+  }
+
+  // Revoke org admin role
+  rpc RevokeOrgAdmin(RevokeOrgAdminRequest) returns (RevokeOrgAdminResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/org-admin"
+    };
+  }
+
+  // Assign org head role
+  rpc AssignOrgHead(AssignOrgHeadRequest) returns (AssignOrgHeadResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/org-head"
+    };
+  }
+
+  // Revoke org head role
+  rpc RevokeOrgHead(RevokeOrgHeadRequest) returns (RevokeOrgHeadResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/org-head"
+    };
+  }
+
+  // Assign dispatcher role
+  rpc AssignDispatcher(AssignDispatcherRequest) returns (AssignDispatcherResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/dispatcher"
+    };
+  }
+
+  // Revoke dispatcher role
+  rpc RevokeDispatcher(RevokeDispatcherRequest) returns (RevokeDispatcherResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/dispatcher"
+    };
+  }
+
+  // Assign clinic head role
+  rpc AssignClinicHead(AssignClinicHeadRequest) returns (AssignClinicHeadResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/clinic-head"
+    };
+  }
+
+  // Revoke clinic head role
+  rpc RevokeClinicHead(RevokeClinicHeadRequest) returns (RevokeClinicHeadResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/clinic-head"
+    };
+  }
+
+  // Assign department responsible role
+  rpc AssignDepartmentResponsible(AssignDepartmentResponsibleRequest) returns (AssignDepartmentResponsibleResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/department-responsible"
+    };
+  }
+
+  // Revoke department responsible role
+  rpc RevokeDepartmentResponsible(RevokeDepartmentResponsibleRequest) returns (RevokeDepartmentResponsibleResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/department-responsible"
+    };
+  }
+
+  // Assign org admin deputy
+  rpc AssignOrgAdminDeputy(AssignOrgAdminDeputyRequest) returns (AssignOrgAdminDeputyResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/org-admin/deputy"
+      body: "*"
+    };
+  }
+
+  // Remove org admin deputy
+  rpc RemoveOrgAdminDeputy(RemoveOrgAdminDeputyRequest) returns (RemoveOrgAdminDeputyResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/org-admin/deputy"
+    };
+  }
+
+  // Assign org head deputy
+  rpc AssignOrgHeadDeputy(AssignOrgHeadDeputyRequest) returns (AssignOrgHeadDeputyResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/org-head/deputy"
+      body: "*"
+    };
+  }
+
+  // Remove org head deputy
+  rpc RemoveOrgHeadDeputy(RemoveOrgHeadDeputyRequest) returns (RemoveOrgHeadDeputyResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/org-head/deputy"
+    };
+  }
+
+  // Assign dispatcher deputy
+  rpc AssignDispatcherDeputy(AssignDispatcherDeputyRequest) returns (AssignDispatcherDeputyResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/dispatcher/deputy"
+      body: "*"
+    };
+  }
+
+  // Remove dispatcher deputy
+  rpc RemoveDispatcherDeputy(RemoveDispatcherDeputyRequest) returns (RemoveDispatcherDeputyResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/dispatcher/deputy"
+    };
+  }
+
+  // Assign clinic head deputy
+  rpc AssignClinicHeadDeputy(AssignClinicHeadDeputyRequest) returns (AssignClinicHeadDeputyResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/clinic-head/deputy"
+      body: "*"
+    };
+  }
+
+  // Remove clinic head deputy
+  rpc RemoveClinicHeadDeputy(RemoveClinicHeadDeputyRequest) returns (RemoveClinicHeadDeputyResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/clinic-head/deputy"
+    };
+  }
+
+  // Assign department responsible deputy
+  rpc AssignDepartmentResponsibleDeputy(AssignDepartmentResponsibleDeputyRequest) returns (AssignDepartmentResponsibleDeputyResponse) {
+    option (google.api.http) = {
+      put: "/v1/employees/{employee_id}/roles/department-responsible/deputy"
+      body: "*"
+    };
+  }
+
+  // Remove department responsible deputy
+  rpc RemoveDepartmentResponsibleDeputy(RemoveDepartmentResponsibleDeputyRequest) returns (RemoveDepartmentResponsibleDeputyResponse) {
+    option (google.api.http) = {
+      delete: "/v1/employees/{employee_id}/roles/department-responsible/deputy"
+    };
+  }
+}
+
+// PhysicalAddress represents a physical address with optional GPS coordinates.
+message PhysicalAddress {
+  string address_line = 1 [(google.api.field_behavior) = REQUIRED];
+  optional double latitude = 2;
+  optional double longitude = 3;
+}
+
+// Organization
+
+message CreateOrganizationRequest {
+  string name = 1 [(google.api.field_behavior) = REQUIRED];
+  PhysicalAddress legal_address = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 3;
+}
+
+message CreateOrganizationResponse {
+  string organization_id = 1;
+}
+
+message UpdateOrganizationRequest {
+  string organization_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  PhysicalAddress legal_address = 3 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 4;
+}
+
+message UpdateOrganizationResponse {
+  string organization_id = 1;
+}
+
+// Clinic
+
+message CreateClinicRequest {
+  string organization_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  PhysicalAddress physical_address = 3 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 4;
+}
+
+message CreateClinicResponse {
+  string clinic_id = 1;
+}
+
+message UpdateClinicRequest {
+  string clinic_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  PhysicalAddress physical_address = 3 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 4;
+}
+
+message UpdateClinicResponse {
+  string clinic_id = 1;
+}
+
+// Department
+
+message CreateDepartmentRequest {
+  string clinic_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 3;
+}
+
+message CreateDepartmentResponse {
+  string department_id = 1;
+}
+
+message UpdateDepartmentRequest {
+  string department_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string description = 3;
+}
+
+message UpdateDepartmentResponse {
+  string department_id = 1;
+}
+
+// Employee
+
+message CreateEmployeeRequest {
+  string user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string organization_id = 2 [(google.api.field_behavior) = REQUIRED];
+  string department_id = 3 [(google.api.field_behavior) = REQUIRED];
+  optional string position = 4;
+}
+
+message CreateEmployeeResponse {
+  string employee_id = 1;
+}
+
+message TerminateEmployeeRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message TerminateEmployeeResponse {
+  string employee_id = 1;
+}
+
+// Org-scoped role assignments
+
+message AssignOrgAdminRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignOrgAdminResponse {}
+
+message RevokeOrgAdminRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RevokeOrgAdminResponse {}
+
+message AssignOrgHeadRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignOrgHeadResponse {}
+
+message RevokeOrgHeadRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RevokeOrgHeadResponse {}
+
+message AssignDispatcherRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignDispatcherResponse {}
+
+message RevokeDispatcherRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RevokeDispatcherResponse {}
+
+// Scoped role assignments
+
+message AssignClinicHeadRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignClinicHeadResponse {}
+
+message RevokeClinicHeadRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RevokeClinicHeadResponse {}
+
+message AssignDepartmentResponsibleRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignDepartmentResponsibleResponse {}
+
+message RevokeDepartmentResponsibleRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RevokeDepartmentResponsibleResponse {}
+
+// Deputy assignments
+
+message AssignOrgAdminDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string deputy_employee_id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignOrgAdminDeputyResponse {}
+
+message RemoveOrgAdminDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RemoveOrgAdminDeputyResponse {}
+
+message AssignOrgHeadDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string deputy_employee_id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignOrgHeadDeputyResponse {}
+
+message RemoveOrgHeadDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RemoveOrgHeadDeputyResponse {}
+
+message AssignDispatcherDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string deputy_employee_id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignDispatcherDeputyResponse {}
+
+message RemoveDispatcherDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RemoveDispatcherDeputyResponse {}
+
+message AssignClinicHeadDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string deputy_employee_id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignClinicHeadDeputyResponse {}
+
+message RemoveClinicHeadDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RemoveClinicHeadDeputyResponse {}
+
+message AssignDepartmentResponsibleDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string deputy_employee_id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignDepartmentResponsibleDeputyResponse {}
+
+message RemoveDepartmentResponsibleDeputyRequest {
+  string employee_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RemoveDepartmentResponsibleDeputyResponse {}

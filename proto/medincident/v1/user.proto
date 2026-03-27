@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package medincident.v1;
+
+option go_package = "github.com/ulbwa/medincident-command-service/pkg/medincident/v1";
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+
+service UserService {
+  // Validate person name
+  //
+  // Validates given_name, family_name, and middle_name against business rules.
+  // Returns per-field validation results. Does not create any entities.
+  rpc ValidateFullName(ValidateFullNameRequest) returns (ValidateFullNameResponse) {
+    option (google.api.http) = {
+      post: "/v1/users/validate-name"
+      body: "*"
+    };
+  }
+
+  // Create new user
+  //
+  // Creates a user from an existing Zitadel identity.
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/users"
+      body: "*"
+    };
+  }
+
+  // Update own user profile
+  //
+  // Allows the authenticated user to update their own profile.
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
+    option (google.api.http) = {
+      put: "/v1/users/me"
+      body: "*"
+    };
+  }
+
+  // Assign system admin role
+  rpc AssignSystemAdmin(AssignSystemAdminRequest) returns (AssignSystemAdminResponse) {
+    option (google.api.http) = {
+      put: "/v1/users/{user_id}/system-admin"
+    };
+  }
+
+  // Revoke system admin role
+  rpc RevokeSystemAdmin(RevokeSystemAdminRequest) returns (RevokeSystemAdminResponse) {
+    option (google.api.http) = {
+      delete: "/v1/users/{user_id}/system-admin"
+    };
+  }
+}
+
+// PersonName represents a person's full name.
+message PersonName {
+  string given_name = 1 [(google.api.field_behavior) = REQUIRED];
+  string family_name = 2 [(google.api.field_behavior) = REQUIRED];
+  optional string middle_name = 3;
+}
+
+message ValidateFullNameRequest {
+  PersonName person_name = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// FieldViolation describes a single validation error for a specific field.
+message FieldViolation {
+  string field = 1;
+  // Machine-readable violation code (e.g. REQUIRED, TOO_LONG, MIXED_SCRIPTS).
+  string code = 2;
+}
+
+message ValidateFullNameResponse {
+  bool valid = 1;
+  repeated FieldViolation violations = 2;
+}
+
+message CreateUserRequest {
+  string zitadel_id = 1 [(google.api.field_behavior) = REQUIRED];
+  PersonName person_name = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message CreateUserResponse {
+  string user_id = 1;
+}
+
+message UpdateUserRequest {
+  PersonName person_name = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message UpdateUserResponse {}
+
+// System admin
+
+message AssignSystemAdminRequest {
+  string user_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AssignSystemAdminResponse {
+  string user_id = 1;
+}
+
+message RevokeSystemAdminRequest {
+  string user_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message RevokeSystemAdminResponse {}

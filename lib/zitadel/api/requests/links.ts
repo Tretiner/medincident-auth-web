@@ -20,6 +20,7 @@ export async function addIdpLinkToUser(
   idpLink: { idpId: string; userId: string; userName: string; }
 ): Promise<Result<z.infer<typeof ZitadelAddIdpLinkResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/${systemUserId}/links`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: Method.Post,
@@ -33,6 +34,7 @@ export async function addIdpLinkToUser(
 
 export async function searchUserLinks(userId: string): Promise<Result<z.infer<typeof ZitadelSearchLinksResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/${userId}/links/_search`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: Method.Post,
@@ -49,6 +51,7 @@ export async function deleteUserLink(
   linkedUserId: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   const url = `${BASE_URL}/v2/users/${userId}/links/${idpId}/${linkedUserId}`;
+  console.log(url);
   return handleFetch(
     () => fetch(url, {
       method: "DELETE",

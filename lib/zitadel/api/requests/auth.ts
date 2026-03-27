@@ -24,6 +24,7 @@ export async function completeAuthRequest(
   
   const endpoint = isOidc ? `/v2/oidc/auth_requests/${requestId}` : `/v2/saml/auth_requests/${requestId}`;
   const url = `${BASE_URL}${endpoint}`;
+  console.log(url);
 
   return handleFetch(
     () => fetch(url, {
