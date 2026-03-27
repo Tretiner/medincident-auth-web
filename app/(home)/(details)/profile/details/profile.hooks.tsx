@@ -33,7 +33,7 @@ export function useProfileData() {
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
-      onSuccess: (data) => {
+      onSuccess: (data: PersonalInfo) => {
         setProfileStore({
           firstName: data.firstName,
           lastName: data.lastName,
@@ -89,7 +89,7 @@ export function useFormProfileDetails(user?: PersonalInfo) {
       // Вызываем Server Action вместо fetch PATCH
       const result = await updateProfileDataAction(data);
 
-      if (!result.success) {
+      if (result && !result.success) {
         setMessage({ type: "error", text: result.error });
         return;
       }
@@ -103,8 +103,6 @@ export function useFormProfileDetails(user?: PersonalInfo) {
       // Сбрасываем isDirty, чтобы кнопка "Сохранить" задизейблилась
       form.reset({
         ...form.getValues(),
-        firstName: result.data.firstName,
-        lastName: result.data.lastName,
       });
 
       setMessage({ type: "success", text: "Данные успешно сохранены" });

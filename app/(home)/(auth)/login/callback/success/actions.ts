@@ -100,7 +100,7 @@ export async function handleLoginAction(userId: string, intentId: string, intent
   console.log("Ответ от createSession:", JSON.stringify(sessionRes));
 
   if (!sessionRes.success || !sessionRes.data?.sessionToken || !sessionRes.data?.sessionId) {
-    throw new Error("Ошибка при создании сессии. Ответ ZITADEL: " + JSON.stringify(sessionRes.error));
+    throw new Error("Ошибка при создании сессии. Ответ ZITADEL: " + JSON.stringify(sessionRes));
   }
 
   await finishAuth(sessionRes.data, requestId);

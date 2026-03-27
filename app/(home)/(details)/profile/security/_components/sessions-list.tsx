@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
-import UAParser from "ua-parser-js";
 
 interface Props {
   sessions: UserSession[];

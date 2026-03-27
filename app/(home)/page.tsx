@@ -80,9 +80,9 @@ export default async function AccountSelectionPage({
   );
 
   // 4. Очищаем массив от возможных null (если юзер не найден или произошла ошибка)
-  const displayAccounts: AccountDisplayItem[] = displayAccountsRaw.filter(
-    (acc): acc is AccountDisplayItem => acc !== null
-  );
+  const displayAccounts = displayAccountsRaw.filter(
+    (acc) => acc !== null
+  ) as AccountDisplayItem[];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background/50 font-sans">

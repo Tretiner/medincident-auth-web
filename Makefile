@@ -8,6 +8,9 @@ release:
 build:
 	npm run build --debug-prerender
 
+builderrors:
+	npm run build:errors
+
 invalidate:
 	powershell -Command "Remove-Item -Recurse -Force .next, node_modules, package-lock.json"
 	npm install

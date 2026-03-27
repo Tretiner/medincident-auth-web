@@ -135,7 +135,7 @@ async function mockSession(): Promise<Result<LoginByTelegramWidgetResponse>> {
     data: {
       accessToken: {
         token: token,
-        expiresIn: 7 * 24 * 60 * 60,
+        expiresInMillis: 7 * 24 * 60 * 60,
       },
       profile: {
         id: jwtUser.uid,

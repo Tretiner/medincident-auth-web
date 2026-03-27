@@ -128,8 +128,12 @@ export async function registerUserSubmit(
     const userRes = await createHumanUser(requestBody);
     console.log("Ответ от createHumanUser:", JSON.stringify(userRes));
 
-    if (!userRes.success || !userRes.data?.userId) {
+    if (!userRes.success) {
       throw new Error("Ошибка при регистрации: " + JSON.stringify(userRes.error));
+    }
+
+    if (!userRes.data?.userId) {
+      throw new Error("Ошибка при регистрации: Не получен ID пользователя");
     }
 
     if (middleName) {

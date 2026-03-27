@@ -7,14 +7,34 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// 1. Define the shape of your form fields
+export interface RegisterFormValues {
+  givenName: string;
+  familyName: string;
+  middleName: string;
+  email: string;
+}
+
+// 2. Define the exact fields that can have errors, plus a generic 'form' error
+export interface RegisterFormErrors {
+  form?: string;
+  givenName?: string;
+  familyName?: string;
+  middleName?: string;
+  email?: string;
+}
+
+// 3. Define the overall state returned by the Server Action
+export interface RegisterFormState {
+  success: boolean;
+  errors?: RegisterFormErrors;
+  values?: RegisterFormValues;
+}
+
 interface RegisterViewProps {
-  action: any; // Сюда приходит забинженный Server Action
-  initialData: {
-    givenName: string;
-    familyName: string;
-    middleName: string;
-    email: string;
-  };
+  // 4. Strongly type the Server Action signature instead of using 'any'
+  action: (state: RegisterFormState, payload: FormData) => Promise<RegisterFormState>;
+  initialData: RegisterFormValues;
 }
 
 export function RegisterView({ action, initialData }: RegisterViewProps) {
