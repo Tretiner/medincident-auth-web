@@ -6,7 +6,7 @@ import { SignJWT } from 'jose';
 import crypto from 'node:crypto';
 
 const KEY_PATH = env.ZITADEL_MACHINE_KEY_PATH;
-const ZITADEL_DOMAIN = env.ZITADEL_API_URL || env.NEXT_PUBLIC_AUTH_URL;
+const ZITADEL_DOMAIN = env.ZITADEL_API_URL;
 
 let cachedAccessToken: string | null = null;
 let tokenExpiresAt: number | null = null;

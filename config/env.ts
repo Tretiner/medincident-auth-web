@@ -4,35 +4,32 @@ import { z } from "zod";
 const envConfig = createEnv({
   server: {
     // Secrets
-    SESSION_SECRET: z.string().min(32),
-    TELEGRAM_BOT_TOKEN: z.string().min(1),
-    APP_URL:   z.url(),
-
-    BACKEND_API_URL:   z.string(),
-    ZITADEL_API_URL:   z.url(),
+    ZITADEL_API_URL: z.url(),
+    ZITADEL_SECRET: z.string().min(32),
     ZITADEL_MACHINE_KEY_PATH: z.string(),
+
+    APP_URL: z.url(),
+    APP_CLIENT_ID: z.string(),
+    API_URL: z.url(),
+    GRPC_API_URL: z.url(),
 
     // Default
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     PORT: z.coerce.number().default(3000),
   },
 
-  client: {
-    NEXT_PUBLIC_AUTH_URL: z.string(),
-    NEXT_PUBLIC_TELEGRAM_BOT_NAME: z.string().min(1),
-  },
-
   runtimeEnv: {
-    SESSION_SECRET: process.env.SESSION_SECRET,
-    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    ZITADEL_API_URL: process.env.ZITADEL_API_URL,
+    ZITADEL_SECRET: process.env.ZITADEL_SECRET,
+    ZITADEL_MACHINE_KEY_PATH: process.env.ZITADEL_MACHINE_KEY_PATH,
+
     APP_URL: process.env.APP_URL,
+    APP_CLIENT_ID: process.env.APP_CLIENT_ID,
+    API_URL: process.env.API_URL,
+    GRPC_API_URL: process.env.GRPC_API_URL,
+
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
-    BACKEND_API_URL: process.env.BACKEND_API_URL,
-    ZITADEL_API_URL: process.env.ZITADEL_API_URL,
-    ZITADEL_MACHINE_KEY_PATH: process.env.ZITADEL_MACHINE_KEY_PATH,
-    NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
-    NEXT_PUBLIC_TELEGRAM_BOT_NAME: process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME,
   },
 });
 
