@@ -15,8 +15,10 @@ export async function getZitadelAccessToken(): Promise<string> {
   const now = Date.now();
   
   if (cachedAccessToken && tokenExpiresAt && now < tokenExpiresAt - 5 * 60 * 1000) {
+    console.log("cached access token:", cachedAccessToken)
     return cachedAccessToken;
   }
+  console.log("NOT CACHED access token")
 
   let machineKey;
   try {
@@ -41,7 +43,7 @@ export async function getZitadelAccessToken(): Promise<string> {
   })
     .setProtectedHeader({ alg: 'RS256', kid: machineKey.keyId })
     .setIssuedAt()
-    .setExpirationTime('1h') 
+    .setExpirationTime('1m') 
     .sign(privateKey);
 
   // 3. Получаем Access Token
@@ -49,7 +51,7 @@ export async function getZitadelAccessToken(): Promise<string> {
   const body = new URLSearchParams({
     grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
     assertion: signedAssertion,
-    scope: 'openid profile email urn:zitadel:iam:org:project:id:zitadel:aud', 
+    scope: 'openid profile email urn:zitadel:iam:org:project:role:custom_ui_service urn:zitadel:iam:org:project:roles urn:zitadel:iam:org:project:id:zitadel:aud urn:zitadel:iam:org:project:id:365068666124894213:aud', 
   });
 
   const response = await fetch(tokenUrl, {

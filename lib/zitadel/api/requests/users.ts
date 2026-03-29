@@ -142,7 +142,7 @@ export async function updateHumanAvatar(
   formData.append("file", file);
 
   return handleZitadelRequest(
-    () => zitadelApi.post(`/v2/users/${userId}/human/profile/avatar`, formData, {
+    () => zitadelApi.post(`/v2/users/${userId}/human/profile/avatar#assets/v1/users/me/avatar#`, formData, {
       // Axios должен сам выставить boundary, но мы явно указываем тип
       headers: { "Content-Type": "multipart/form-data" }
     }),

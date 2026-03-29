@@ -2,25 +2,23 @@
 
 import { createHumanUser, createSession, updateUserMiddleName } from "@/lib/zitadel/api";
 import { finishAuth } from "../callback/success/actions";
-import { userService } from "@/lib/grpc/api/client"; // Ваш клиент nice-grpc
+import { userService } from "@/lib/grpc/api/client"; 
 import { ClientError } from "nice-grpc";
 
-// --- ТИПЫ ИЗ СГЕНЕРИРОВАННОГО PROTO (nice-grpc) ---
 interface PersonName {
   givenName: string;
   familyName: string;
   middleName?: string | undefined;
 }
 
-// Утилита для перевода машинных кодов ошибок в человеческий текст
 function getErrorMessage(code: string): string {
   switch (code) {
     case "REQUIRED": return "Обязательное поле";
     case "TOO_SHORT": return "Слишком короткое значение";
     case "TOO_LONG": return "Слишком длинное значение";
-    case "CONTAINS_DIGITS": return "Слишком длинное значение";
-    case "MIXED_SCRIPTS": return "Слишком разные буквы";
-    case "SPECIAL_CHARACTERS": return "Слишком недопсустимые символы";
+    case "CONTAINS_DIGITS": return "Недопустимые цифры";
+    case "MIXED_SCRIPTS": return "Смешение разных алфавитов";
+    case "SPECIAL_CHARACTERS": return "Недопустимые спецсимволы";
     case "INVALID_FORMAT": return "Недопустимые символы";
     default: return "Произошла ошибка: " + code;
   }
@@ -28,8 +26,6 @@ function getErrorMessage(code: string): string {
 
 export async function validatePersonNameGrpc(name: PersonName): Promise<Record<string, string> | null> {
   try {
-    // 1. Делаем настоящий запрос к микросервису
-    // Обратите внимание: метод называется validateFullName, а внутри объект personName (согласно вашему proto)
     const response = await userService.validateFullName({
       personName: {
         givenName: name.givenName,
@@ -38,13 +34,24 @@ export async function validatePersonNameGrpc(name: PersonName): Promise<Record<s
       }
     });
 
+    console.log("validateFullName: " + JSON.stringify(response))
+
     if (response.valid) {
       return null;
     }
 
+    // Добавляем словарь для перевода полей из gRPC (snake_case) во frontend (camelCase)
+    const fieldMapping: Record<string, string> = {
+      "given_name": "givenName",
+      "family_name": "familyName",
+      "middle_name": "middleName"
+    };
+
     const formErrors: Record<string, string> = {};
     for (const violation of response.violations) {
-      formErrors[violation.field] = getErrorMessage(violation.code);
+      // Ищем правильное имя поля, если не нашли — оставляем как есть
+      const mappedField = fieldMapping[violation.field] || violation.field; 
+      formErrors[mappedField] = getErrorMessage(violation.code);
     }
 
     return formErrors;
@@ -67,7 +74,6 @@ export interface SecureRegisterPayload {
   idpInformation: any;
 }
 
-// --- SERVER ACTION ---
 export async function registerUserSubmit(
   securePayload: SecureRegisterPayload,
   prevState: any,
@@ -80,7 +86,6 @@ export async function registerUserSubmit(
   const middleName = formData.get("middleName") as string;
   const email = formData.get("email") as string;
 
-  // Сохраняем введенные значения, чтобы вернуть их в UI и они не стерлись
   const values = { givenName, familyName, middleName, email };
   const errors: Record<string, string> = {};
 
@@ -133,8 +138,21 @@ export async function registerUserSubmit(
     }
 
     if (!userRes.data?.userId) {
-      throw new Error("Ошибка при регистрации: Не получен ID пользователя");
+      throw new Error("Ошибка при регистрации: Не получен ID пользователя " + JSON.stringify(userRes.error));
     }
+
+    const body = {
+      zitadelId: userRes.data.userId,
+      personName: {
+        givenName: requestBody.profile?.givenName || givenName,
+        familyName: requestBody.profile?.familyName || familyName,
+        middleName: middleName || undefined,
+      },
+    }
+    console.log("Перед gRPC userService.createUser:", JSON.stringify(body));
+    const grpcResponse = await userService.createUser(body);
+    
+    console.log("Ответ от gRPC userService.createUser:", JSON.stringify(grpcResponse));
 
     if (middleName) {
       await updateUserMiddleName(userRes.data.userId, middleName);
@@ -144,14 +162,18 @@ export async function registerUserSubmit(
     console.log("Ответ от createSession:", JSON.stringify(sessionRes));
 
     if (!sessionRes.success || !sessionRes.data?.sessionToken || !sessionRes.data?.sessionId) {
-      throw new Error("Пользователь создан, но не удалось создать сессию");
+      throw new Error("Пользователь создан, но не удалось создать сессию.");
     }
 
-    // Редирект происходит внутри этой функции
     await finishAuth(sessionRes.data, requestId);
 
     return { success: true, errors: {}, values };
   } catch (error: any) {
+    console.log(JSON.stringify(error))
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+      throw error;
+    }
+
     return { success: false, errors: { form: error.message || "Ошибка регистрации в ZITADEL" }, values };
   }
 }

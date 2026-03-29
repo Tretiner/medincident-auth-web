@@ -1,7 +1,5 @@
 import { Result } from "@/domain/error";
 import z from "zod";
-import { refreshToken } from "./services/server-http-client";
-import { getAccessToken, setAccessToken } from "./services/access-token-manager";
 
 const ServerErrorSchema = z.object({
   domain: z.string().optional(),
@@ -9,35 +7,6 @@ const ServerErrorSchema = z.object({
   traceId: z.string().optional(),
 });
 
-export async function authorizedFetch<T>(
-  url: string,
-  options: RequestInit = {},
-  schema: z.Schema<T>,
-): Promise<Result<T>> {
-  let token = getAccessToken();
-
-  if (!token) {
-    const refreshTokenResult = await refreshToken();
-    if (refreshTokenResult.success) {
-      const accessToken = refreshTokenResult.data.accessToken;
-      setAccessToken({
-        token: accessToken.token,
-        expiresInMillis: accessToken.expiresInMillis,
-      });
-      token = getAccessToken();
-    } else {
-      return {
-        success: false,
-        error: refreshTokenResult.error,
-      };
-    }
-  }
-
-  const headers = new Headers(options.headers);
-  headers.set("Authorization", `Bearer ${token!}`);
-
-  return handleFetch(() => fetch(url, { ...options, headers }), schema);
-}
 
 export async function handleFetch<T>(
   request: () => Promise<Response>,

@@ -11,7 +11,7 @@ const envConfig = createEnv({
     APP_URL: z.url(),
     APP_CLIENT_ID: z.string(),
     API_URL: z.url(),
-    GRPC_API_URL: z.url(),
+    GRPC_API_URL: z.string(),
 
     // Default
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),

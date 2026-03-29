@@ -1,11 +1,14 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation"; // Импортируем redirect
 import { Card, CardContent } from "@/components/ui/card";
 import { AppLogoIcon } from "@/components/icons";
 import { APP_NAME } from "@/lib/constants";
 import { QrAuthSection } from "./_components/qr-auth-section";
 import { Suspense } from "react";
-import { ExternalIdentityProviders } from "./_components/social-links";
+import { ExternalIdentityProviders } from "./_components/external-idp";
 import { fetchProvidersAction } from "./actions";
+import { signIn } from "@/lib/zitadel/user/auth";
+import { AutoSignIn } from "./_components/auto-sign-in";
 
 export const metadata: Metadata = {
   title: "Вход",
@@ -13,13 +16,22 @@ export const metadata: Metadata = {
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: any }) {
-  const { requestId } = await searchParams;
+  const resolvedSearchParams = await searchParams;
+  
+  const requestId = resolvedSearchParams.requestId || resolvedSearchParams.authRequest;
+
+  // if (!requestId) {
+  //   return (<AutoSignIn provider="zitadel" redirectTo="/profile" />);
+  // }
+
+  // Если requestId есть, продолжаем обычную отрисовку страницы
   const providers = await fetchProvidersAction();
 
   return (
     <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
       <div className="w-full flex justify-center max-w-full">
         <Card className="w-full max-w-[960px] overflow-hidden rounded-xl shadow-none border border-border bg-card grid grid-cols-1 md:grid-cols-2 animate-in fade-in duration-500">
+          
           {/* LEFT COLUMN */}
           <div className="hidden md:flex relative flex-col items-center justify-center text-center p-12 overflow-hidden border-r border-border bg-primary/5">
             <div className="absolute -top-[40%] -left-[40%] w-[80%] h-[80%] rounded-full bg-primary/10 blur-xl pointer-events-none" />
@@ -51,17 +63,11 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
 
             <p className="mt-6 md:mt-8 text-center text-xs text-muted-foreground leading-relaxed px-2 md:px-0">
               Нажимая на кнопки входа, вы принимаете{" "}
-              <a
-                href="#"
-                className="text-primary hover:underline font-medium transition-colors"
-              >
+              <a href="#" className="text-primary hover:underline font-medium transition-colors">
                 пользовательское соглашение
               </a>{" "}
               и{" "}
-              <a
-                href="#"
-                className="text-primary hover:underline font-medium transition-colors"
-              >
+              <a href="#" className="text-primary hover:underline font-medium transition-colors">
                 политику конфиденциальности
               </a>{" "}
               сервиса {APP_NAME}.

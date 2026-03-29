@@ -4,13 +4,16 @@ import { getCurrentSessionId } from "@/lib/zitadel/zitadel-current-session";
 import { AccountSelectionView, AccountDisplayItem } from "./_components/account-selection-view";
 import { Suspense } from "react";
 import { getUserById, searchSessions } from "@/lib/zitadel/api";
+import { AutoSignIn } from "./(auth)/login/_components/auto-sign-in";
 
-export default async function AccountSelectionPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ requestId?: string }>;
-}) {
-  const { requestId } = await searchParams;
+export default async function AccountSelectionPage({searchParams}: {searchParams: any;}) {
+  const resolvedSearchParams = await searchParams;
+  
+  const requestId = resolvedSearchParams.requestId || resolvedSearchParams.authRequest;
+
+  // if (!requestId) {
+  //   return (<AutoSignIn provider="zitadel" redirectTo="/profile" />);
+  // }
 
   const loginLink = `/login${requestId ? `?requestId=${requestId}` : ""}`;
   const localContinueLink = `/profile`;
