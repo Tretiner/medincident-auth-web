@@ -1,8 +1,8 @@
 import { SidebarNav } from "./_components/sidebar-nav";
 import { MobileNav } from "./_components/mobile-nav";
 import { MobileTopBar } from "./_components/mobile-top-bar";
-import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card } from "@/shared/ui/card";
+import { cn } from "@/shared/lib/utils";
 import { Suspense } from "react";
 
 export default function ProfileLayout({

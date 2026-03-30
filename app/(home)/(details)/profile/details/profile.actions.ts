@@ -1,11 +1,11 @@
 "use server";
 
-import { requireValidSession } from "@/lib/zitadel/session";
+import { requireValidSession } from "@/services/zitadel/session";
 import { PersonalInfo } from "@/domain/profile/types";
 import { ProfileFormData } from "./profile.hooks";
 
-import { getUserById, updateHumanProfile, updateHumanEmail, updateUserMetadata, searchUserMetadata, updateUserMiddleName, getUserMiddleName } from "@/lib/zitadel/api";
-import { updateHumanAvatar } from "@/lib/zitadel/api";
+import { getUserById, updateHumanProfile, updateHumanEmail, updateUserMetadata, searchUserMetadata, updateUserMiddleName, getUserMiddleName } from "@/services/zitadel/api";
+import { updateHumanAvatar } from "@/services/zitadel/api";
 import { revalidatePath } from "next/cache";
 
 export async function getProfileDataAction() {

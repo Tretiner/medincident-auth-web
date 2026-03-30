@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { User as UserIcon, ShieldCheck } from "lucide-react";
 
 export function MobileNav() {

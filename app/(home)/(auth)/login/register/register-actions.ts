@@ -1,8 +1,8 @@
 "use server";
 
-import { createHumanUser, createSession, updateUserMiddleName } from "@/lib/zitadel/api";
+import { createHumanUser, createSession, updateUserMiddleName } from "@/services/zitadel/api";
 import { finishAuth } from "../callback/success/actions";
-import { userService } from "@/lib/grpc/api/client"; 
+import { userService } from "@/services/grpc/client"; 
 import { ClientError } from "nice-grpc";
 
 interface PersonName {

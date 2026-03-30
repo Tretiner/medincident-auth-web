@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { TelegramLogoIcon, MaxLogoIcon } from "@/components/icons";
 import { Loader2, Link2, Unlink, KeyRound } from "lucide-react"; // Добавили KeyRound
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 // --- ТИПЫ И КОНФИГУРАЦИЯ ---
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { fetchZitadel } from "@/lib/zitadel/api";
+import { fetchZitadel } from "@/services/zitadel/api";
 
 // GET: Получить все сессии пользователя
 export async function GET(req: NextRequest) {

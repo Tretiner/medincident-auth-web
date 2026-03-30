@@ -1,10 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { env } from "@/config/env";
-import { deleteSession, getActiveIdps, startIdpIntent } from "@/lib/zitadel/api";
-import { getCurrentSessionId } from "@/lib/zitadel/zitadel-current-session";
-import { getAllSessions, getSessionCookieById, removeSessionFromCookie } from "@/lib/zitadel/zitadel-cookies";
+import { env } from "@/shared/config/env";
+import { deleteSession, getActiveIdps, startIdpIntent } from "@/services/zitadel/api";
+import { getCurrentSessionId } from "@/services/zitadel/current-session";
+import { getAllSessions, getSessionCookieById, removeSessionFromCookie } from "@/services/zitadel/cookies";
 import { cookies } from "next/headers";
 
 export async function fetchProvidersAction() {

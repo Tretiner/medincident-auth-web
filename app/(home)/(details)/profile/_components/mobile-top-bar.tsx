@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { AppLogoIcon } from "@/components/icons";
-import { APP_NAME } from "@/lib/constants";
+import { APP_NAME } from "@/shared/lib/constants";
 
 export function MobileTopBar() {
   const searchParams = useSearchParams();

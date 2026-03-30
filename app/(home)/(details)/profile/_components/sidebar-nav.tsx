@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { ShieldCheckIcon, LogOutIcon, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/shared/ui/separator";
 import { SidebarUserCard } from "./sidebar-user-card";
 
 export function SidebarNav() {

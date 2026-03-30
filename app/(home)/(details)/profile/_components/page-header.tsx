@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { LucideIcon } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/shared/ui/separator";
 
 interface PageHeaderProps {
   title: string;

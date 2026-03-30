@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
+import { Button } from "@/shared/ui/button";
 import { AlertCircle, Loader2, Plus, Check } from "lucide-react";
 import { AppLogoIcon } from "@/components/icons";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { selectAccountAction } from "../(auth)/login/callback/success/actions";
-import { setCurrentSessionId } from "@/lib/zitadel/zitadel-current-session";
+import { setCurrentSessionId } from "@/services/zitadel/current-session";
 import { toast } from "sonner";
 
 export interface AccountDisplayItem {

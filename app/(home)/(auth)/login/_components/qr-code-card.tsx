@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 // 1. Возвращаем правильную библиотеку для стилизации точек и глаз
 import { QRCode } from "react-qrcode-logo";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 // Обходим ошибку типов TypeScript
 const QRCodeStyled = QRCode as any;

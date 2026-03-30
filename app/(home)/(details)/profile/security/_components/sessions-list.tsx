@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { UserSession } from "@/domain/profile/types";
-import { Button } from "@/components/ui/button";
-import { 
-  Laptop, 
-  Smartphone, 
-  LogOut, 
-  Loader2, 
-  Info, 
-  Copy, 
-  Check 
+import { Button } from "@/shared/ui/button";
+import {
+  Laptop,
+  Smartphone,
+  LogOut,
+  Loader2,
+  Info,
+  Copy,
+  Check
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -20,8 +20,8 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
+} from "@/shared/ui/dialog";
+import { Separator } from "@/shared/ui/separator";
 import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
 
 interface Props {

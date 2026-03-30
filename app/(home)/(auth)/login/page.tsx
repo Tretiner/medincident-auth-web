@@ -1,13 +1,13 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation"; // Импортируем redirect
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/shared/ui/card";
 import { AppLogoIcon } from "@/components/icons";
-import { APP_NAME } from "@/lib/constants";
+import { APP_NAME } from "@/shared/lib/constants";
 import { QrAuthSection } from "./_components/qr-auth-section";
 import { Suspense } from "react";
 import { ExternalIdentityProviders } from "./_components/external-idp";
 import { fetchProvidersAction } from "./actions";
-import { signIn } from "@/lib/zitadel/user/auth";
+import { signIn } from "@/services/zitadel/user/auth";
 import { AutoSignIn } from "./_components/auto-sign-in";
 
 export const metadata: Metadata = {

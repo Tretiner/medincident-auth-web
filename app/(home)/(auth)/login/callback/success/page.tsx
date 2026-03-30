@@ -1,5 +1,5 @@
-import { retrieveIdpIntent } from "@/lib/zitadel/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { retrieveIdpIntent } from "@/services/zitadel/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { AuthFlowSelector } from "./_components/auth-flow-selector"; // Импортируем компонент с кнопками
 import { redirect } from "next/navigation";
 

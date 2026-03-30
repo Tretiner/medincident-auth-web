@@ -2,12 +2,12 @@
 
 import { cookies } from "next/headers";
 import { UserSession, LinkedAccountsStatus } from "@/domain/profile/types";
-import { requireValidSession } from "@/lib/zitadel/session";
-import { deleteSession, deleteUserLink, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent } from "@/lib/zitadel/api";
-import { env } from "@/config/env";
+import { requireValidSession } from "@/services/zitadel/session";
+import { deleteSession, deleteUserLink, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent } from "@/services/zitadel/api";
+import { env } from "@/shared/config/env";
 import { redirect } from "next/navigation";
-import { parseUserAgent } from "@/lib/utils/user-agent";
-import { getAllSessions } from "@/lib/zitadel/zitadel-cookies";
+import { parseUserAgent } from "@/shared/lib/user-agent";
+import { getAllSessions } from "@/services/zitadel/cookies";
 
 // GET: Получить все активные сессии пользователя
 export async function getSessionsAction(): Promise<UserSession[]> {

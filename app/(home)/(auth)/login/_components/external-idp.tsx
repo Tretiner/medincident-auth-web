@@ -1,9 +1,9 @@
 // app/login/_components/social-links.tsx
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { MaxLogoIcon, TelegramLogoIcon } from "@/components/icons";
-import { ZitadelIdp } from "@/lib/zitadel/api";
+import { ZitadelIdp } from "@/services/zitadel/api";
 import { loginWithProviderAction } from "../actions"; // Импортируем Action
 
 interface AuthButtonProps {

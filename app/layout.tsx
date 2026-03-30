@@ -1,13 +1,13 @@
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import "./globals.css";
-import { APP_NAME } from "@/lib/constants";
-import { ThemeProvider } from "../components/ui/theme-provider";
+import { APP_NAME } from "@/shared/lib/constants";
+import { ThemeProvider } from "@/shared/ui/theme-provider";
 import z from "zod";
 import { ru } from "zod/v4/locales";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/shared/ui/sonner";
 
 z.config(ru());
 

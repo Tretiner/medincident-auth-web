@@ -2,10 +2,10 @@
 
 import { useState, useRef, useTransition } from "react";
 import { Camera, Loader2 } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Замени на свои пути к UI компонентам
+import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar"; // Замени на свои пути к UI компонентам
 import { uploadAvatarAction } from "../profile.actions"; // Путь до твоего экшена
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 interface EditableAvatarProps {
   currentAvatarUrl: string | undefined;

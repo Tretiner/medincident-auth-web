@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getAllSessions } from "@/lib/zitadel/zitadel-cookies";
-import { getCurrentSessionId } from "@/lib/zitadel/zitadel-current-session";
+import { getAllSessions } from "@/services/zitadel/cookies";
+import { getCurrentSessionId } from "@/services/zitadel/current-session";
 import { AccountSelectionView, AccountDisplayItem } from "./_components/account-selection-view";
 import { Suspense } from "react";
-import { getUserById, searchSessions } from "@/lib/zitadel/api";
+import { getUserById, searchSessions } from "@/services/zitadel/api";
 import { AutoSignIn } from "./(auth)/login/_components/auto-sign-in";
 
 export default async function AccountSelectionPage({searchParams}: {searchParams: any;}) {

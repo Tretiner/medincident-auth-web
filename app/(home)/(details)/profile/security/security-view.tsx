@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { LinkedAccountsCard } from "./_components/linked-accounts-card";
 import { SessionsList } from "./_components/sessions-list";
 import { useLinkedAccounts, useUserSessions, useSecurityMutations } from "./security.hooks";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface SecurityViewProps {

@@ -5,8 +5,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 // Импортируем ваши методы для работы с пользователями и сессиями
-import { createHumanUser, createSession, addIdpLinkToUser, completeAuthRequest, deleteSession, searchUserSessions } from "@/lib/zitadel/api";
-import { addSessionToCookie, getAllSessions, removeSessionFromCookie } from "@/lib/zitadel/zitadel-cookies";
+import { createHumanUser, createSession, addIdpLinkToUser, completeAuthRequest, deleteSession, searchUserSessions } from "@/services/zitadel/api";
+import { addSessionToCookie, getAllSessions, removeSessionFromCookie } from "@/services/zitadel/cookies";
 
 export async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
   const result = await completeAuthRequest(requestId, sessionId, sessionToken);

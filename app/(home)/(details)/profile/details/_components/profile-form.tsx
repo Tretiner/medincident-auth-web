@@ -2,11 +2,11 @@
 
 import { Controller, UseFormReturn } from "react-hook-form";
 import { PersonalInfoFormData } from "@/domain/profile/schema";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 import { Loader2, CheckCircle2, AlertCircle, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 export interface FormMessage {
   type: "success" | "error";

@@ -1,3 +1,3 @@
-import { handlers } from "@/lib/zitadel/user/auth";
+import { handlers } from "@/services/zitadel/user/auth";
 
 export const { GET, POST } = handlers;

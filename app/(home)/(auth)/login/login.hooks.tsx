@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import { QrData } from "@/domain/auth/types";
-import { handleFetch } from "@/lib/fetch-helper";
+import { handleFetch } from "@/shared/lib/fetch-helper";
 import z from "zod";
 import { useProfileStore } from "../../(details)/profile/profile.store";
 import { logoutAction } from "./actions";
