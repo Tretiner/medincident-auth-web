@@ -30,7 +30,7 @@ const fetchQrCodeAPI = async (): Promise<QrData> => {
 };
 
 export function useQrAuth(enabled: boolean = true) {
-  const { data, error, isLoading, isValidating } = useSWR(
+  const { data, error, isLoading, isValidating, mutate } = useSWR(
     enabled ? "/api/auth/qr" : null,
     fetchQrCodeAPI,
     {
@@ -47,6 +47,7 @@ export function useQrAuth(enabled: boolean = true) {
     qrUrl: data?.url,
     isLoading: isLoading || isValidating,
     isError: !!error,
+    refresh: mutate,
   };
 }
 
