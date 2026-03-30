@@ -28,7 +28,7 @@ export function QrAuthSection() {
         url={qrUrl}
         isLoading={isLoading}
         isError={isError}
-        className="mb-8 shadow-sm bg-background/60 backdrop-blur-md border border-border"
+        className="mb-8 bg-background/60 backdrop-blur-md border border-border border-2"
       />
       <h2 className="text-2xl font-bold text-foreground mb-3 tracking-tight">
         Вход по QR-коду

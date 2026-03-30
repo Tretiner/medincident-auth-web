@@ -1,13 +1,19 @@
 "use client";
 
-import Image from "next/image";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+// 1. Возвращаем правильную библиотеку для стилизации точек и глаз
+import { QRCode } from "react-qrcode-logo";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// Обходим ошибку типов TypeScript
+const QRCodeStyled = QRCode as any;
 
 interface QrCodeCardProps {
   url?: string;
   isLoading: boolean;
   isError: boolean;
+  onRefresh?: () => void;
   className?: string;
 }
 
@@ -15,39 +21,79 @@ export function QrCodeCard({
   url,
   isLoading,
   isError,
+  onRefresh,
   className,
 }: QrCodeCardProps) {
+  const hasValidValue = url && url.trim() !== "";
+
+  // 2. Гарантия рендера в браузере.
+  // Это решит проблему пустого экрана, которая была в самом начале.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <div
       className={cn(
-        // Responsive sizing: full width up to 256px, always square
-        "bg-background p-4 rounded-xl border border-border relative overflow-hidden group w-full max-w-[256px] aspect-square flex items-center justify-center",
+        "relative flex aspect-square w-full max-w-[256px] items-center justify-center overflow-hidden rounded-2xl border-2 border-border bg-white p-0 transition-all duration-300",
         className
       )}
     >
+      <div
+        className="absolute inset-0 opacity-[0.02] pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+        }}
+      />
+
       {isError && (
-        <div className="flex flex-col items-center text-destructive gap-2 px-4 animate-in fade-in zoom-in-95 duration-300">
-          <AlertCircle className="w-8 h-8 opacity-50" />
-          <span className="text-xs font-medium text-center">Ошибка загрузки QR</span>
+        <div className="z-20 flex flex-col items-center gap-2 animate-in fade-in zoom-in-95">
+          <AlertCircle className="h-8 w-8 text-destructive/50" />
+          <button
+            onClick={onRefresh}
+            className="text-xs font-medium text-muted-foreground hover:text-primary flex items-center gap-1"
+          >
+            <RefreshCw className="h-3 w-3" /> Повторить
+          </button>
         </div>
       )}
 
-      {(isLoading || (!url && !isError)) && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
-            <Loader2 className="size-12 animate-spin text-primary/60" />
-          </div>
+      {isLoading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
+          <Loader2 className="h-10 w-10 animate-spin text-[#76c446]" />
+        </div>
       )}
 
-      {!isError && !isLoading && url && (
-        <Image
-          src={url}
-          alt="QR Code Login"
-          fill
-          priority
-          unoptimized
-          sizes="(max-width: 768px) 100vw, 256px"
-          className="object-contain p-4 animate-in fade-in duration-700"
-        />
+      {!isError && isMounted && (
+        <div
+          className={cn(
+            "transition-all duration-500",
+            isLoading || !hasValidValue
+              ? "opacity-20 scale-95"
+              : "opacity-86 scale-100"
+          )}
+        >
+          <QRCodeStyled
+            value={hasValidValue ? url : "https://google.com"}
+            size={220}
+            qrStyle="fluid"
+            eyeRadius={[
+              [12, 12, 12, 12],
+              [12, 12, 12, 12],
+              [12, 12, 12, 12],
+            ]}
+            quietZone={14}
+            fgColor="#2b3a15"
+            bgColor="#00000000"
+            level="H"
+
+            // logoImage="/qr-icon.svg" 
+            // logoWidth={60}
+            // removeQrCodeBehindLogo={true}
+          />
+        </div>
       )}
     </div>
   );
