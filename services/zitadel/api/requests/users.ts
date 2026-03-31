@@ -212,3 +212,42 @@ export async function searchUserMetadata(
     ZitadelSearchMetadataResponseSchema
   );
 }
+
+// ==========================================
+// ПОИСК ПОЛЬЗОВАТЕЛЕЙ
+// ==========================================
+
+export const ZitadelSearchUsersResponseSchema = z.object({
+  details: z.any().optional(),
+  result: z.array(
+    z.object({
+      userId: z.string().optional(),
+      preferredLoginName: z.string().optional(),
+      human: z.object({
+        email: z.object({ email: z.string().optional() }).optional(),
+        profile: z.object({
+          givenName: z.string().optional(),
+          familyName: z.string().optional(),
+        }).optional(),
+      }).optional(),
+    }).catchall(z.any())
+  ).optional(),
+}).catchall(z.any());
+
+export async function searchUserByEmail(
+  email: string
+): Promise<Result<z.infer<typeof ZitadelSearchUsersResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.post("/v2/users/search", {
+      queries: [
+        {
+          emailQuery: {
+            emailAddress: email,
+            method: "TEXT_FILTER_METHOD_EQUALS",
+          },
+        },
+      ],
+    }),
+    ZitadelSearchUsersResponseSchema
+  );
+}

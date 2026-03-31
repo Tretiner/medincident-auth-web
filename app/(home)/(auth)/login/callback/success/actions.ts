@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 // Импортируем ваши методы для работы с пользователями и сессиями
 import { createHumanUser, createSession, addIdpLinkToUser, completeAuthRequest, deleteSession, searchUserSessions } from "@/services/zitadel/api";
 import { addSessionToCookie, getAllSessions, removeSessionFromCookie } from "@/services/zitadel/cookies";
+import { env } from "@/shared/config/env";
 
 export async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
   const result = await completeAuthRequest(requestId, sessionId, sessionToken);
@@ -65,7 +66,7 @@ export async function finishAuth(sessionResData: any, requestId?: string) {
     // Записываем ID выбранной сессии в отдельную куку "текущего пользователя"
     cookieStore.set("zitadel_current_session", sessionResData.sessionId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: env.NODE_ENV === "production",
       path: "/",
       sameSite: "lax",
     });
