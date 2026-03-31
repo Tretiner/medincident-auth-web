@@ -22,6 +22,8 @@ export interface RegisterFormErrors {
   familyName?: string;
   middleName?: string;
   email?: string;
+  password?: string;
+  confirm?: string;
 }
 
 // 3. Define the overall state returned by the Server Action
@@ -32,12 +34,13 @@ export interface RegisterFormState {
 }
 
 interface RegisterViewProps {
-  // 4. Strongly type the Server Action signature instead of using 'any'
   action: (state: RegisterFormState, payload: FormData) => Promise<RegisterFormState>;
   initialData: RegisterFormValues;
+  buttonLabel?: string;
+  showPassword?: boolean;
 }
 
-export function RegisterView({ action, initialData }: RegisterViewProps) {
+export function RegisterView({ action, initialData, buttonLabel = "Продолжить", showPassword }: RegisterViewProps) {
   const [state, formAction, isPending] = useActionState(action, { 
     success: false, 
     errors: {},
@@ -133,20 +136,59 @@ export function RegisterView({ action, initialData }: RegisterViewProps) {
         )}
       </div>
 
-      {/* КНОПКА ОТПРАВКИ: Узкая и по центру */}
-      <div className="flex justify-center pt-2">
-        <Button 
-          type="submit" 
-          disabled={isPending}
-          className="w-full max-w-[200px]" // Делает кнопку узкой (максимум 200px)
-        >
+      {showPassword && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="password" className={cn(state.errors?.password && "text-destructive")}>
+              Пароль
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              disabled={isPending}
+              placeholder="Не менее 8 символов"
+              className={cn(state.errors?.password && "border-destructive focus-visible:ring-destructive", "bg-card")}
+            />
+            {state.errors?.password && (
+              <span className="text-[11px] font-medium text-destructive mt-1 block leading-tight">
+                {state.errors.password}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirm" className={cn(state.errors?.confirm && "text-destructive")}>
+              Повторите пароль
+            </Label>
+            <Input
+              id="confirm"
+              name="confirm"
+              type="password"
+              autoComplete="new-password"
+              disabled={isPending}
+              placeholder="Повторите пароль"
+              className={cn(state.errors?.confirm && "border-destructive focus-visible:ring-destructive", "bg-card")}
+            />
+            {state.errors?.confirm && (
+              <span className="text-[11px] font-medium text-destructive mt-1 block leading-tight">
+                {state.errors.confirm}
+              </span>
+            )}
+          </div>
+        </>
+      )}
+
+      <div className="pt-2">
+        <Button type="submit" disabled={isPending} className="w-full">
           {isPending ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Создание...
+              Загрузка...
             </>
           ) : (
-            "Создать"
+            buttonLabel
           )}
         </Button>
       </div>

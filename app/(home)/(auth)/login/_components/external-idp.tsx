@@ -1,13 +1,14 @@
-// app/login/_components/social-links.tsx
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/shared/ui/button";
 import { MaxLogoIcon, TelegramLogoIcon } from "@/components/icons";
 import { ZitadelIdp } from "@/services/zitadel/api";
-import { loginWithProviderAction } from "../actions"; // Импортируем Action
+import { loginWithProviderAction } from "../actions";
+import { Mail } from "lucide-react";
 
 interface AuthButtonProps {
-  requestId: string;
+  requestId?: string;
   idpId: string;
 }
 
@@ -15,7 +16,6 @@ interface GenericButtonProps extends AuthButtonProps {
   name: string;
 }
 
-// Заметьте: убрали asChild и <Link>, добавили type="submit"
 export const GenericButton = ({ requestId, idpId, name }: GenericButtonProps) => (
   <form action={loginWithProviderAction.bind(null, idpId, requestId)} className="w-full">
     <Button
@@ -63,32 +63,57 @@ const STYLED_PROVIDERS: Record<string, React.FC<AuthButtonProps>> = {
 };
 
 interface ExternalIdentityProvidersProps {
-  requestId: string;
+  requestId?: string;
   providers: ZitadelIdp[];
 }
 
 export function ExternalIdentityProviders({ requestId, providers }: ExternalIdentityProvidersProps) {
-  if (!providers || providers.length === 0) return null;
+  const emailHref = requestId ? `/login/email?requestId=${requestId}` : "/login/email";
 
   return (
     <div className="grid gap-2 md:gap-3">
-      {providers.map((provider) => {
-        const lowerCaseName = provider.name.toLowerCase();
-        const StyledProvider = STYLED_PROVIDERS[lowerCaseName];
-        
-        if (StyledProvider) {
-          return <StyledProvider key={provider.id} requestId={requestId} idpId={provider.id} />;
-        }
+      {providers && providers.length > 0 && (
+        <>
+          {providers.map((provider) => {
+            const lowerCaseName = provider.name.toLowerCase();
+            const StyledProvider = STYLED_PROVIDERS[lowerCaseName];
 
-        return (
-          <GenericButton 
-            key={provider.id} 
-            requestId={requestId}
-            idpId={provider.id} 
-            name={provider.name} 
-          />
-        );
-      })}
+            if (StyledProvider) {
+              return <StyledProvider key={provider.id} requestId={requestId} idpId={provider.id} />;
+            }
+
+            return (
+              <GenericButton
+                key={provider.id}
+                requestId={requestId}
+                idpId={provider.id}
+                name={provider.name}
+              />
+            );
+          })}
+
+          <div className="relative my-1">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">или</span>
+            </div>
+          </div>
+        </>
+      )}
+
+      <Button
+        variant="outline"
+        size="lg"
+        className="w-full relative py-6 text-base shadow-none transition-all active:scale-[0.98]"
+        asChild
+      >
+        <Link href={emailHref}>
+          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" />
+          <span className="pl-4">Электронная почта</span>
+        </Link>
+      </Button>
     </div>
   );
 }

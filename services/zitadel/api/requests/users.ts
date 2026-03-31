@@ -234,6 +234,25 @@ export const ZitadelSearchUsersResponseSchema = z.object({
   ).optional(),
 }).catchall(z.any());
 
+export async function verifyUserEmail(
+  userId: string,
+  code: string
+): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.post(`/v2/users/${userId}/email/verify`, { verificationCode: code }),
+    ZitadelGenericUpdateResponseSchema
+  );
+}
+
+export async function resendEmailVerification(
+  userId: string
+): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.post(`/v2/users/${userId}/email/resend`, {}),
+    ZitadelGenericUpdateResponseSchema
+  );
+}
+
 export async function searchUserByEmail(
   email: string
 ): Promise<Result<z.infer<typeof ZitadelSearchUsersResponseSchema>>> {

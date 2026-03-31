@@ -1,0 +1,72 @@
+"use server";
+
+import { cookies } from "next/headers";
+
+const IDP_INTENT_COOKIE = "zitadel_idp_intent";
+const REG_FLOW_COOKIE = "zitadel_reg_flow";
+const COOKIE_MAX_AGE = 60 * 15; // 15 минут
+
+// Данные IDP intent (для пути через внешний провайдер)
+export interface IdpIntentData {
+  intentId: string;
+  intentToken: string;
+  idpInformation: any;
+  requestId?: string;
+}
+
+// Состояние многошагового flow регистрации
+export interface RegFlowData {
+  // Профиль
+  givenName: string;
+  familyName: string;
+  middleName?: string;
+  email: string;
+  // Путь
+  source: "idp" | "email";
+  requestId?: string;
+  // После создания пользователя
+  userId?: string;
+  loginName?: string;
+  // Для email-пути (хранится кратко)
+  password?: string;
+  // Для IDP-пути
+  intentId?: string;
+  intentToken?: string;
+}
+
+async function setCookie(name: string, data: object, maxAge = COOKIE_MAX_AGE) {
+  const store = await cookies();
+  store.set(name, JSON.stringify(data), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge,
+  });
+}
+
+async function getCookie<T>(name: string): Promise<T | null> {
+  const store = await cookies();
+  const value = store.get(name)?.value;
+  if (!value) return null;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
+
+async function deleteCookie(name: string) {
+  const store = await cookies();
+  store.delete(name);
+}
+
+// IDP Intent cookie
+export const setIdpIntentCookie = async (data: IdpIntentData) => setCookie(IDP_INTENT_COOKIE, data);
+export const getIdpIntentCookie = async () => getCookie<IdpIntentData>(IDP_INTENT_COOKIE);
+export const deleteIdpIntentCookie = async () => deleteCookie(IDP_INTENT_COOKIE);
+
+// Reg Flow cookie
+export const setRegFlowCookie = async (data: RegFlowData) => setCookie(REG_FLOW_COOKIE, data);
+export const getRegFlowCookie = async () => getCookie<RegFlowData>(REG_FLOW_COOKIE);
+export const deleteRegFlowCookie = async () => deleteCookie(REG_FLOW_COOKIE);

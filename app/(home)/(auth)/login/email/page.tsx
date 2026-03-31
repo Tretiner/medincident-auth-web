@@ -1,0 +1,37 @@
+import { AppLogoIcon } from "@/components/icons";
+import { APP_NAME } from "@/shared/lib/constants";
+import { EmailLoginForm } from "./_components/email-login-form";
+import { loginWithEmailAction } from "./actions";
+
+export default async function EmailLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ requestId?: string }>;
+}) {
+  const { requestId } = await searchParams;
+  const boundAction = loginWithEmailAction.bind(null, requestId);
+
+  const registerHref = requestId
+    ? `/login/register?source=email&requestId=${requestId}`
+    : "/login/register?source=email";
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-start pt-16 md:pt-24 p-4 bg-background font-sans">
+      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
+        <div className="flex flex-col items-center mb-8 text-center">
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 text-primary border border-primary/20">
+            <AppLogoIcon className="w-8 h-8" />
+          </div>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            Вход в {APP_NAME}
+          </h1>
+          <p className="text-muted-foreground mt-2 text-sm">
+            Войдите по электронной почте
+          </p>
+        </div>
+
+        <EmailLoginForm action={boundAction} registerHref={registerHref} />
+      </div>
+    </div>
+  );
+}

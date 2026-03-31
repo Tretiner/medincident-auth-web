@@ -30,20 +30,17 @@ export async function completeAuthFlow(sessionId: string, sessionToken: string, 
  * Универсальная функция финализации авторизации
  * Теперь принимает полный объект data, возвращаемый API Zitadel.
  */
-export async function finishAuth(sessionResData: any, requestId?: string) {
-  // 1. Извлекаем детальную информацию о сессии из ответа ZITADEL
-  // (В ответе createSession обычно есть поля sessionId, sessionToken и объект session)
+export async function finishAuth(sessionResData: any, requestId?: string, loginNameOverride?: string) {
   const sessionDetails = sessionResData.session || {};
   const userFactors = sessionDetails.factors?.user || {};
 
-  // Формируем объект согласно новому интерфейсу Cookie
   const newSessionCookie = {
     id: sessionResData.sessionId,
     token: sessionResData.sessionToken,
     creationTs: new Date(sessionDetails.creationDate || Date.now()).getTime().toString(),
     expirationTs: new Date(sessionDetails.expirationDate || Date.now() + 86400000).getTime().toString(),
     changeTs: new Date(sessionDetails.changeDate || Date.now()).getTime().toString(),
-    loginName: userFactors.loginName || "unknown",
+    loginName: loginNameOverride || userFactors.loginName || "unknown",
     organization: userFactors.organizationId || "",
     requestId: requestId,
   };

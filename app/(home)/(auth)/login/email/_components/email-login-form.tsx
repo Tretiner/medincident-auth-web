@@ -1,0 +1,75 @@
+"use client";
+
+import { useActionState } from "react";
+import Link from "next/link";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
+import { EmailLoginState } from "../actions";
+
+interface Props {
+  action: (state: EmailLoginState, formData: FormData) => Promise<EmailLoginState>;
+  registerHref: string;
+}
+
+export function EmailLoginForm({ action, registerHref }: Props) {
+  const [state, formAction, isPending] = useActionState(action, { errors: {} });
+
+  return (
+    <form action={formAction} className="space-y-5">
+      {state.errors?.form && (
+        <div className="p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-md text-sm text-center">
+          {state.errors.form}
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Label htmlFor="email" className={cn(state.errors?.email && "text-destructive")}>
+          Email
+        </Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          defaultValue={state.values?.email}
+          placeholder="your@email.com"
+          disabled={isPending}
+          autoComplete="email"
+          className={cn(state.errors?.email && "border-destructive focus-visible:ring-destructive", "bg-card")}
+        />
+        {state.errors?.email && (
+          <span className="text-[11px] font-medium text-destructive block">{state.errors.email}</span>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="password" className={cn(state.errors?.password && "text-destructive")}>
+          Пароль
+        </Label>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="••••••••"
+          disabled={isPending}
+          autoComplete="current-password"
+          className={cn(state.errors?.password && "border-destructive focus-visible:ring-destructive", "bg-card")}
+        />
+        {state.errors?.password && (
+          <span className="text-[11px] font-medium text-destructive block">{state.errors.password}</span>
+        )}
+      </div>
+
+      <div className="flex gap-3 pt-2">
+        <Button variant="outline" className="flex-1 bg-card" asChild disabled={isPending}>
+          <Link href={registerHref}>Создать аккаунт</Link>
+        </Button>
+        <Button type="submit" className="flex-1" disabled={isPending}>
+          {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Войти"}
+        </Button>
+      </div>
+    </form>
+  );
+}

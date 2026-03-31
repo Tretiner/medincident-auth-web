@@ -108,6 +108,21 @@ export async function updateSession(
   );
 }
 
+export async function createSessionWithPassword(
+  loginName: string,
+  password: string
+): Promise<Result<z.infer<typeof ZitadelCreateSessionResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.post("/v2/sessions", {
+      checks: {
+        user: { loginName },
+        password: { password },
+      },
+    }),
+    ZitadelCreateSessionResponseSchema
+  );
+}
+
 export async function deleteSession(
   sessionId: string,
   sessionToken: string

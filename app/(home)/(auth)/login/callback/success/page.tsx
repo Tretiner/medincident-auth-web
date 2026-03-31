@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { retrieveIdpIntent } from "@/services/zitadel/api";
+import { setIdpIntentCookie } from "../../_lib/reg-flow";
 import { handleLoginAction } from "./actions";
 
 export default async function CallbackSuccessPage({
@@ -7,31 +8,39 @@ export default async function CallbackSuccessPage({
 }: {
   searchParams: Promise<{ requestId?: string; id?: string; token?: string; userId?: string; user?: string }>;
 }) {
-  const { requestId, id, token, userId: queryUserId, user } = await searchParams;
+  const params = await searchParams;
+  const { requestId } = params;
+  const id = params.id as string;
+  const token = params.token as string;
+  const userId = params.userId ?? params.user;
 
-  if (!id || !token) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <h1 className="text-xl text-destructive font-bold">Отсутствуют id или token</h1>
-      </div>
-    );
+  if (!params.id || !params.token) {
+    redirect("/login");
   }
 
-  const userId = queryUserId || user;
-  if (!userId){
-    redirect(`/login/register?id=${id}&token=${token}${requestId ? `&requestId=${requestId}` : ""}`);
-    return;
+  // Пользователь уже привязан — создаём сессию автоматически
+  if (userId) {
+    await handleLoginAction(userId, id, token, requestId);
+    return null;
   }
 
-  const response = await retrieveIdpIntent(userId, { idpIntentToken: token!!});
-  if (!response || !response.success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <h1 className="text-xl text-destructive font-bold">Не удалось получить информацию из внешнего провайдера</h1>
-      </div>
-    );
+  // Новый пользователь — получаем данные провайдера и сохраняем в cookie
+  const intentRes = await retrieveIdpIntent(id, { idpIntentToken: token });
+
+  if (!intentRes.success) {
+    const failParams = new URLSearchParams({ error: "Не удалось получить данные провайдера" });
+    if (requestId) failParams.set("requestId", requestId);
+    redirect(`/login/callback/failure?${failParams}`);
   }
 
-  await handleLoginAction(userId, id!!, token!!, requestId);
-  return null;
+  await setIdpIntentCookie({
+    intentId: id,
+    intentToken: token,
+    idpInformation: (intentRes as { success: true; data: any }).data?.idpInformation,
+    requestId,
+  });
+
+  const regParams = new URLSearchParams({ source: "idp" });
+  if (requestId) regParams.set("requestId", requestId);
+  redirect(`/login/register?${regParams}`);
 }
