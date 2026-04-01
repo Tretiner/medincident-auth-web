@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { createHumanUser, updateUserMiddleName } from "@/services/zitadel/api";
 import { userService } from "@/services/grpc/client";
 import { ClientError } from "nice-grpc";
@@ -9,6 +10,7 @@ import {
   deleteIdpIntentCookie,
   setRegFlowCookie,
 } from "../_lib/reg-flow";
+import { env } from "@/shared/config/env";
 import type { RegisterFormState } from "./_components/register-view";
 
 // ==========================================
@@ -120,6 +122,23 @@ function parseZitadelError(rawMessage: string): Record<string, string> | null {
   return { [field]: humanReason };
 }
 
+function formatUnexpectedError(error: any): string {
+  const raw: string = error?.message ?? "";
+  const jsonStart = raw.indexOf("{");
+  if (jsonStart !== -1) {
+    try {
+      const parsed = JSON.parse(raw.slice(jsonStart));
+      if (env.isDev) return raw;
+      return parsed.message ?? "Ошибка регистрации";
+    } catch {
+      // не JSON — возвращаем как есть в dev, generic в prod
+    }
+  }
+  if (env.isDev) return raw || "Ошибка регистрации";
+  console.error("[register] unexpected error:", error);
+  return "Ошибка регистрации";
+}
+
 // ==========================================
 // IDP ПУТЬ: создаём пользователя, сохраняем userId → /verify
 // ==========================================
@@ -155,7 +174,7 @@ export async function continueRegisterIdp(
         preferredLanguage:
           rawInfo.preferredLanguage === "und" ? "ru" : (rawInfo.preferredLanguage ?? "ru"),
       },
-      email: { email, isVerified: false },
+      email: { email, sendCode: {} },
       idpLinks: [
         {
           idpId: intent.idpInformation?.idpId,
@@ -191,9 +210,9 @@ export async function continueRegisterIdp(
     const params = new URLSearchParams({ requestId: requestId ?? "" });
     redirect(`/login/verify?${params}`);
   } catch (error: any) {
-    if (error?.message === "NEXT_REDIRECT") throw error;
+    if (isRedirectError(error)) throw error;
     const zitadelFields = parseZitadelError(error.message ?? "");
-    const errorFields = zitadelFields ?? { form: error.message ?? "Ошибка регистрации" };
+    const errorFields = zitadelFields ?? { form: formatUnexpectedError(error) };
     return { success: false, errors: errorFields, values };
   }
 }
@@ -232,7 +251,7 @@ export async function continueRegisterEmail(
         displayName: `${givenName} ${familyName}`,
         preferredLanguage: "ru",
       },
-      email: { email, isVerified: false },
+      email: { email, sendCode: {} },
       password: { password, changeRequired: false },
     });
 
@@ -258,9 +277,9 @@ export async function continueRegisterEmail(
     if (requestId) params.set("requestId", requestId);
     redirect(`/login/verify?${params}`);
   } catch (error: any) {
-    if (error?.message === "NEXT_REDIRECT") throw error;
+    if (isRedirectError(error)) throw error;
     const zitadelFields = parseZitadelError(error.message ?? "");
-    const errorFields = zitadelFields ?? { form: error.message ?? "Ошибка регистрации" };
+    const errorFields = zitadelFields ?? { form: formatUnexpectedError(error) };
     return { success: false, errors: errorFields, values };
   }
 }

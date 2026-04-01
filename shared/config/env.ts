@@ -7,6 +7,7 @@ const envConfig = createEnv({
     ZITADEL_API_URL: z.url(),
     ZITADEL_SECRET: z.string().min(32),
     ZITADEL_MACHINE_KEY_PATH: z.string(),
+    ZITADEL_ORG_ID: z.string().min(1),
 
     APP_URL: z.url(),
     APP_CLIENT_ID: z.string(),
@@ -22,6 +23,7 @@ const envConfig = createEnv({
     ZITADEL_API_URL: process.env.ZITADEL_API_URL,
     ZITADEL_SECRET: process.env.ZITADEL_SECRET,
     ZITADEL_MACHINE_KEY_PATH: process.env.ZITADEL_MACHINE_KEY_PATH,
+    ZITADEL_ORG_ID: process.env.ZITADEL_ORG_ID,
 
     APP_URL: process.env.APP_URL,
     APP_CLIENT_ID: process.env.APP_CLIENT_ID,

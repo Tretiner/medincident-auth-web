@@ -14,7 +14,7 @@ export async function verifyEmailAction(
 ): Promise<VerifyState> {
   const code = (formData.get("code") as string)?.trim();
 
-  if (!code || code.length < 4) {
+  if (!code ) {
     return { errors: { code: "Введите код подтверждения" } };
   }
 

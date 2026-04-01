@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Result } from "@/domain/error";
 import { handleZitadelRequest } from "../client-helper";
 import { zitadelApi } from "../client";
+import { env } from "@/shared/config/env";
 import { PaginationRequest, TextFilterMethod, ZitadelGenericUpdateResponseSchema } from "./shared";
 
 // ==========================================
@@ -51,7 +52,7 @@ export interface ZitadelUpdateHumanProfileRequest {
 
 export interface ZitadelUpdateHumanEmailRequest {
   email: string;
-  isVerified: boolean;
+  sendCode: Record<string, never>;
 }
 
 export interface ZitadelUpdateUserMetadataRequest {
@@ -84,7 +85,9 @@ export async function createHumanUser(
   body: any // Можно заменить на конкретный тип Request, если он у вас описан
 ): Promise<Result<z.infer<typeof ZitadelCreateHumanUserResponseSchema>>> {
   return handleZitadelRequest(
-    () => zitadelApi.post("/v2/users/human", body),
+    () => zitadelApi.post("/v2/users/human", body, {
+      headers: { "x-zitadel-orgid": env.ZITADEL_ORG_ID },
+    }),
     ZitadelCreateHumanUserResponseSchema
   );
 }
@@ -121,11 +124,10 @@ export async function updateHumanProfile(
 
 export async function updateHumanEmail(
   userId: string,
-  email: string,
-  isVerified: boolean = false
+  email: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
 
-  const body: ZitadelUpdateHumanEmailRequest = { isVerified, email };
+  const body: ZitadelUpdateHumanEmailRequest = { email, sendCode: {} };
 
   return handleZitadelRequest(
     () => zitadelApi.post(`/v2/users/${userId}/email`, body),
@@ -248,7 +250,7 @@ export async function resendEmailVerification(
   userId: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   return handleZitadelRequest(
-    () => zitadelApi.post(`/v2/users/${userId}/email/resend`, {}),
+    () => zitadelApi.post(`/v2/users/${userId}/email/resend`, { sendCode: {} }),
     ZitadelGenericUpdateResponseSchema
   );
 }
