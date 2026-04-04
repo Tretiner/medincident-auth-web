@@ -11,7 +11,12 @@ const nextConfig: NextConfig = {
   ],
 
   experimental: {
+    turbopackFileSystemCacheForDev: true,
     authInterrupts: true,
+  },
+
+  turbopack: {
+    resolveAlias: {},
   },
 };
 

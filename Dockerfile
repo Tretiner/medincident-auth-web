@@ -2,11 +2,10 @@ FROM oven/bun:1-alpine
 WORKDIR /app
 
 COPY package.json bun.lock* ./
-
 RUN bun install --frozen-lockfile || bun install
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["bun", "run", "next", "dev", "-p", "3000"]
+CMD ["bun", "run", "next", "dev", "--turbopack", "-p", "3000"]
