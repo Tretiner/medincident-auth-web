@@ -1,190 +1,248 @@
-# Auth UI
+# Auth UI — MedIncident
 
-Custom login/profile UI for a self-hosted Zitadel IAM instance. Replaces the default Zitadel ui and provides profile management for users of the MedIncident platform.
-
-Integrates with Zitadel via machine-to-machine JWT assertion (RS256), exposes OIDC-compatible login flows, and communicates with the MedIncident backend over gRPC.
+Custom login/profile UI for self-hosted Zitadel IAM. Replaces default Zitadel UI, provides profile management. Integrates via JWT assertion (RS256), OIDC login flows, gRPC to MedIncident backend.
 
 ## Stack
 
-Next.js 16 (App Router, Turbopack), Bun, TypeScript (strict), Tailwind CSS v4, shadcn/ui (new-york), Zitadel (self-hosted IAM), NextAuth.js v5, react-hook-form + Zod, zustand, nice-grpc.
+Next.js 16 (App Router, Turbopack), Bun, TypeScript (strict), Tailwind CSS v4, shadcn/ui (new-york), Zitadel, NextAuth.js v5, react-hook-form + Zod, zustand, nice-grpc.
 
 ## Project Structure
 
 ```
-app/                         - Next.js App Router: routing shells only, max ~10 lines per page
-  (home)/
-    (auth)/login/            - Login flow pages and server actions
-    (details)/profile/       - Profile, security, settings pages and server actions
-  api/
-    auth/[...nextauth]/      - NextAuth.js route handler
-    health/                  - Health check endpoint
-services/                    - External integrations (never import into shared/ or domain/)
-  zitadel/
-    api/                     - Fetch + Axios clients, JWT auth, error handling
-      requests/              - Per-resource API functions (users, sessions, auth, idps, links)
-    user/auth.ts             - NextAuth.js config with Zitadel provider + token refresh
-    session.ts               - Server-side session validation and redirect helper
-    cookies.ts               - HttpOnly session cookie management
-    current-session.ts       - Current session ID tracking
-    helpers.ts               - Timestamp utilities for Zitadel proto types
-  grpc/
-    client.ts                - nice-grpc channel config for MedIncident gRPC API
-shared/                      - Cross-cutting, no business logic
-  ui/                        - shadcn/ui base components (button, card, input, dialog, etc.)
-  lib/
-    utils.ts                 - cn() class merging, delay()
-    constants.ts             - APP_NAME and other app-wide constants
-    fetch-helper.ts          - Generic typed fetch wrapper with Zod validation
-    ui-error-handler.ts      - Toast error display helpers
-    user-agent.ts            - Browser/OS parser from User-Agent string
-    mock-db.ts               - Dev-only mock data (do not use in production paths)
-  config/
-    env.ts                   - @t3-oss/env-nextjs environment validation schema
-domain/                      - Business types and Zod schemas, no runtime side effects
-  auth/                      - TelegramUser, AuthResponse, JwtUser, QrData
-  profile/                   - User, PersonalInfo, UserSession, SecurityData
-  consent/                   - Consent flow params and response schemas
-  error.ts                   - Result<T> discriminated union
-  external-api.ts            - External API response schemas
-lib/generated/               - Auto-generated protobuf (buf generate) — do not edit
-components/
-  icons.tsx                  - Custom SVG icon components
+app/                         — routing shells only, max ~10 lines per page
+  (home)/(auth)/login/       — login flow pages + server actions
+  (home)/(details)/profile/  — profile, security pages + server actions
+  api/auth/[...nextauth]/    — NextAuth.js route handler
+  api/health/                — health check
+services/                    — external integrations
+  zitadel/api/requests/      — per-resource API (users, sessions, auth, idps, links)
+  zitadel/user/auth.ts       — NextAuth.js config + Zitadel provider
+  zitadel/session.ts         — server-side session validation
+  zitadel/cookies.ts         — HttpOnly session cookie management
+  zitadel/current-session.ts — current session ID tracking
+  zitadel/helpers.ts         — timestamp utilities
+  grpc/client.ts             — nice-grpc channel config
+shared/                      — cross-cutting, zero business logic
+  ui/                        — shadcn/ui components (button, card, input, dialog…)
+  lib/utils.ts               — cn(), delay()
+  lib/constants.ts           — APP_NAME
+  lib/fetch-helper.ts        — typed fetch wrapper + Zod validation
+  lib/ui-error-handler.ts    — toast error display
+  lib/user-agent.ts          — browser/OS parser
+  config/env.ts              — @t3-oss/env-nextjs schema
+domain/                      — business types + Zod schemas, no side effects
+  auth/                      — TelegramUser, AuthResponse, JwtUser, QrData
+  profile/                   — User, PersonalInfo, UserSession, SecurityData
+  consent/                   — consent flow schemas
+  error.ts                   — Result<T> discriminated union
+lib/generated/               — auto-generated protobuf (buf generate) — DO NOT EDIT
+components/icons.tsx         — AppLogoIcon, TelegramLogoIcon, MaxLogoIcon
 ```
 
 ## Where to Put New Code
 
-| What you're adding | Where it goes |
-|--------------------|---------------|
-| New Zitadel API call | `services/zitadel/api/requests/<resource>.ts` |
-| New gRPC call | `services/grpc/` |
-| New shadcn component | `shared/ui/` (run `bunx shadcn add <component>`, then move) |
-| New utility function | `shared/lib/utils.ts` or a new file in `shared/lib/` |
-| New env variable | `shared/config/env.ts` (add to server or client schema) |
-| New business type or Zod schema | `domain/<feature>/types.ts` and `domain/<feature>/schema.ts` |
-| New login/auth UI | `app/(home)/(auth)/login/_components/` + actions in `app/(home)/(auth)/login/` |
-| New profile/settings UI | `app/(home)/(details)/profile/<section>/` |
-| Page-level server action | Co-locate with the page in `app/` — not in services/ |
-| Feature store (zustand) | Co-locate with the feature in `app/` if small, or `app/<feature>/store.ts` |
+| What | Where |
+|------|-------|
+| Zitadel API call | `services/zitadel/api/requests/<resource>.ts` |
+| gRPC call | `services/grpc/` |
+| shadcn component | `shared/ui/` via `bunx shadcn add <name>` |
+| Utility function | `shared/lib/` |
+| Env variable | `shared/config/env.ts` (server or client schema) |
+| Business type / Zod schema | `domain/<feature>/types.ts` + `schema.ts` |
+| Login/auth UI | `app/(home)/(auth)/login/_components/` |
+| Profile/settings UI | `app/(home)/(details)/profile/<section>/` |
+| Server action | co-locate with page in `app/`, not in `services/` |
+| Zustand store | co-locate with feature in `app/` |
+
+---
 
 ## Rules
 
-### Routing
-Pages in `app/` are thin routing shells. No business logic, no direct API calls, no large JSX trees. Extract to `_components/` inside the page directory.
+### Architecture
 
-### Imports — layer boundaries
+**Import boundaries — strict:**
 ```
-app/        → can import from services/, shared/, domain/
-services/   → can import from shared/, domain/
-shared/     → can import from domain/ only
-domain/     → no internal imports
+app/        → services/, shared/, domain/
+services/   → shared/, domain/
+shared/     → domain/
+domain/     → nothing
 ```
-Never import upward (services must not import from app/).
+Upward imports are forbidden. `services/` must never import from `app/`.
 
-### Server vs Client components
-Default to server components. Add `"use client"` only for:
-- Event handlers (onClick, onChange, onSubmit)
-- React hooks (useState, useEffect, etc.)
-- Browser-only APIs
+**Pages** — thin routing shells. No business logic, no direct API calls. Extract everything into `_components/` inside the page directory.
 
-### Forms
-Always: `react-hook-form` + `zod` resolver + Russian locale error messages.
+**Server vs Client** — server components by default. Add `"use client"` only for: event handlers, React hooks, browser APIs.
 
-### State
-Use zustand for cross-component state. Co-locate store with the feature that owns it.
+**Forms** — always `react-hook-form` + `zod` resolver + Russian locale error messages.
+
+**State** — zustand for cross-component state. Co-locate store with the feature that owns it.
 
 ---
 
-## Design System Rules
+## Styles
 
-### STRICT: Only use semantic color tokens
+All colors are CSS variables in OKLCH, defined in `app/globals.css`. Light/dark mode via `:root` / `.dark` selectors.
 
-All colors MUST come from CSS variables defined in `app/globals.css`. Never use raw Tailwind colors (red-500, emerald-400, gray-300, etc.) or hardcoded hex/rgb/hsl/oklch values in components.
+### Color Tokens
 
-**Allowed (semantic tokens):**
-```
-bg-background, text-foreground
-bg-card, text-card-foreground
-bg-primary, text-primary-foreground
-bg-secondary, text-secondary-foreground
-bg-muted, text-muted-foreground
-bg-accent, text-accent-foreground
-bg-destructive, text-destructive-foreground
-bg-warning, text-warning-foreground
-border-border, border-input, ring-ring
-bg-brand-telegram, bg-brand-max
-```
+| Token | Purpose | Usage example |
+|-------|---------|---------------|
+| `primary` | main actions, links, active states | `bg-primary text-primary-foreground` |
+| `secondary` | secondary actions, subtle backgrounds | `bg-secondary text-secondary-foreground` |
+| `muted` | disabled elements, placeholders | `text-muted-foreground bg-muted` |
+| `accent` | hover backgrounds, highlights | `hover:bg-accent` |
+| `destructive` | errors, delete actions | `text-destructive bg-destructive/10` |
+| `warning` | warnings, pending states | `text-warning` |
+| `success` | success states, verified status | `text-success bg-success/10` |
+| `border` | all borders | `border-border` |
+| `brand-telegram` | Telegram UI | `text-brand-telegram` |
+| `brand-max` | MAX ID UI | `text-brand-max` |
 
-**Forbidden in components:**
-```
-text-red-500, bg-emerald-400, text-amber-500, bg-gray-300  (raw Tailwind palette)
-text-[#76c446], bg-[#ff0000]                               (arbitrary hex)
-style={{ color: 'red' }}                                   (inline colors)
-```
-
-**Why:** Raw colors break dark mode, prevent centralized theme changes, and create visual inconsistency. All color decisions live in `globals.css` `:root` and `.dark` selectors.
-
-### When you need a new color
-
-If a design requires a color that doesn't exist as a semantic token:
-1. Add the token to `:root` and `.dark` in `app/globals.css`
-2. Expose it via `@theme` block (e.g., `--color-success: var(--success)`)
-3. Use the new token in components (`text-success`)
-
-Never bypass this by hardcoding.
-
-### Known violations to fix
-
-These files currently have hardcoded colors that should be replaced with theme tokens:
-- `app/(home)/(auth)/login/_components/qr-code-card.tsx` — `text-[#76c446]` → `text-primary`, `fgColor="#2b3a15"` → use CSS var
-- `app/(home)/(details)/profile/details/_components/profile-form.tsx` — `text-amber-500` → `text-warning`, `text-emerald-500` → `text-primary`
-- `app/(home)/(details)/profile/security/security-view.tsx` — `bg-emerald-500/10`, `text-emerald-600`, `dark:text-emerald-400`, `border-emerald-500/20` → add `--success` token to globals.css
-- `app/(home)/(details)/profile/security/_components/sessions-list.tsx` — `text-emerald-500` → `text-primary` or `text-success`
-- `shared/ui/skeleton.tsx` — `bg-gray-500/10` → `bg-muted`
-
-### Color token reference
-
-| Token | Light | Dark | Use for |
-|-------|-------|------|---------|
-| `primary` | green oklch(0.696) | green oklch(0.62) | Main actions, links, active states |
-| `secondary` | light green | dark gray | Secondary actions, subtle backgrounds |
-| `muted` | gray-100 | dark gray | Disabled states, placeholders |
-| `accent` | light green | dark gray | Hover backgrounds, highlights |
-| `destructive` | red | red | Errors, delete actions |
-| `warning` | orange | orange | Warnings, pending states |
-| `border` | gray-200 | dark border | All borders |
-| `brand-telegram` | blue | blue | Telegram-specific UI |
-| `brand-max` | purple | purple | MAX ID-specific UI |
+Every token supports `bg-*`, `text-*`, `border-*` + a `*-foreground` pair for text on top.
 
 ### Gradients
 
-Use CSS variable gradients, not inline values:
-```
-bg-gradient-telegram  (uses --telegram-gradient)
-bg-gradient-max       (uses --max-gradient)
+```tsx
+// In className
+className="bg-gradient-telegram"   // var(--telegram-gradient)
+className="bg-gradient-max"        // var(--max-gradient)
+
+// In component configs
+className="bg-[image:var(--telegram-gradient)]"
 ```
 
-### Radius
+### Text Sizes
 
-Use theme radius tokens: `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-2xl`, `rounded-3xl`. Don't hardcode pixel values.
+| Class | Size | When to use |
+|-------|------|-------------|
+| `text-3xs` | 10px/14px | badges, status labels |
+| `text-2xs` | 11px/16px | validation errors, small captions |
+| `text-xs` | 12px/16px | standard small text |
+
+### Custom Utilities
+
+| Class | Expands to | When to use |
+|-------|-----------|-------------|
+| `section-label` | `text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1` | section headings |
+| `scrollbar-app` | custom thin scrollbar + `scrollbar-gutter: stable` | scrollable containers |
+| `container` | centered container + responsive padding | page wrappers |
+
+### Border Radius
+
+`rounded-sm` / `rounded-md` / `rounded-lg` / `rounded-xl` / `rounded-2xl` / `rounded-3xl`. Hardcoded pixel values are forbidden.
+
+### Adding a New Color
+
+1. Add CSS variable to `:root` and `.dark` in `app/globals.css`
+2. Expose in `@theme` block: `--color-<name>: var(--<name>)`
+3. Use in components: `text-<name>`, `bg-<name>`
 
 ---
 
-## Component Patterns
+## Components
+
+### shadcn/ui — `shared/ui/`
+
+Style: new-york. Install: `bunx shadcn add <component>`.
+
+`Button`, `Card`, `Input`, `Label`, `Dialog`, `Avatar`, `Separator`, `Skeleton`, `Sonner` (toasts).
+
+### Icons
+
+- **Custom SVGs** in `components/icons.tsx`: `AppLogoIcon`, `TelegramLogoIcon`, `MaxLogoIcon`
+- **Lucide React** (`lucide-react`) — primary icon library
+
+### Button
+
+Variants: `default` · `destructive` · `outline` · `secondary` · `ghost` · `link` · `icon` · `telegram` · `max`
+
+Sizes: `default`(h-9) · `sm`(h-8) · `md`(h-10) · `lg`(h-10 px-8) · `icon`(h-9 w-9)
+
+**Already in base — do NOT duplicate:**
+
+| Base style | Consequence |
+|-----------|-------------|
+| `shadow-none` | never add `shadow-none` in className |
+| `transition-all` | never add `transition-all` / `transition-colors` |
+| `[&_svg]:size-4` | never add `w-4 h-4` / `size-4` to icons inside buttons |
+| `[&_svg]:size-6` (telegram/max/icon) | never size icons inside these variants |
+
+```tsx
+// YES
+<Button variant="ghost" size="icon"><LogOut /></Button>
+<Button><Loader2 className="mr-2 animate-spin" />Saving</Button>
+
+// NO
+<Button className="shadow-none transition-all"><LogOut className="w-4 h-4" /></Button>
+```
+
+### Card
+
+**In base:** `shadow-none`, `border border-border`, `bg-card`, `text-card-foreground`. Do not duplicate.
+
+```tsx
+// YES
+<Card className="rounded-xl p-4">
+
+// NO
+<Card className="shadow-none border border-border bg-card">
+```
+
+### Input
+
+**In base:** `shadow-none`. Error state via `cn()`:
+
+```tsx
+<Input className={cn(errors.field && "border-destructive focus-visible:ring-destructive")} />
+```
+
+### Configurable Components (providers)
+
+Styles live in a config object as Tailwind classes, applied via `cn()`:
+
+```tsx
+// YES — class in config
+const PROVIDERS = {
+  telegram: { icon: TelegramLogoIcon, activeClass: "bg-[image:var(--telegram-gradient)]" },
+  max:      { icon: MaxLogoIcon,      activeClass: "bg-[image:var(--max-gradient)]" },
+};
+<div className={cn("base", isActive && config.activeClass)} />
+
+// NO — inline style
+<div style={{ background: config.gradient }} />
+```
+
+---
+
+## Checklist Before Writing Styles
+
+Verify every point when writing or reviewing className:
+
+1. **Color from a token?** — `text-primary`, not `text-green-500` / `text-[#hex]` / `style={{ color }}`
+2. **Gradient via class?** — `bg-gradient-telegram` / `bg-[image:var(--…)]`, not `style={{ background }}`
+3. **Not duplicating component base?** — check `shadow-none`, `transition-*`, `[&_svg]:size-*` in `shared/ui/` source
+4. **Text size from the palette?** — `text-3xs` / `text-2xs` / `text-xs` / `text-sm`, not `text-[10px]`
+5. **No conflicts?** — never put `h-full h-fit`, `bg-white bg-background`, two `transition-*` on one element
+6. **Repeated 3+ times?** — extract to `@utility` in `globals.css`
+7. **Conditional classes via `cn()`?** — never concatenate with template literals
+8. **Radius from tokens?** — `rounded-xl`, not `rounded-[12px]`
+9. **Icons inside Button without size?** — size is inherited from button base
+
+---
+
+## Code Style
+
+- Comments in Russian are acceptable
+- Zod errors use Russian locale
+- `cn()` from `@/shared/lib/utils` is the only way to merge classes
+- Server components by default; `"use client"` only when necessary
+- API routes go in `app/api/`
 
 ### Imports
+
 ```typescript
 import { Button } from "@/shared/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Card, CardContent } from "@/shared/ui/card"
 import { cn } from "@/shared/lib/utils"
 import { env } from "@/shared/config/env"
 ```
-
-### Button variants
-Available: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`, `icon`, `telegram`, `max`
-
-### Code style
-- Russian locale for Zod validation messages
-- Comments in Russian are acceptable
-- Use `cn()` from `@/shared/lib/utils` for conditional class merging
-- Prefer server components; use `"use client"` only when needed
-- API routes in `app/api/` directory

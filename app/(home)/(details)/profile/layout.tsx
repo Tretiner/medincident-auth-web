@@ -29,8 +29,8 @@ export default function ProfileLayout({
           "md:grid md:grid-cols-[280px_1fr] md:gap-4 md:items-start",
         )}
       >
-        <aside className="hidden md:block h-full overflow-hidden h-fit">
-          <Card className="flex flex-col bg-card border-border shadow-none overflow-hidden rounded-xl p-4">
+        <aside className="hidden md:block overflow-hidden h-fit">
+          <Card className="flex flex-col bg-card border-border overflow-hidden rounded-xl p-4">
              <Suspense>
               <SidebarNav />
             </Suspense>
@@ -40,7 +40,7 @@ export default function ProfileLayout({
         <main className="flex-1 min-h-0 h-full flex flex-col overflow-hidden">
           <Card
             className={cn(
-              "w-full bg-card shadow-none flex flex-col overflow-hidden",
+              "w-full bg-card flex flex-col overflow-hidden",
               "rounded-none border-0 h-full", 
               "md:rounded-xl md:border md:border-border",
             )}

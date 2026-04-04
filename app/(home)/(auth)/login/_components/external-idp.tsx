@@ -22,7 +22,7 @@ export const GenericButton = ({ requestId, idpId, name }: GenericButtonProps) =>
       type="submit"
       variant="outline"
       size="lg"
-      className="w-full relative py-6 text-base group shadow-none transition-all active:scale-[0.98]"
+      className="w-full relative py-6 text-base group active:scale-[0.98]"
     >
       <span>{name}</span>
     </Button>
@@ -35,7 +35,7 @@ const TelegramButton = ({ requestId, idpId }: AuthButtonProps) => (
       type="submit"
       variant="telegram"
       size="lg"
-      className="w-full relative py-6 text-base group shadow-none transition-all active:scale-[0.98]"
+      className="w-full relative py-6 text-base group active:scale-[0.98]"
     >
       <TelegramLogoIcon className="absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-hover:scale-110" />
       <span className="pl-4">Telegram</span>
@@ -49,7 +49,7 @@ const MaxButton = ({ requestId, idpId }: AuthButtonProps) => (
       type="submit"
       variant="max"
       size="lg"
-      className="w-full relative py-6 text-base group shadow-none transition-all active:scale-[0.98]"
+      className="w-full relative py-6 text-base group active:scale-[0.98]"
     >
       <MaxLogoIcon className="absolute left-4 top-1/2 -translate-y-1/2 transition-transform group-hover:scale-110" />
       <span className="pl-4">MAX</span>
@@ -106,7 +106,7 @@ export function ExternalIdentityProviders({ requestId, providers }: ExternalIden
       <Button
         variant="outline"
         size="lg"
-        className="w-full relative py-6 text-base shadow-none transition-all active:scale-[0.98]"
+        className="w-full relative py-6 text-base active:scale-[0.98]"
         asChild
       >
         <Link href={emailHref}>

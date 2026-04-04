@@ -2,6 +2,14 @@
 @plugin "tailwindcss-animate";
 @custom-variant dark (&:is(.dark *));
 
+@source not "**/*.md";
+@source not "**/*.yaml";
+@source not "**/*.yml";
+@source not "**/*.log";
+@source not "**/*.proto";
+@source not "**/lib/generated/**";
+@source not "**/openapi/**";
+
 :root {
   /* Primary */
   --brand-green: oklch(0.696 0.176 132.22);
@@ -21,6 +29,10 @@
   /* Destructive (Red) */
   --red: oklch(0.64 0.22 25);
   --red-foreground: oklch(0.98 0 0);
+
+  /* Success (Green) */
+  --success: oklch(0.65 0.17 145);
+  --success-foreground: oklch(0.98 0 0);
 
   /* Grays */
   --gray-50: oklch(0.99 0.002 265);
@@ -107,6 +119,9 @@
   --destructive: oklch(0.65 0.18 25);
   --destructive-foreground: oklch(0.98 0 0);
 
+  --success: oklch(0.70 0.15 145);
+  --success-foreground: oklch(0.98 0 0);
+
   /* Border: Должен быть светлее фона (0.25), ставим 0.35 */
   --border: oklch(0.35 0.02 270);
   --input: oklch(0.35 0.02 270);
@@ -143,6 +158,9 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
 
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -175,6 +193,12 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
+
+  /* Font sizes */
+  --font-size-2xs: 0.6875rem;
+  --font-size-2xs--line-height: 1rem;
+  --font-size-3xs: 0.625rem;
+  --font-size-3xs--line-height: 0.875rem;
   
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
@@ -221,6 +245,10 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+}
+
+@utility section-label {
+  @apply text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1;
 }
 
 @layer utilities {

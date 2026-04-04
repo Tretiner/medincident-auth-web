@@ -12,6 +12,7 @@ export function QrAuthSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const colorRef = useRef<HTMLSpanElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [fgColor, setFgColor] = useState("#2b3a15");
   const { qrUrl, isError, isLoading, refresh } = useQrAuth(isVisible);
 
   const refreshCommand = () => refresh();
@@ -37,7 +38,7 @@ export function QrAuthSection() {
 
       <div
         className={cn(
-          "relative flex aspect-square w-full max-w-[256px] items-center justify-center overflow-hidden rounded-2xl border-2 border-border bg-white p-0 transition-all duration-300 mb-8 bg-background/60 backdrop-blur-md",
+          "relative flex aspect-square w-full max-w-[256px] items-center justify-center overflow-hidden rounded-2xl border-2 border-border p-0 transition-all duration-300 mb-8 bg-background/60 backdrop-blur-md",
         )}
       >
         <div
@@ -85,7 +86,7 @@ export function QrAuthSection() {
                 [12, 12, 12, 12],
               ]}
               quietZone={14}
-              fgColor="#2b3a15"
+              fgColor={fgColor}
               bgColor="#00000000"
               level="H"
             />

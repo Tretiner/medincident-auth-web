@@ -47,13 +47,13 @@ function CopyButton({ text, className }: { text: string; className?: string }) {
       variant="ghost"
       size="icon"
       onClick={handleCopy}
-      className={cn("text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-all shadow-none border-0", className)}
+      className={cn("text-muted-foreground hover:text-foreground hover:bg-secondary/80 border-0", className)}
       title="Скопировать"
     >
       {isCopied ? (
-        <Check className="w-4 h-4 text-emerald-500 animate-in zoom-in duration-300" />
+        <Check className="text-success animate-in zoom-in duration-300" />
       ) : (
-        <Copy className="w-4 h-4" />
+        <Copy />
       )}
       <span className="sr-only">Скопировать</span>
     </Button>
@@ -178,7 +178,7 @@ function LogoutConfirmDialog({ children }: { children: React.ReactNode }) {
                 onClick={handleLogout}
                 disabled={isLoggingOut}
             >
-                {isLoggingOut && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {isLoggingOut && <Loader2 className="mr-2 animate-spin" />}
                 Да, выйти
             </Button>
         </DialogFooter>
@@ -248,13 +248,13 @@ function SessionItem({
         size="icon"
         onClick={() => onRevoke(session.id)}
         disabled={isDisabled}
-        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9 rounded-lg transition-all shrink-0 ml-2"
+        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9 rounded-lg shrink-0 ml-2"
         aria-label="Завершить сессию"
       >
         {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className="animate-spin" />
         ) : (
-          <LogOut className="w-4 h-4" />
+          <LogOut />
         )}
       </Button>
     </div>
@@ -276,7 +276,7 @@ export function SessionsList({
     <div className="space-y-8">
       {/* 1. CURRENT SESSION */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
+        <h4 className="section-label">
           Текущая сессия
         </h4>
         {currentSession && (
@@ -294,8 +294,8 @@ export function SessionsList({
                   {currentSession.deviceName}
                 </h4>
                 
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider shrink-0">
-                  <span>Этот браузер</span>
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-3xs font-bold uppercase tracking-wider shrink-0">
+                  <span className="text-xs">Этот браузер</span>
                 </div>
 
                 <SessionInfoModal session={currentSession}>
@@ -338,7 +338,7 @@ export function SessionsList({
          <div className="space-y-4">
            {/* Я скопировал логику рендера списка ниже для полноты */}
            <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
+            <h3 className="section-label">
               Другие сессии
             </h3>
             <Button
@@ -346,10 +346,10 @@ export function SessionsList({
               size="sm"
               onClick={onRevokeAllOthers}
               disabled={isRevokingAll}
-              className="h-8 text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 bg-transparent transition-all shadow-none"
+              className="h-8 text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 bg-transparent"
             >
               {isRevokingAll && (
-                <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                <Loader2 className="mr-2 animate-spin" />
               )}
               Завершить все ({otherSessions.length})
             </Button>

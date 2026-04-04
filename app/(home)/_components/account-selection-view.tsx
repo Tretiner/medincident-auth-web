@@ -77,7 +77,7 @@ export function AccountSelectionView({ accounts, requestId, defaultSelectedId, a
         
         {/* HEADER */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-primary shadow-none border border-primary/20">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-primary border border-primary/20">
             <AppLogoIcon className="w-6 h-6 md:w-8 md:h-8" />
           </div>
           <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight text-center">
@@ -163,10 +163,10 @@ export function AccountSelectionView({ accounts, requestId, defaultSelectedId, a
           <Button
             onClick={handleContinue}
             disabled={isPending || !selectedId}
-            className="w-full max-w-[200px] shadow-none"
+            className="w-full max-w-[200px]"
           >
             {isPending ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 animate-spin" />
             ) : null}
             Продолжить
           </Button>

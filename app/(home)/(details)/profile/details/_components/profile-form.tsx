@@ -83,7 +83,7 @@ export function ProfileForm({
             )}
           />
           {errors.lastName && (
-            <span className="text-[11px] font-medium text-destructive mt-1 block animate-in fade-in">
+            <span className="text-2xs font-medium text-destructive mt-1 block animate-in fade-in">
               {errors.lastName.message}
             </span>
           )}
@@ -115,7 +115,7 @@ export function ProfileForm({
             <span
               className={cn(
                 "text-xs font-medium flex items-center gap-1.5 transition-colors duration-200",
-                willRequireVerification ? "text-amber-500" : "text-emerald-500"
+                willRequireVerification ? "text-warning" : "text-success"
               )}
             >
               {dirtyFields.email ? (
@@ -149,7 +149,7 @@ export function ProfileForm({
             )}
           />
           {errors.email && (
-            <span className="text-[11px] text-destructive">
+            <span className="text-2xs text-destructive">
               {errors.email.message}
             </span>
           )}
@@ -189,11 +189,11 @@ export function ProfileForm({
         <Button
           type="submit"
           disabled={isSaving || !isDirty}
-          className="min-w-[140px] bg-primary text-primary-foreground shadow-none"
+          className="min-w-[140px]"
         >
           {isSaving ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 animate-spin" />
               Сохраняем
             </>
           ) : (

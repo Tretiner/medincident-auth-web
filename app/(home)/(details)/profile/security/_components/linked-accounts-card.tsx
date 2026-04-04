@@ -21,35 +21,34 @@ interface Props {
 }
 
 // Конфиг для известных провайдеров
-const KNOWN_PROVIDERS: Record<string, any> = {
+const KNOWN_PROVIDERS: Record<string, { icon: React.FC<{ className?: string }>; activeClass: string }> = {
   telegram: {
     icon: TelegramLogoIcon,
-    gradient: "var(--telegram-gradient)",
+    activeClass: "bg-[image:var(--telegram-gradient)]",
   },
   max: {
     icon: MaxLogoIcon,
-    gradient: "var(--max-gradient)",
+    activeClass: "bg-[image:var(--max-gradient)]",
   }
 };
 
 // Функция определения стилей (кастомный или дженерик)
 function getProviderConfig(name: string) {
   const lowerName = name.toLowerCase();
-  
+
   if (lowerName.includes("telegram")) {
     return { label: "Telegram", ...KNOWN_PROVIDERS.telegram };
   }
-  
+
   if (lowerName.includes("max")) {
     return { label: "MAX ID", ...KNOWN_PROVIDERS.max };
   }
 
   // ДЖЕНЕРИК ПРОВАЙДЕР
   return {
-    label: name, // Оставляем оригинальное имя из ZITADEL
+    label: name,
     icon: KeyRound,
-    // Используем CSS-переменную Primary для универсального градиента
-    gradient: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.6) 100%)",
+    activeClass: "bg-primary",
   };
 }
 
@@ -77,9 +76,8 @@ function LinkedAccountItem({
         <div 
           className={cn(
             "w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all",
-            isConnected ? "text-primary-foreground" : "bg-muted text-muted-foreground"
+            isConnected ? cn("text-primary-foreground", config.activeClass) : "bg-muted text-muted-foreground"
           )}
-          style={isConnected ? { background: config.gradient } : undefined}
         >
           <Icon className={name.toLowerCase().includes('max') ? "w-7 h-7" : "w-6 h-6"} />
         </div>
@@ -106,24 +104,23 @@ function LinkedAccountItem({
           onClick={onToggle}
           disabled={isLoading}
           className={cn(
-            "h-8 px-3 font-medium shadow-none transition-all",
-            isConnected 
+            "h-8 px-3 font-medium",
+            isConnected
               ? "border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 bg-transparent"
-              : "text-primary-foreground border-0 hover:opacity-90"
+              : cn("text-primary-foreground border-0 hover:opacity-90", config.activeClass)
           )}
-          style={!isConnected ? { background: config.gradient } : undefined}
         >
           {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="animate-spin" />
           ) : (
             isConnected ? (
                 <>
-                    <Unlink className="w-4 h-4 mr-2" />
+                    <Unlink className="mr-2" />
                     Отвязать
                 </>
             ) : (
                 <>
-                    <Link2 className="w-4 h-4 mr-2" />
+                    <Link2 className="mr-2" />
                     Привязать
                 </>
             )
@@ -139,7 +136,7 @@ function LinkedAccountItem({
 export function LinkedAccountsCard({ items, onToggle }: Props) {
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
+      <h3 className="section-label">
         Социальные сети и сервисы
       </h3>
       

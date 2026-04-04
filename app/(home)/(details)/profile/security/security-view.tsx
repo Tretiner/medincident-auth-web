@@ -39,7 +39,7 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
       
       {/* УВЕДОМЛЕНИЯ О ПРИВЯЗКЕ */}
       {statusMessage === 'success' && (
-        <div className="p-4 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-xl flex items-center gap-3">
+        <div className="p-4 bg-success/10 text-success border border-success/20 rounded-xl flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 shrink-0" />
           <p className="text-sm font-medium">Аккаунт успешно привязан</p>
         </div>
@@ -55,7 +55,7 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
       {/* СОЦИАЛЬНЫЕ СЕТИ */}
       {loadingLinks || !links ? (
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
+          <h3 className="section-label">
             Социальные сети и сервисы
           </h3>
           <div className="flex flex-wrap gap-4">
@@ -81,7 +81,7 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
       {loadingSessions || !sessions ? (
         <div className="space-y-8">
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
+            <h4 className="section-label">
               Текущая сессия
             </h4>
             <Skeleton className="h-20 w-full rounded-xl" />
@@ -89,7 +89,7 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
           
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1">
+                <h3 className="section-label">
                   Другие сессии
                 </h3>
                 <Skeleton className="h-8 w-24 rounded-md" />
