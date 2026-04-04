@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { AppLogoIcon } from "@/components/icons";
 import { APP_NAME } from "@/shared/lib/constants";
+import { QrScannerButton } from "./qr-scanner-button";
 
 export function MobileTopBar() {
   const searchParams = useSearchParams();
@@ -20,19 +21,23 @@ export function MobileTopBar() {
         </div>
       </div>
 
-      {from ?
-        <Button
-          variant="ghost"
-          size="sm"
-          asChild
-          className="text-muted-foreground hover:bg-muted-foreground/10 hover:text-primary -mr-2"
-        >
-          <Link href={from}>
-            <ArrowLeft className="w-5 h-5 mr-1" />
-            Вернуться
-          </Link>
-        </Button>
-      : ""}
+      <div className="flex items-center gap-1 -mr-2">
+        <QrScannerButton variant="icon" />
+
+        {from && (
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="text-muted-foreground hover:bg-muted-foreground/10 hover:text-primary"
+          >
+            <Link href={from}>
+              <ArrowLeft className="w-5 h-5 mr-1" />
+              Вернуться
+            </Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

@@ -23,5 +23,8 @@ export interface JwtUser extends JWTPayload {
 
 export interface QrData {
   url?: string;
+  token?: string;
   expiresInSeconds: number;
 }
+
+export type QrStatus = "pending" | "confirmed" | "expired";

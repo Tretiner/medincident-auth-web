@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { ShieldCheckIcon, LogOutIcon, ArrowLeft } from "lucide-react";
+import { QrScannerButton } from "./qr-scanner-button";
 import { Button } from "@/shared/ui/button";
 import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
 import { Separator } from "@/shared/ui/separator";
@@ -44,6 +45,12 @@ export function SidebarNav() {
             Безопасность
           </span>
         </Link>
+
+        <div className="px-2 my-1">
+          <Separator />
+        </div>
+
+        <QrScannerButton />
 
         <div className="px-2 my-1">
           <Separator />
