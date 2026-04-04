@@ -1,10 +1,26 @@
 "server only";
 
+import { headers } from "next/headers";
 import { z } from "zod";
 import { Result } from "@/domain/error";
 import { handleZitadelRequest } from "../client-helper";
 import { zitadelApi } from "../client";
 import { ZitadelGenericUpdateResponseSchema } from "./shared";
+
+async function getRequestUserAgent() {
+  try {
+    const h = await headers();
+    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? undefined;
+    const ua = h.get("user-agent") ?? undefined;
+    if (!ip && !ua) return undefined;
+    return {
+      ...(ip && { ip }),
+      ...(ua && { description: ua, header: { "user-agent": { values: [ua] } } }),
+    };
+  } catch {
+    return undefined;
+  }
+}
 
 // --- Схемы ---
 
@@ -86,7 +102,8 @@ export async function createSession(
     checks: {
       user: { userId },
       idpIntent: { idpIntentId, idpIntentToken }
-    }
+    },
+    userAgent: await getRequestUserAgent(),
   };
 
   return handleZitadelRequest(
@@ -118,8 +135,34 @@ export async function createSessionWithPassword(
         user: { loginName },
         password: { password },
       },
+      userAgent: await getRequestUserAgent(),
     }),
     ZitadelCreateSessionResponseSchema
+  );
+}
+
+export const ZitadelGetSessionResponseSchema = z.object({
+  session: ZitadelSessionSchema.optional(),
+}).catchall(z.any());
+
+export async function createSessionByUserId(
+  userId: string
+): Promise<Result<z.infer<typeof ZitadelCreateSessionResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.post("/v2/sessions", {
+      checks: { user: { userId } },
+      userAgent: await getRequestUserAgent(),
+    }),
+    ZitadelCreateSessionResponseSchema
+  );
+}
+
+export async function getSession(
+  sessionId: string
+): Promise<Result<z.infer<typeof ZitadelGetSessionResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.get(`/v2/sessions/${sessionId}`),
+    ZitadelGetSessionResponseSchema
   );
 }
 
