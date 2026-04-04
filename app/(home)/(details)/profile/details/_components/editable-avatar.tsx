@@ -2,8 +2,8 @@
 
 import { useState, useRef, useTransition } from "react";
 import { Camera, Loader2 } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar"; // Замени на свои пути к UI компонентам
-import { uploadAvatarAction } from "../profile.actions"; // Путь до твоего экшена
+import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar";
+import { uploadAvatarAction } from "../profile.actions";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/utils";
 
@@ -21,7 +21,6 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Оптимистичное обновление: сразу показываем локальную картинку
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
 
@@ -34,13 +33,13 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
       if (!result?.success) {
         setPreviewUrl(currentAvatarUrl);
         console.error("Ошибка при загрузке аватара:", result?.error);
-        toast("Ошибка загрузки")
+        toast("Ошибка загрузки");
       }
     });
   };
 
   return (
-    <div 
+    <div
       className="relative inline-block group cursor-pointer rounded-full"
       onClick={() => fileInputRef.current?.click()}
     >
@@ -51,16 +50,20 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
         </AvatarFallback>
       </Avatar>
 
-      {/* Оверлей при наведении */}
-      <div className={cn("absolute inset-0 bg-black/40 rounded-full flex items-center justify-center group-hover:opacity-100 transition-opacity duration-200", isPending ? "opacity-50" : "opacity-0")}>
+      <div className={cn(
+        "absolute inset-0 rounded-full flex items-center justify-center",
+        "transition-all duration-200 ease-in-out",
+        isPending
+          ? "bg-black/80 opacity-100"
+          : "bg-black/50 opacity-0 group-hover:opacity-100",
+      )}>
         {isPending ? (
-          <Loader2 className="w-6 h-6 text-white animate-spin" />
+          <Loader2 className="w-5 h-5 text-white/80 animate-spin" />
         ) : (
-          <Camera className="w-6 h-6 text-white" />
+          <Camera className="w-5 h-5 text-white/70 transition-transform duration-300 ease-in-out group-hover:scale-110" />
         )}
       </div>
 
-      {/* Скрытый инпут для выбора файла */}
       <input
         type="file"
         accept="image/png, image/jpeg, image/webp"

@@ -30,7 +30,8 @@ export async function getProfileDataAction() {
     lastName: human?.profile?.familyName || "",
     middleName: middleName, // Передаем найденное отчество
     email: human?.email?.email || "",
-    isEmailVerified: human?.email?.isVerified || false, 
+    isEmailVerified: human?.email?.isVerified || false,
+    position: "Врач скорой помощи", // TODO: получать из реального источника
     avatarUrl: human?.profile?.avatarUrl || "",
   };
 }

@@ -1,12 +1,17 @@
 "use client";
 
-import { Controller, UseFormReturn } from "react-hook-form";
+import { UseFormReturn, FieldError } from "react-hook-form";
 import { PersonalInfoFormData } from "@/domain/profile/schema";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { Loader2, CheckCircle2, AlertCircle, AlertTriangle } from "lucide-react";
+import {
+  Loader2, CheckCircle2, AlertCircle, AlertTriangle,
+  User, Mail, RotateCcw, Briefcase,
+} from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+
+export const SECTION_CLASS = "space-y-4 p-5 rounded-xl border border-border bg-gradient-to-tr from-muted/20 to-white";
 
 export interface FormMessage {
   type: "success" | "error";
@@ -17,8 +22,81 @@ interface ProfileFormProps {
   form: UseFormReturn<PersonalInfoFormData>;
   isSaving: boolean;
   message: FormMessage | null;
-  isEmailVerified?: boolean; // Добавили пропс для статуса email
-  onSubmit: (e: React.FormEvent) => void;
+  isEmailVerified?: boolean;
+  onSubmit: (e: React.SyntheticEvent) => void;
+  onCancel: () => void;
+}
+
+function SectionLabel({ icon: Icon, label }: { icon: typeof User; label: string }) {
+  return (
+    <div className="flex items-center gap-2 select-none mb-3">
+      <Icon className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+      <span className="text-xs font-medium text-muted-foreground tracking-wide uppercase">{label}</span>
+    </div>
+  );
+}
+
+function DirtyBadge() {
+  return <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning animate-in fade-in" />;
+}
+
+function FieldLabel({ htmlFor, children, isDirty, hasError }: {
+  htmlFor: string;
+  children: React.ReactNode;
+  isDirty?: boolean;
+  hasError?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Label htmlFor={htmlFor} className={cn("text-xs font-medium", hasError && "text-destructive")}>
+        {children}
+      </Label>
+      {isDirty && <DirtyBadge />}
+    </div>
+  );
+}
+
+function EditableField({ id, label, isDirty, error, children }: {
+  id: string;
+  label: string;
+  isDirty?: boolean;
+  error?: FieldError;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <FieldLabel htmlFor={id} isDirty={isDirty} hasError={!!error}>{label}</FieldLabel>
+      {children}
+      {error && <p className="text-2xs text-destructive animate-in fade-in">{error.message}</p>}
+    </div>
+  );
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Input value={value} disabled className="bg-muted/50 text-muted-foreground" />
+    </div>
+  );
+}
+
+function EmailStatus({ isDirty, isVerified }: { isDirty: boolean; isVerified: boolean }) {
+  const [cls, Icon, text] = isDirty
+    ? ["bg-warning/10 text-warning", AlertTriangle, "Потребует подтверждения"] as const
+    : isVerified
+    ? ["bg-success/10 text-success", CheckCircle2, "Подтверждён"] as const
+    : ["bg-destructive/10 text-destructive", AlertCircle, "Не подтверждён"] as const;
+
+  return (
+    <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold transition-colors duration-200", cls)}>
+      <Icon className="w-3 h-3" />{text}
+    </span>
+  );
+}
+
+function capitalizeFirst(value: string) {
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
 }
 
 export function ProfileForm({
@@ -27,178 +105,90 @@ export function ProfileForm({
   message,
   isEmailVerified = false,
   onSubmit,
+  onCancel,
 }: ProfileFormProps) {
-  const {
-    register,
-    formState: { errors, isDirty, isValid, dirtyFields }, // Достали dirtyFields
-  } = form;
+  const { register, formState: { errors, isDirty, dirtyFields } } = form;
 
-  // Если поле email было изменено пользователем, оно точно потребует подтверждения
-  const willRequireVerification = dirtyFields.email || !isEmailVerified;
+  const cap = (name: "firstName" | "lastName" | "middleName") => {
+    const { onChange, ...rest } = register(name);
+    return {
+      ...rest,
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.target.value = capitalizeFirst(e.target.value);
+        onChange(e);
+      },
+    };
+  };
+
+  const inputError = (error?: FieldError) =>
+    cn("bg-card", error && "border-destructive focus-visible:ring-destructive");
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <div className="grid gap-6">
-        {/* ИМЯ */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="firstName"
-            className={cn(errors.firstName && "text-destructive")}
-          >
-            Имя
-          </Label>
-          <Input
-            id="firstName"
-            {...register("firstName")}
-            defaultValue={form.getValues().firstName}
-            disabled={isSaving}
-            className={cn(
-              errors.firstName &&
-                "border-destructive focus-visible:ring-destructive"
-            )}
-          />
-          {errors.firstName && (
-            <span className="text-2xs font-medium text-destructive mt-1 block animate-in fade-in">
-              {errors.firstName.message}
-            </span>
-          )}
-        </div>
+    <form onSubmit={onSubmit} className="space-y-3">
 
-        {/* ФАМИЛИЯ */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="lastName"
-            className={cn(errors.lastName && "text-destructive")}
-          >
-            Фамилия
-          </Label>
-          <Input
-            id="lastName"
-            {...register("lastName")}
-            defaultValue={form.getValues().lastName}
-            disabled={isSaving}
-            className={cn(
-              errors.lastName &&
-                "border-destructive focus-visible:ring-destructive"
-            )}
-          />
-          {errors.lastName && (
-            <span className="text-2xs font-medium text-destructive mt-1 block animate-in fade-in">
-              {errors.lastName.message}
-            </span>
-          )}
+      {/* ── ЛИЧНЫЕ ДАННЫЕ ─── */}
+      <div className={SECTION_CLASS}>
+        <SectionLabel icon={User} label="Личные данные" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <EditableField id="firstName" label="Имя" isDirty={!!dirtyFields.firstName} error={errors.firstName}>
+            <Input id="firstName" {...cap("firstName")} defaultValue={form.getValues().firstName}
+              disabled={isSaving} placeholder="Иван" className={inputError(errors.firstName)} />
+          </EditableField>
+          <EditableField id="lastName" label="Фамилия" isDirty={!!dirtyFields.lastName} error={errors.lastName}>
+            <Input id="lastName" {...cap("lastName")} defaultValue={form.getValues().lastName}
+              disabled={isSaving} placeholder="Иванов" className={inputError(errors.lastName)} />
+          </EditableField>
         </div>
+        <EditableField id="middleName" label="Отчество" isDirty={!!dirtyFields.middleName} error={errors.middleName}>
+          <Input id="middleName" {...cap("middleName")} defaultValue={form.getValues().middleName}
+            disabled={isSaving} placeholder="Иванович" className={inputError(errors.middleName)} />
+        </EditableField>
+      </div>
 
-        {/* ОТЧЕСТВО */}
-        <div className="space-y-2">
-          <Label htmlFor="middleName">Отчество</Label>
-          <Input
-            id="middleName"
-            {...register("middleName")}
-            defaultValue={form.getValues().middleName}
-            disabled={isSaving}
-          />
-        </div>
-
-        {/* КОНТАКТЫ (GRID) */}
-        <div className="space-y-2">
-          {/* Флекс-контейнер для лейбла и статуса */}
+      {/* ── КОНТАКТЫ ─── */}
+      <div className={SECTION_CLASS}>
+        <SectionLabel icon={Mail} label="Контакты" />
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label
-              htmlFor="email"
-              className={cn(errors.email && "text-destructive")}
-            >
-              Email
-            </Label>
-            
-            {/* Вывод статуса верификации с цветом */}
-            <span
-              className={cn(
-                "text-xs font-medium flex items-center gap-1.5 transition-colors duration-200",
-                willRequireVerification ? "text-warning" : "text-success"
-              )}
-            >
-              {dirtyFields.email ? (
-                <>
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  Потребует подтверждения
-                </>
-              ) : isEmailVerified ? (
-                <>
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Подтвержден
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  Не подтвержден
-                </>
-              )}
-            </span>
+            <FieldLabel htmlFor="email" isDirty={!!dirtyFields.email} hasError={!!errors.email}>Email</FieldLabel>
+            <EmailStatus isDirty={!!dirtyFields.email} isVerified={isEmailVerified} />
           </div>
-
-          <Input
-            id="email"
-            type="email"
-            {...register("email")}
-            defaultValue={form.getValues().email}
-            disabled={isSaving}
-            className={cn(
-              errors.email &&
-                "border-destructive focus-visible:ring-destructive"
-            )}
-          />
-          {errors.email && (
-            <span className="text-2xs text-destructive">
-              {errors.email.message}
-            </span>
-          )}
+          <Input id="email" type="email" {...register("email")} defaultValue={form.getValues().email}
+            disabled={isSaving} placeholder="ivan@example.com" className={inputError(errors.email)} />
+          {errors.email && <p className="text-2xs text-destructive animate-in fade-in">{errors.email.message}</p>}
         </div>
       </div>
 
-      {/* FOOTER ACTIONS & STATUS */}
-      <div className="flex items-center justify-between pt-6 border-t border-border">
-        {/* Статусная зона */}
-        <div className="flex-1 pr-4 flex items-center gap-3 min-h-[20px]">
-          {/* Status: Modified */}
-          {isDirty && isValid && !message && (
-            <span className="text-sm font-medium text-warning animate-in fade-in slide-in-from-left-2 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-warning shadow-none" />
-              Данные изменены
-            </span>
-          )}
-
-          {/* Status: Result Message */}
-          {message && (
-            <div
-              className={cn(
-                "flex items-center gap-2 text-sm font-medium animate-in fade-in zoom-in-95",
-                message.type === "success" ? "text-primary" : "text-destructive"
-              )}
-            >
-              {message.type === "success" ? (
-                <CheckCircle2 className="w-4 h-4" />
-              ) : (
-                <AlertCircle className="w-4 h-4" />
-              )}
-              {message.text}
-            </div>
-          )}
+      {/* ── РАБОЧИЕ ДАННЫЕ ─── */}
+      <div className={SECTION_CLASS}>
+        <SectionLabel icon={Briefcase} label="Рабочие данные" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ReadOnlyField label="Организация" value="ГБУЗ «СМП Москвы»" />
+          <ReadOnlyField label="Отделение" value="Бригада экстренной помощи" />
+          <ReadOnlyField label="Должность" value="Врач скорой помощи" />
+          <ReadOnlyField label="Специализация" value="Кардиология" />
         </div>
+      </div>
 
-        <Button
-          type="submit"
-          disabled={isSaving || !isDirty}
-          className="min-w-[140px]"
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 animate-spin" />
-              Сохраняем
-            </>
-          ) : (
-            "Сохранить"
-          )}
+      {/* ── FOOTER ─── */}
+      <div className="flex items-center justify-end gap-2 pt-4 mt-4 min-h-[36px]">
+        {message && (
+          <div className={cn(
+            "flex-1 flex items-center gap-1.5 text-xs font-medium animate-in fade-in zoom-in-95",
+            message.type === "success" ? "text-success" : "text-destructive",
+          )}>
+            {message.type === "success" ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+            {message.text}
+          </div>
+        )}
+        {isDirty && (
+          <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={isSaving}
+            className="gap-1.5 text-muted-foreground animate-in fade-in">
+            <RotateCcw className="w-3.5 h-3.5" />Отменить
+          </Button>
+        )}
+        <Button type="submit" disabled={isSaving || !isDirty} size="sm" className="min-w-[120px] gap-2">
+          {isSaving ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Сохраняем</> : "Сохранить"}
         </Button>
       </div>
     </form>

@@ -111,6 +111,16 @@ export function useFormProfileDetails(user?: PersonalInfo) {
     });
   });
 
+  const handleCancel = () => {
+    setMessage(null);
+    form.reset({
+      firstName: user?.firstName ?? "",
+      lastName: user?.lastName ?? "",
+      middleName: user?.middleName ?? "",
+      email: user?.email ?? "",
+    });
+  };
+
   return {
     state: {
       form,
@@ -123,6 +133,7 @@ export function useFormProfileDetails(user?: PersonalInfo) {
     },
     actions: {
       onSubmit: handleSubmit,
+      onCancel: handleCancel,
       dismissMessage: () => setMessage(null),
     },
   };
