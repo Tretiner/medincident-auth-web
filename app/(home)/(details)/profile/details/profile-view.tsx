@@ -55,11 +55,12 @@ export function ProfileDetailsView() {
   if (!user) return null;
 
   return (
-    <ProfileForm 
-      form={formState.form} 
-      isSaving={formState.isSaving} 
+    <ProfileForm
+      form={formState.form}
+      isSaving={formState.isSaving}
       message={formState.message}
-      onSubmit={actions.onSubmit} 
+      isEmailVerified={formState.isEmailVerified}
+      onSubmit={actions.onSubmit}
     />
   );
 }

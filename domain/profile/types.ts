@@ -9,6 +9,7 @@ export interface PersonalInfo {
   lastName: string;
   middleName?: string;
   email: string;
+  isEmailVerified: boolean;
   position: string;
   avatarUrl?: string;
 }

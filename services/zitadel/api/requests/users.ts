@@ -173,8 +173,7 @@ export async function getUserMiddleName(userId: string): Promise<string | undefi
     return undefined;
   }
 
-  // Исправлено: Zod схема парсит массив в поле result, а не metadata
-  const metadataArray = response.data.result;
+  const metadataArray = response.data.metadata;
   if (!metadataArray || metadataArray.length === 0) {
     return undefined;
   }

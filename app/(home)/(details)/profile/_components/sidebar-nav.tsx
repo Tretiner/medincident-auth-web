@@ -6,9 +6,9 @@ import { cn } from "@/shared/lib/utils";
 import { ShieldCheckIcon, LogOutIcon, ArrowLeft } from "lucide-react";
 import { QrScannerButton } from "./qr-scanner-button";
 import { Button } from "@/shared/ui/button";
-import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
 import { Separator } from "@/shared/ui/separator";
 import { SidebarUserCard } from "./sidebar-user-card";
+import { LogoutConfirmDialog } from "./logout-confirm-dialog";
 
 export function SidebarNav() {
   const pathname = usePathname();
@@ -69,14 +69,15 @@ export function SidebarNav() {
           </Button>
         )}
 
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
-          onClick={() => logoutClient()}
-        >
-          <LogOutIcon className="h-5 w-5" />
-          Выйти
-        </Button>
+        <LogoutConfirmDialog>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
+          >
+            <LogOutIcon className="h-5 w-5" />
+            Выйти
+          </Button>
+        </LogoutConfirmDialog>
       </div>
     </nav>
   );

@@ -20,8 +20,9 @@ export async function getProfileDataAction() {
     throw new Error("Не удалось получить данные пользователя");
   }
 
+  console.log("USER: ", JSON.stringify(userResult))
+
   const human = userResult.data.user?.human;
-  const isEmailVerified = human?.email?.isEmailVerified || false;
 
   return {
     id: userId,
@@ -29,7 +30,7 @@ export async function getProfileDataAction() {
     lastName: human?.profile?.familyName || "",
     middleName: middleName, // Передаем найденное отчество
     email: human?.email?.email || "",
-    isEmailVerified, 
+    isEmailVerified: human?.email?.isVerified || false, 
     avatarUrl: human?.profile?.avatarUrl || "",
   };
 }

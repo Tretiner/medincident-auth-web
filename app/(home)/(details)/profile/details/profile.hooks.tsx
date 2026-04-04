@@ -38,6 +38,7 @@ export function useProfileData() {
           firstName: data.firstName,
           lastName: data.lastName,
           photoUrl: data.avatarUrl,
+          isEmailVerified: data.isEmailVerified,
           email: data.email,
         });
       },
@@ -118,6 +119,7 @@ export function useFormProfileDetails(user?: PersonalInfo) {
       isValid: form.formState.isValid,
       errors: form.formState.errors,
       message,
+      isEmailVerified: user?.isEmailVerified ?? false,
     },
     actions: {
       onSubmit: handleSubmit,

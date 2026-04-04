@@ -21,8 +21,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/shared/ui/dialog";
-import { Separator } from "@/shared/ui/separator";
-import { logoutClient } from "@/app/(home)/(auth)/login/login.hooks";
+import { LogoutConfirmDialog } from "../../_components/logout-confirm-dialog";
 
 interface Props {
   sessions: UserSession[];
@@ -149,14 +148,7 @@ export function SessionInfoModal({
   );
 }
 
-function LogoutConfirmDialog({ children }: { children: React.ReactNode }) {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    await logoutClient();
-  };
-
+function RevokeAllConfirmDialog({ children, onConfirm }: { children: React.ReactNode; onConfirm: () => void }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -164,23 +156,20 @@ function LogoutConfirmDialog({ children }: { children: React.ReactNode }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <DialogTitle>Выход из системы</DialogTitle>
+          <DialogTitle>Завершить все сессии</DialogTitle>
           <DialogDescription className="pt-2">
-            Вы уверены, что хотите завершить текущую сессию на этом устройстве?
+            Вы уверены, что хотите завершить все остальные активные сессии?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0 mt-4">
-            <DialogClose asChild>
-                <Button variant="outline">Отмена</Button>
-            </DialogClose>
-            <Button 
-                variant="destructive" 
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-            >
-                {isLoggingOut && <Loader2 className="mr-2 animate-spin" />}
-                Да, выйти
+          <DialogClose asChild>
+            <Button variant="outline">Отмена</Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button variant="destructive" onClick={onConfirm}>
+              Да, завершить все
             </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -295,7 +284,7 @@ export function SessionsList({
                 </h4>
                 
                 <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-3xs font-bold uppercase tracking-wider shrink-0">
-                  <span className="text-xs">Этот браузер</span>
+                  <span className="text-2xs">Этот браузер</span>
                 </div>
 
                 <SessionInfoModal session={currentSession}>
@@ -341,18 +330,19 @@ export function SessionsList({
             <h3 className="section-label">
               Другие сессии
             </h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRevokeAllOthers}
-              disabled={isRevokingAll}
-              className="h-8 text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 bg-transparent"
-            >
-              {isRevokingAll && (
-                <Loader2 className="mr-2 animate-spin" />
-              )}
-              Завершить все ({otherSessions.length})
-            </Button>
+            <RevokeAllConfirmDialog onConfirm={onRevokeAllOthers}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isRevokingAll}
+                className="h-8 text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 bg-transparent"
+              >
+                {isRevokingAll && (
+                  <Loader2 className="mr-2 animate-spin" />
+                )}
+                Завершить все ({otherSessions.length})
+              </Button>
+            </RevokeAllConfirmDialog>
           </div>
 
           <div className="flex flex-col gap-3">

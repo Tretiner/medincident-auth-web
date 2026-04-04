@@ -232,6 +232,15 @@ Verify every point when writing or reviewing className:
 
 ---
 
+## Zitadel API
+
+**Всегда сверяйся с официальной документацией перед реализацией или изменением любого Zitadel API-вызова:** → https://zitadel.com/docs/apis/resources
+
+- `zitadelApi` (services/zitadel/api) использует API **v2** c JWT ключем
+- `zitadel/user` (services/zitadel/user) использует API **v1** с access Token из NextAuth
+
+---
+
 ## Code Style
 
 - Comments in Russian are acceptable
