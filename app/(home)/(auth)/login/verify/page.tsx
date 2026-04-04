@@ -4,20 +4,46 @@ import { getRegFlowCookie } from "../_lib/reg-flow";
 import { VerifyForm } from "./_components/verify-form";
 import { verifyEmailAction } from "./actions";
 import { resendEmailVerification } from "@/services/zitadel/api";
+import { getCurrentSessionId } from "@/services/zitadel/current-session";
+import { zitadelApi } from "@/services/zitadel/api/client";
 
 export default async function VerifyPage({
   searchParams,
 }: {
   searchParams: Promise<{ requestId?: string }>;
 }) {
-  const { requestId } = await searchParams;
+  await searchParams;
   const flow = await getRegFlowCookie();
 
-  if (!flow?.userId) {
-    redirect("/login");
-  }
+  let userId: string;
+  let email: string;
 
-  const userId = flow.userId;
+  if (flow?.userId) {
+    // Путь регистрации (email или IDP) — данные уже в куке
+    userId = flow.userId;
+    email = flow.email;
+  } else {
+    // Путь из профиля — читаем текущую сессию напрямую
+    const sessionId = await getCurrentSessionId();
+    if (!sessionId) redirect("/login");
+
+    let sessionData: any;
+    try {
+      const res = await zitadelApi.get(`/v2/sessions/${sessionId}`);
+      sessionData = res.data?.session;
+    } catch {
+      redirect("/login");
+    }
+
+    const uid: string | undefined = sessionData?.factors?.user?.id;
+    if (!uid) redirect("/login");
+
+    userId = uid;
+    email = sessionData?.factors?.user?.loginName ?? "";
+
+    // Server Component может вызывать API — отправляем код здесь
+    await resendEmailVerification(userId);
+  }
 
   async function resendAction() {
     "use server";
@@ -40,7 +66,7 @@ export default async function VerifyPage({
         <VerifyForm
           action={verifyEmailAction}
           resendAction={resendAction}
-          email={flow.email}
+          email={email}
         />
       </div>
     </div>

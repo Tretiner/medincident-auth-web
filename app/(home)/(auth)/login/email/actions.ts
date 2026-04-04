@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createSessionWithPassword } from "@/services/zitadel/api";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { createSessionWithPassword, searchUserByEmail, resendEmailVerification } from "@/services/zitadel/api";
+import { setRegFlowCookie } from "../_lib/reg-flow";
 import { finishAuth } from "../callback/success/actions";
 
 export interface EmailLoginState {
@@ -39,6 +41,37 @@ export async function loginWithEmailAction(
         ? "Неверный email или пароль"
         : "Ошибка входа. Проверьте данные и попробуйте снова.";
     return { errors: { form: message }, values: { email } };
+  }
+
+  const { sessionId, sessionToken } = sessionRes.data;
+
+  try {
+    // Проверяем, подтверждён ли email пользователя
+    const userSearch = await searchUserByEmail(email);
+    const user = userSearch.success ? userSearch.data?.result?.[0] : undefined;
+    const isVerified = user?.human?.email?.isVerified ?? true;
+
+    if (!isVerified && user?.userId) {
+      // Email не подтверждён — отправляем код и показываем экран верификации
+      await resendEmailVerification(user.userId);
+      await setRegFlowCookie({
+        givenName: user.human?.profile?.givenName ?? "",
+        familyName: user.human?.profile?.familyName ?? "",
+        email,
+        source: "login",
+        requestId,
+        userId: user.userId,
+        loginName: email,
+        sessionId,
+        sessionToken,
+      });
+      const params = new URLSearchParams();
+      if (requestId) params.set("requestId", requestId);
+      redirect(`/login/verify?${params}`);
+    }
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    // Если проверка не удалась — продолжаем без неё (не блокируем вход)
   }
 
   await finishAuth(sessionRes.data, requestId, email);

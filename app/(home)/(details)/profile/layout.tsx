@@ -1,15 +1,45 @@
+import { redirect } from "next/navigation";
 import { SidebarNav } from "./_components/sidebar-nav";
 import { MobileNav } from "./_components/mobile-nav";
 import { MobileTopBar } from "./_components/mobile-top-bar";
 import { Card } from "@/shared/ui/card";
 import { cn } from "@/shared/lib/utils";
 import { Suspense } from "react";
+import { getCurrentSessionId } from "@/services/zitadel/current-session";
+import { getUserById } from "@/services/zitadel/api";
+import { zitadelApi } from "@/services/zitadel/api/client";
 
-export default function ProfileLayout({
+async function guardEmailVerified() {
+  const sessionId = await getCurrentSessionId();
+  if (!sessionId) redirect("/");
+
+  let userId: string | undefined;
+  try {
+    const res = await zitadelApi.get(`/v2/sessions/${sessionId}`);
+    userId = res.data?.session?.factors?.user?.id;
+  } catch {
+    redirect("/");
+  }
+
+  if (!userId) redirect("/");
+
+  const userRes = await getUserById(userId);
+  const isVerified: boolean = userRes.success
+    ? (userRes.data?.user?.human?.email?.isVerified ?? false)
+    : false;
+
+  if (!isVerified) {
+    // verify/page сам прочитает сессию и отправит код — куки писать не нужно
+    redirect("/login/verify");
+  }
+}
+
+export default async function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await guardEmailVerified();
   return (
     <div className="flex flex-col items-center h-[100dvh] w-full bg-background md:p-6 lg:p-8 font-sans overflow-hidden">
 

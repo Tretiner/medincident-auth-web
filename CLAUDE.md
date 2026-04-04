@@ -73,6 +73,8 @@ Upward imports are forbidden. `services/` must never import from `app/`.
 
 **Server vs Client** — server components by default. Add `"use client"` only for: event handlers, React hooks, browser APIs.
 
+**Server Actions vs Route Handlers** — prefer Server Actions. Use Route Handlers only when a Server Action cannot work: webhooks, OAuth callbacks, streaming responses, or external services that require a stable URL. Never use a Route Handler just to set cookies or call an API — a Server Action does both without an extra HTTP round-trip.
+
 **Forms** — always `react-hook-form` + `zod` resolver + Russian locale error messages.
 
 **State** — zustand for cross-component state. Co-locate store with the feature that owns it.

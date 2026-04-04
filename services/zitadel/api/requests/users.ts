@@ -226,7 +226,10 @@ export const ZitadelSearchUsersResponseSchema = z.object({
       userId: z.string().optional(),
       preferredLoginName: z.string().optional(),
       human: z.object({
-        email: z.object({ email: z.string().optional() }).optional(),
+        email: z.object({
+          email: z.string().optional(),
+          isVerified: z.boolean().optional(),
+        }).catchall(z.any()).optional(),
         profile: z.object({
           givenName: z.string().optional(),
           familyName: z.string().optional(),

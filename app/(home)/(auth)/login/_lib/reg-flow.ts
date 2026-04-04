@@ -22,16 +22,19 @@ export interface RegFlowData {
   middleName?: string;
   email: string;
   // Путь
-  source: "idp" | "email";
+  source: "idp" | "email" | "login";
   requestId?: string;
   // После создания пользователя
   userId?: string;
   loginName?: string;
-  // Для email-пути (хранится кратко)
+  // Для email-пути регистрации (хранится кратко)
   password?: string;
   // Для IDP-пути
   intentId?: string;
   intentToken?: string;
+  // Для login-пути (сессия уже создана до верификации)
+  sessionId?: string;
+  sessionToken?: string;
 }
 
 async function setCookie(name: string, data: object, maxAge = COOKIE_MAX_AGE) {
