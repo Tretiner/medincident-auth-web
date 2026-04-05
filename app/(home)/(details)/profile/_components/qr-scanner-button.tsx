@@ -112,6 +112,7 @@ export function QrScannerButton({ variant = "default" }: QrScannerButtonProps) {
 
     return () => {
       cancelled = true;
+      stopCamera();
     };
   }, [open]);
 

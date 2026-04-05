@@ -8,6 +8,7 @@ import { useQrAuth, useQrStatus } from "../login.hooks";
 import { applyQrSessionAction } from "../actions";
 
 const QRCodeStyled = QRCode as any;
+const QR_FG_COLOR = "#2b3a15";
 
 interface QrAuthSectionProps {
   requestId?: string;
@@ -15,9 +16,7 @@ interface QrAuthSectionProps {
 
 export function QrAuthSection({ requestId }: QrAuthSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const colorRef = useRef<HTMLSpanElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [fgColor] = useState("#2b3a15");
   const [isPending, startTransition] = useTransition();
 
   const { qrUrl, qrToken, isError, isLoading, refresh } = useQrAuth(isVisible, requestId);
@@ -52,8 +51,6 @@ export function QrAuthSection({ requestId }: QrAuthSectionProps) {
       ref={containerRef}
       className="relative z-10 flex flex-col items-center w-full"
     >
-      <span ref={colorRef} className="text-foreground hidden" aria-hidden />
-
       <div
         className={cn(
           "relative flex aspect-square w-full max-w-[256px] items-center justify-center overflow-hidden rounded-2xl border-2 border-border p-0 transition-all duration-300 mb-8 bg-background/60 backdrop-blur-md",
@@ -113,7 +110,7 @@ export function QrAuthSection({ requestId }: QrAuthSectionProps) {
                   [12, 12, 12, 12],
                 ]}
                 quietZone={14}
-                fgColor={fgColor}
+                fgColor={QR_FG_COLOR}
                 bgColor="#00000000"
                 level="H"
               />

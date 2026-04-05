@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
@@ -57,6 +58,8 @@ export function AccountSelectionView({ accounts, requestId, defaultSelectedId, a
           console.error("Zitadel Select Account Error:", result.error);
         }
       } catch (error) {
+        if (isRedirectError(error)) throw error;
+
         toast.error("Системная ошибка", {
           description: "Не удалось продолжить. Попробуйте обновить страницу.",
         });

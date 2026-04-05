@@ -21,7 +21,7 @@ export const useProfileStore = create<ProfileState>()(
       email: null,
       isEmailVerified: false,
 
-      setProfile: (data) => set((state) => ({ ...state, ...data })),
+      setProfile: (data) => set(data),
       clearProfile: () => set({ firstName: null, lastName: null, photoUrl: null, email: null, isEmailVerified: false}),
     }),
     {

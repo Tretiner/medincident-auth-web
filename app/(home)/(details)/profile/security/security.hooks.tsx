@@ -32,13 +32,10 @@ export function useUserSessions() {
 
 export type SecurityActionId = "telegram" | "max" | "revoke_all" | `sess_${string}`;
 
-export function useSecurityMutations() {
+export function useSecurityMutations(links: any[] | undefined) {
   const { mutate } = useSWRConfig();
   const [isPending, startTransition] = useTransition();
   const [activeActionId, setActiveActionId] = useState<SecurityActionId | null>(null);
-
-  // Чтобы знать текущий статус привязки (нужно для toggle-экшена)
-  const { links } = useLinkedAccounts();
 
   const runAction = (
     id: SecurityActionId, 

@@ -170,13 +170,13 @@ export async function getMostRecentSessionCookie<T>(): Promise<Cookie | undefine
   const stringifiedCookie = cookiesList.get("sessions");
 
   if (stringifiedCookie?.value) {
-    const sessions: SessionCookie<T>[] = JSON.parse(stringifiedCookie?.value);
+    const sessions: SessionCookie<T>[] = JSON.parse(stringifiedCookie.value);
 
-    const latest = sessions.reduce((prev, current) => {
+    if (sessions.length === 0) return undefined;
+
+    return sessions.reduce((prev, current) => {
       return prev.changeTs > current.changeTs ? prev : current;
     });
-
-    return latest;
   } else {
     return undefined;
   }

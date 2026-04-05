@@ -24,13 +24,24 @@ export function DeviceQrSection() {
   const [open, setOpen] = useState(false);
   const [qr, setQr] = useState<QrState>({ loading: false });
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   async function loadQr() {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setQr({ loading: true });
     try {
-      const res = await fetch("/api/auth/qr/transfer", { cache: "no-store" });
+      const res = await fetch("/api/auth/qr/transfer", {
+        cache: "no-store",
+        signal: controller.signal,
+      });
       if (!res.ok) throw new Error();
       const data = await res.json();
+
+      if (controller.signal.aborted) return;
+
       setQr({ url: data.url, expiresInSeconds: data.expiresInSeconds, loading: false });
 
       // Авто-обновление за 10 сек до истечения
@@ -38,7 +49,8 @@ export function DeviceQrSection() {
         const refreshIn = Math.max((data.expiresInSeconds - 10) * 1000, 5000);
         timerRef.current = setTimeout(loadQr, refreshIn);
       }
-    } catch {
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
       setQr({ loading: false, error: true });
     }
   }
@@ -48,6 +60,7 @@ export function DeviceQrSection() {
     if (isOpen) {
       loadQr();
     } else {
+      abortRef.current?.abort();
       if (timerRef.current) clearTimeout(timerRef.current);
       setQr({ loading: false });
     }
@@ -55,6 +68,7 @@ export function DeviceQrSection() {
 
   useEffect(() => {
     return () => {
+      abortRef.current?.abort();
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, []);

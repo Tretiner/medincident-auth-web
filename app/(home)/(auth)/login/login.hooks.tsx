@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { QrData, QrStatus } from "@/domain/auth/types";
 import { handleFetch } from "@/shared/lib/fetch-helper";
@@ -65,17 +66,37 @@ export function useQrAuth(enabled: boolean = true, requestId?: string) {
 }
 
 export function useQrStatus(token: string | undefined, enabled: boolean) {
-  const { data } = useSWR(
-    enabled && token ? `/api/auth/qr/status?token=${token}` : null,
-    () => fetchQrStatus(token!),
-    {
-      refreshInterval: 3000,
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-    },
-  );
+  const [status, setStatus] = useState<QrStatus>("pending");
 
-  return { status: (data?.status ?? "pending") as QrStatus };
+  useEffect(() => {
+    if (!enabled || !token) {
+      setStatus("pending");
+      return;
+    }
+
+    // SSE — одно соединение вместо polling каждые 3 секунды
+    const es = new EventSource(`/api/auth/qr/status?token=${token}`);
+
+    es.addEventListener("status", (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        setStatus(data.status);
+        if (data.status === "confirmed" || data.status === "expired") {
+          es.close();
+        }
+      } catch {}
+    });
+
+    es.onerror = () => {
+      // SSE connection lost — fallback: одноразовый запрос
+      es.close();
+      fetchQrStatus(token).then((data) => setStatus(data.status));
+    };
+
+    return () => es.close();
+  }, [token, enabled]);
+
+  return { status };
 }
 
 export async function logoutClient() {

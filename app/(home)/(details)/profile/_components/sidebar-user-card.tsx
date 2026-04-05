@@ -22,8 +22,6 @@ export function SidebarUserCard({ isActive }: Props) {
     }))
   );
 
-  console.log("User card render:", user)
-
   // Логика отображения:
   const hasData = user.firstName || user.lastName;
   const showSkeleton = !hasData || isApiLoading;

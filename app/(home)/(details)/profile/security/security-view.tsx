@@ -20,7 +20,7 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
   const { links, isLoading: loadingLinks } = useLinkedAccounts();
   const { sessions, isLoading: loadingSessions } = useUserSessions();
 
-  const { isMutating, activeActionId, actions } = useSecurityMutations();
+  const { isMutating, activeActionId, actions } = useSecurityMutations(links);
 
   const [statusMessage, setStatusMessage] = useState<string | undefined>(linkStatus);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useRef, useTransition, useEffect } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar";
 import { uploadAvatarAction } from "../profile.actions";
@@ -16,12 +16,26 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
   const [isPending, startTransition] = useTransition();
   const [previewUrl, setPreviewUrl] = useState(currentAvatarUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    };
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+    }
+
     const objectUrl = URL.createObjectURL(file);
+    objectUrlRef.current = objectUrl;
     setPreviewUrl(objectUrl);
 
     startTransition(async () => {
@@ -34,6 +48,11 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
         setPreviewUrl(currentAvatarUrl);
         console.error("Ошибка при загрузке аватара:", result?.error);
         toast("Ошибка загрузки");
+      }
+
+      if (objectUrlRef.current === objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrlRef.current = null;
       }
     });
   };
