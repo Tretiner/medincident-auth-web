@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "env-cmd -f .env next dev -p 80",
-    "build": "env-cmd -f .env next build",
+    "dev": "env-cmd -f .env bun --bun next dev --turbopack -p 80",
+    "build": "env-cmd -f .env bun --bun next build",
     "build:errors": "__NEXT_TEST_MODE=true next build",
-    "start": "env-cmd -f .env next start -p 80",
+    "start": "env-cmd -f .env bun --bun next start -p 80",
     "lint": "next lint",
     "proto:update": "buf dep update",
     "proto:generate": "mkdir -p lib/generated/proto && buf generate"

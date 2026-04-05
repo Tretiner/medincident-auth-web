@@ -1,26 +1,23 @@
-# --- Stage 1: Install dependencies ---
+# --- Stage 1: Install production dependencies only ---
 FROM oven/bun:1-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile || bun install
+RUN bun install --frozen-lockfile --production || bun install --production
 
-# --- Stage 2: Build Next.js ---
+# --- Stage 2: Install all deps + build ---
 FROM oven/bun:1-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile || bun install
+
 COPY . .
 
-# Next.js собирает env-переменные на этапе build.
-# Серверные переменные (без NEXT_PUBLIC_) можно передать в runtime,
-# но NEXT_PUBLIC_* должны быть доступны при build.
 ARG NEXT_PUBLIC_AUTH_URL
 ARG NEXT_PUBLIC_TELEGRAM_BOT_NAME
-
 ENV NEXT_PUBLIC_AUTH_URL=${NEXT_PUBLIC_AUTH_URL}
 ENV NEXT_PUBLIC_TELEGRAM_BOT_NAME=${NEXT_PUBLIC_TELEGRAM_BOT_NAME}
 
-# Серверные переменные нужны для prerender страниц при build.
-# Передаём через build args, чтобы не запекать в образ.
 ARG ZITADEL_API_URL
 ARG ZITADEL_SECRET
 ARG ZITADEL_MACHINE_KEY_PATH=/app/secrets/key.json
@@ -45,9 +42,10 @@ ENV ZITADEL_API_URL=${ZITADEL_API_URL} \
     AUTH_URL=${AUTH_URL} \
     AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
 
-RUN bun run next build
+# --bun = нативный Bun runtime для максимальной ��корости билда
+RUN bun --bun run next build
 
-# --- Stage 3: Production runner ---
+# --- Stage 3: Minimal production runner ---
 FROM oven/bun:1-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
@@ -55,12 +53,14 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Копируем standalone-сборку
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
-# Директория для secrets (монтируется через volume в runtime)
+# Результат билда
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
+COPY --from=builder --chown=nextjs:nodejs /app/next.config.ts ./
+
 RUN mkdir -p /app/secrets && chown nextjs:nodejs /app/secrets
 
 USER nextjs
@@ -68,4 +68,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["bun", "run", "server.js"]
+CMD ["bun", "--bun", "--smol", "run", "next", "start", "-H", "0.0.0.0", "-p", "3000"]

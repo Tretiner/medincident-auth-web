@@ -4,29 +4,14 @@ import { AccountSelectionView, AccountDisplayItem } from "./_components/account-
 import { Suspense } from "react";
 import { getUserById } from "@/services/zitadel/api";
 import { syncSessionCookies } from "@/services/zitadel/sync-sessions";
+import { Skeleton } from "@/shared/ui/skeleton";
 
-export default async function AccountSelectionPage({searchParams}: {searchParams: any;}) {
-  const resolvedSearchParams = await searchParams;
-
-  const requestId = resolvedSearchParams.requestId || resolvedSearchParams.authRequest;
-
-  if (!requestId) {
-    redirect("/profile");
-  }
-
-  const loginLink = `/login?requestId=${requestId}`;
-  const addAccountLink = `/login?requestId=${requestId}&newAccount=true`;
-
-  // Очищаем мёртвые куки, получаем живые сессии одним запросом к Zitadel
+async function AccountList({ requestId }: { requestId: string }) {
   const syncedSessions = await syncSessionCookies();
 
   const validSessions = syncedSessions.filter(
     ({ cookie, zitadel }) => cookie.token && zitadel?.factors?.user
   );
-
-  // if (validSessions.length === 0) {
-  //   redirect(loginLink);
-  // }
 
   const mostRecent = await getMostRecentSessionCookie();
   const currentAccount = validSessions.find(({ cookie }) => cookie.id === mostRecent?.id);
@@ -61,15 +46,43 @@ export default async function AccountSelectionPage({searchParams}: {searchParams
   const displayAccounts = displayAccountsRaw.filter(Boolean) as AccountDisplayItem[];
 
   return (
+    <AccountSelectionView
+      accounts={displayAccounts}
+      requestId={requestId}
+      defaultSelectedId={currentAccount?.cookie.id}
+      addAccountLink={`/login?requestId=${requestId}&newAccount=true`}
+      localContinueLink="/profile"
+    />
+  );
+}
+
+function AccountListSkeleton() {
+  return (
+    <div className="w-full max-w-md space-y-4 p-6">
+      <Skeleton className="h-8 w-48 mx-auto" />
+      <Skeleton className="h-4 w-64 mx-auto" />
+      <div className="space-y-3 mt-6">
+        <Skeleton className="h-16 w-full rounded-xl" />
+        <Skeleton className="h-16 w-full rounded-xl" />
+      </div>
+      <Skeleton className="h-10 w-full rounded-lg mt-4" />
+    </div>
+  );
+}
+
+export default async function AccountSelectionPage({searchParams}: {searchParams: any;}) {
+  const resolvedSearchParams = await searchParams;
+
+  const requestId = resolvedSearchParams.requestId || resolvedSearchParams.authRequest;
+
+  if (!requestId) {
+    redirect("/profile");
+  }
+
+  return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background/50 font-sans">
-      <Suspense>
-        <AccountSelectionView
-          accounts={displayAccounts}
-          requestId={requestId}
-          defaultSelectedId={currentAccount?.cookie.id}
-          addAccountLink={addAccountLink}
-          localContinueLink="/profile"
-        />
+      <Suspense fallback={<AccountListSkeleton />}>
+        <AccountList requestId={requestId} />
       </Suspense>
     </div>
   );

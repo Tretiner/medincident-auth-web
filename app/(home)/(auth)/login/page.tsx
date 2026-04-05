@@ -9,11 +9,28 @@ import { ExternalIdentityProviders } from "./_components/external-idp";
 import { fetchProvidersAction } from "./actions";
 import { getAllSessions } from "@/services/zitadel/cookies";
 import { completeAuthRequest } from "@/services/zitadel/api";
+import { Skeleton } from "@/shared/ui/skeleton";
 
 export const metadata: Metadata = {
   title: "Вход",
   description: "Авторизация в системе",
 };
+
+async function ProviderButtons({ requestId }: { requestId: string }) {
+  const providers = await fetchProvidersAction();
+  return <ExternalIdentityProviders providers={providers} requestId={requestId} />;
+}
+
+function ProviderButtonsSkeleton() {
+  return (
+    <div className="grid gap-2 md:gap-3">
+      <Skeleton className="h-12 w-full rounded-lg" />
+      <Skeleton className="h-12 w-full rounded-lg" />
+      <Skeleton className="h-4 w-8 mx-auto my-1" />
+      <Skeleton className="h-12 w-full rounded-lg" />
+    </div>
+  );
+}
 
 export default async function LoginPage({ searchParams }: { searchParams: any }) {
   const resolvedSearchParams = await searchParams;
@@ -44,13 +61,11 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
   }
 
   // 0 сессий — показываем форму логина
-  const providers = await fetchProvidersAction();
-
   return (
     <main className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
       <div className="w-full flex justify-center max-w-full">
         <Card className="w-full max-w-[960px] overflow-hidden rounded-xl border border-border bg-card grid grid-cols-1 md:grid-cols-2 animate-in fade-in duration-500">
-          
+
           {/* LEFT COLUMN */}
           <div className="hidden md:flex relative flex-col items-center justify-center text-center p-12 overflow-hidden border-r border-border bg-primary/5">
             <div className="absolute -top-[40%] -left-[40%] w-[80%] h-[80%] rounded-full bg-primary/10 blur-xl pointer-events-none" />
@@ -75,9 +90,9 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
             </div>
 
             <div className="space-y-4 md:space-y-6 w-full">
-              <div className="grid gap-2 md:gap-3">
-                <ExternalIdentityProviders providers={providers} requestId={requestId} />
-              </div>
+              <Suspense fallback={<ProviderButtonsSkeleton />}>
+                <ProviderButtons requestId={requestId} />
+              </Suspense>
             </div>
 
             <p className="mt-6 md:mt-8 text-center text-xs text-muted-foreground leading-relaxed px-2 md:px-0">

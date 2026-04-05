@@ -61,7 +61,7 @@ export async function updateMyProfile(userId: string, profile: {
   gender?: number;
 }): Promise<Result<z.infer<typeof ZitadelUpdateResponseSchema>>> {
   return handleZitadelRequest(
-    () => zitadelUserApi.put(`/v2/users/${userId}`, { profile }),
+    () => zitadelUserApi.put(`/v2/users/human/${userId}`, { profile }),
     ZitadelUpdateResponseSchema
   );
 }

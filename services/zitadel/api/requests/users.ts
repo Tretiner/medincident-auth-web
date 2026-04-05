@@ -117,7 +117,7 @@ export async function updateHumanProfile(
   };
 
   return handleZitadelRequest(
-    () => zitadelApi.put(`/v2/users/${userId}`, body),
+    () => zitadelApi.put(`/v2/users/human/${userId}`, body),
     ZitadelGenericUpdateResponseSchema
   );
 }
@@ -262,7 +262,7 @@ export async function searchUserByEmail(
   email: string
 ): Promise<Result<z.infer<typeof ZitadelSearchUsersResponseSchema>>> {
   return handleZitadelRequest(
-    () => zitadelApi.post("/v2/users/search", {
+    () => zitadelApi.post("/v2/users", {
       queries: [
         {
           emailQuery: {
