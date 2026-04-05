@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import { ExternalIdentityProviders } from "./_components/external-idp";
 import { fetchProvidersAction } from "./actions";
 import { getAllSessions } from "@/services/zitadel/cookies";
-import { completeAuthRequest } from "@/services/zitadel/api";
+import { completeAuthRequest, getAuthRequest } from "@/services/zitadel/api";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 export const metadata: Metadata = {
@@ -42,8 +42,29 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
     redirect("/profile");
   }
 
-  // Если не добавляем новый аккаунт — пробуем авто-complete
-  if (!isNewAccount) {
+  // Проверяем auth request у Zitadel — содержит ли prompt
+  // Zitadel не прокидывает prompt в redirect URL, но хранит его в auth request
+  let forceLogin = false;
+  let forceSelectAccount = false;
+  const authReqResult = await getAuthRequest(requestId);
+  if (authReqResult.success) {
+    const prompts = authReqResult.data.authRequest?.prompt || [];
+    forceLogin = prompts.some((p: string) =>
+      p === "PROMPT_LOGIN" || p === "login"
+    );
+    forceSelectAccount = prompts.some((p: string) =>
+      p === "PROMPT_SELECT_ACCOUNT" || p === "select_account"
+    );
+  }
+
+  // prompt=select_account — принудительно показать выбор аккаунта
+  if (forceSelectAccount) {
+    redirect(`/?requestId=${requestId}`);
+  }
+
+  // Если prompt=login или добавляем новый аккаунт — всегда показываем форму
+  // Иначе пробуем авто-complete через существующие сессии
+  if (!isNewAccount && !forceLogin) {
     const sessions = await getAllSessions(true);
 
     if (sessions.length === 1) {

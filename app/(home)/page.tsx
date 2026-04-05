@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getMostRecentSessionCookie } from "@/services/zitadel/cookies";
 import { AccountSelectionView, AccountDisplayItem } from "./_components/account-selection-view";
 import { Suspense } from "react";
-import { getUserById } from "@/services/zitadel/api";
+import { getUserById, getAuthRequest } from "@/services/zitadel/api";
 import { syncSessionCookies } from "@/services/zitadel/sync-sessions";
 import { Skeleton } from "@/shared/ui/skeleton";
 
@@ -77,6 +77,13 @@ export default async function AccountSelectionPage({searchParams}: {searchParams
 
   if (!requestId) {
     redirect("/profile");
+  }
+
+  // Проверяем что requestId валиден (не протух, не подделан)
+  const authReqResult = await getAuthRequest(requestId);
+  if (!authReqResult.success) {
+    console.log("[account-selection] Невалидный requestId=%s, редирект на /login", requestId);
+    redirect("/login");
   }
 
   return (

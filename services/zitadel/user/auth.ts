@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import ZitadelProvider from "next-auth/providers/zitadel";
-import { env } from "@/shared/config/env"; // Ваш конфиг переменных окружения
+import { env } from "@/shared/config/env";
 
 // Scopes для OIDC — вынесены чтобы использовать и в authorization, и в refresh
 const OIDC_SCOPES = [
@@ -73,13 +73,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         maxAge: 60 * 15,
       },
     },
+    nonce: {
+      name: `${useSecureCookies ? "__Secure-" : ""}authjs.nonce`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+        maxAge: 60 * 15,
+      },
+    },
   },
   providers: [
     ZitadelProvider({
       clientId: env.APP_CLIENT_ID,
       issuer: env.ZITADEL_API_URL,
 
-      checks: ["pkce", "state"],
+      // pkce — защита от перехвата кода
+      // state — CSRF защита
+      // nonce — защита от replay-атак (id_token привязан к конкретному запросу)
+      checks: ["pkce", "state", "nonce"],
 
       client: {
         token_endpoint_auth_method: "none",

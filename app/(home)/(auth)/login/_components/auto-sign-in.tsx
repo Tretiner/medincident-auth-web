@@ -4,14 +4,20 @@ import { useEffect } from "react";
 import { signIn } from "next-auth/react";
 
 export interface Props {
-    provider: string, 
-    redirectTo: string
+    provider: string;
+    redirectTo: string;
+    forceLogin?: boolean;
 }
 
-export function AutoSignIn({ provider, redirectTo }: Props) {
+export function AutoSignIn({ provider, redirectTo, forceLogin }: Props) {
   useEffect(() => {
-    signIn(provider, { callbackUrl: redirectTo });
-  }, [provider, redirectTo]);
+    const options: Record<string, string> = { callbackUrl: redirectTo };
+    if (forceLogin) {
+      options.prompt = "login";
+    }
+
+    signIn(provider, options);
+  }, [provider, redirectTo, forceLogin]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

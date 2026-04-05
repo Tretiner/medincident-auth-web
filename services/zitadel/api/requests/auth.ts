@@ -42,6 +42,27 @@ export async function approveDeviceAuthorization(
   );
 }
 
+const ZitadelGetAuthRequestResponseSchema = z.object({
+  authRequest: z.object({
+    id: z.string(),
+    clientId: z.string().optional(),
+    scope: z.array(z.string()).optional(),
+    redirectUri: z.string().optional(),
+    prompt: z.array(z.string()).optional(),
+    loginHint: z.string().optional(),
+    hintUserId: z.string().optional(),
+  }).catchall(z.any()),
+}).catchall(z.any());
+
+export async function getAuthRequest(
+  requestId: string
+): Promise<Result<z.infer<typeof ZitadelGetAuthRequestResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.get(`/v2/oidc/auth_requests/${requestId}`),
+    ZitadelGetAuthRequestResponseSchema
+  );
+}
+
 export async function completeAuthRequest(
   requestId: string,
   sessionId: string,
