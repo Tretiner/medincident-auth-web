@@ -1,30 +1,27 @@
 // app/actions/auth.ts
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 // Импортируем ваши методы для работы с пользователями и сессиями
 import { createHumanUser, createSession, addIdpLinkToUser, completeAuthRequest, deleteSession, searchUserSessions } from "@/services/zitadel/api";
 import { addSessionToCookie, getAllSessions, removeSessionFromCookie } from "@/services/zitadel/cookies";
-import { env } from "@/shared/config/env";
 
 export async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
   const result = await completeAuthRequest(requestId, sessionId, sessionToken);
 
   if (!result.success) {
     console.error("Ошибка завершения Auth Request в ZITADEL:", result.error);
-    throw new Error("Не удалось завершить OIDC-запрос. Возможно, requestId устарел.");
+    redirect("/login");
   }
 
-  // ZITADEL возвращает { "redirectUri": "..." } для OIDC или { "url": "..." } для SAML
-  const redirectUrl = result.data.redirectUri || result.data.url;
+  const callbackUrl = result.data.callbackUrl || result.data.url;
 
-  if (!redirectUrl) {
-    throw new Error("ZITADEL не вернул redirectUri");
+  if (!callbackUrl) {
+    throw new Error("ZITADEL не вернул callbackUrl");
   }
 
-  return redirectUrl;
+  return callbackUrl;
 }
 /**
  * Универсальная функция финализации авторизации
@@ -45,28 +42,22 @@ export async function finishAuth(sessionResData: any, requestId?: string, loginN
     requestId: requestId,
   };
 
-  // Сохраняем сессию через твой новый менеджер (с авто-очисткой старых)
+  // Сохраняем сессию в куки sessions (для мульти-аккаунт и auto-complete)
   await addSessionToCookie({
     session: newSessionCookie,
     cleanup: true,
   });
 
-  const cookieStore = await cookies();
+  console.log("[auth:finishAuth] Сессия сохранена в cookie: id=%s, loginName=%s",
+    newSessionCookie.id, newSessionCookie.loginName);
 
   // 2. РАЗВИЛКА ЛОГИНА
   if (requestId) {
-    console.log("OIDC/SAML ROUTE:")
+    console.log("[auth:finishAuth] OIDC/SAML ROUTE: sessionId=%s, requestId=%s", sessionResData.sessionId, requestId);
     const redirectUrl = await completeAuthFlow(sessionResData.sessionId, sessionResData.sessionToken, requestId);
     redirect(redirectUrl);
   } else {
-    console.log("PROFILE ROUTE:")
-    // Записываем ID выбранной сессии в отдельную куку "текущего пользователя"
-    cookieStore.set("zitadel_current_session", sessionResData.sessionId, {
-      httpOnly: true,
-      secure: env.NODE_ENV === "production",
-      path: "/",
-      sameSite: "lax",
-    });
+    console.log("[auth:finishAuth] PROFILE ROUTE: sessionId=%s — NextAuth AutoSignIn обработает авторизацию", sessionResData.sessionId);
     redirect("/profile");
   }
 }
@@ -128,12 +119,10 @@ export async function handleLinkAction(targetUserId: string, intentId: string, i
   await finishAuth(sessionRes.data, requestId);
 }
 
-export async function selectAccountAction(sessionId: string, sessionToken: string, requestId?: string) {
-  try {
-    return await completeAuthFlow(sessionId, sessionToken, requestId ?? "");
-  } catch (error: any) {
-    // Если сессия протухла в момент клика, возвращаем ошибку, 
-    // чтобы UI мог обработать её и предложить войти заново
-    return { success: false, error: error.message };
+export async function selectAccountAction(sessionId: string, sessionToken: string, requestId: string) {
+  const result = await completeAuthRequest(requestId, sessionId, sessionToken);
+  if (result.success) {
+    redirect(result.data.callbackUrl || result.data.url || "/profile");
   }
+  return { success: false as const, error: result.error };
 }

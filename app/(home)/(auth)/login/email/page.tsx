@@ -2,6 +2,7 @@ import { AppLogoIcon } from "@/components/icons";
 import { APP_NAME } from "@/shared/lib/constants";
 import { EmailLoginForm } from "./_components/email-login-form";
 import { loginWithEmailAction } from "./actions";
+import { env } from "@/shared/config/env";
 
 export default async function EmailLoginPage({
   searchParams,
@@ -14,6 +15,11 @@ export default async function EmailLoginPage({
   const registerHref = requestId
     ? `/login/register?source=email&requestId=${requestId}`
     : "/login/register?source=email";
+
+
+      const initialState = env.isDev 
+        ? { values: { email: "admin@medincident.ru", password: "Password1!" }, errors: {}}
+        : { errors: {} }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start pt-16 md:pt-24 p-4 bg-background font-sans">
@@ -30,7 +36,7 @@ export default async function EmailLoginPage({
           </p>
         </div>
 
-        <EmailLoginForm action={boundAction} registerHref={registerHref} />
+        <EmailLoginForm action={boundAction} registerHref={registerHref} initialState={initialState} />
       </div>
     </div>
   );

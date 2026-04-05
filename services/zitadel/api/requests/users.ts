@@ -117,7 +117,7 @@ export async function updateHumanProfile(
   };
 
   return handleZitadelRequest(
-    () => zitadelApi.put(`/v2/users/human/${userId}`, body),
+    () => zitadelApi.put(`/v2/users/${userId}`, body),
     ZitadelGenericUpdateResponseSchema
   );
 }
@@ -144,7 +144,7 @@ export async function updateHumanAvatar(
   formData.append("file", file);
 
   return handleZitadelRequest(
-    () => zitadelApi.post(`/v2/users/${userId}/human/profile/avatar#assets/v1/users/me/avatar#`, formData, {
+    () => zitadelApi.post(`/v2/users/${userId}/avatar`, formData, {
       // Axios должен сам выставить boundary, но мы явно указываем тип
       headers: { "Content-Type": "multipart/form-data" }
     }),
@@ -251,8 +251,9 @@ export async function verifyUserEmail(
 export async function resendEmailVerification(
   userId: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
+  // Zitadel v2: POST /v2/users/{userId}/email с sendCode:{} повторно отправляет код верификации
   return handleZitadelRequest(
-    () => zitadelApi.post(`/v2/users/${userId}/email/resend`, { sendCode: {} }),
+    () => zitadelApi.post(`/v2/users/${userId}/email`, { sendCode: {} }),
     ZitadelGenericUpdateResponseSchema
   );
 }

@@ -1,28 +1,71 @@
+# --- Stage 1: Install dependencies ---
 FROM oven/bun:1-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile || bun install
 
+# --- Stage 2: Build Next.js ---
 FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Next.js собирает env-переменные на этапе build.
+# Серверные переменные (без NEXT_PUBLIC_) можно передать в runtime,
+# но NEXT_PUBLIC_* должны быть доступны при build.
+ARG NEXT_PUBLIC_AUTH_URL
+ARG NEXT_PUBLIC_TELEGRAM_BOT_NAME
+
+ENV NEXT_PUBLIC_AUTH_URL=${NEXT_PUBLIC_AUTH_URL}
+ENV NEXT_PUBLIC_TELEGRAM_BOT_NAME=${NEXT_PUBLIC_TELEGRAM_BOT_NAME}
+
+# Серверные переменные нужны для prerender страниц при build.
+# Передаём через build args, чтобы не запекать в образ.
+ARG ZITADEL_API_URL
+ARG ZITADEL_SECRET
+ARG ZITADEL_MACHINE_KEY_PATH=/app/secrets/key.json
+ARG ZITADEL_ORG_ID
+ARG APP_URL
+ARG APP_CLIENT_ID
+ARG API_URL
+ARG GRPC_API_URL
+ARG AUTH_SECRET
+ARG AUTH_URL
+ARG AUTH_TRUST_HOST=true
+
+ENV ZITADEL_API_URL=${ZITADEL_API_URL} \
+    ZITADEL_SECRET=${ZITADEL_SECRET} \
+    ZITADEL_MACHINE_KEY_PATH=${ZITADEL_MACHINE_KEY_PATH} \
+    ZITADEL_ORG_ID=${ZITADEL_ORG_ID} \
+    APP_URL=${APP_URL} \
+    APP_CLIENT_ID=${APP_CLIENT_ID} \
+    API_URL=${API_URL} \
+    GRPC_API_URL=${GRPC_API_URL} \
+    AUTH_SECRET=${AUTH_SECRET} \
+    AUTH_URL=${AUTH_URL} \
+    AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
+
 RUN bun run next build
 
-FROM node:22-alpine AS runner
+# --- Stage 3: Production runner ---
+FROM oven/bun:1-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
+# Копируем standalone-сборку
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Директория для secrets (монтируется через volume в runtime)
+RUN mkdir -p /app/secrets && chown nextjs:nodejs /app/secrets
 
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["bun", "run", "server.js"]

@@ -1,10 +1,9 @@
 "use server";
 
-import { verifyUserEmail, createSession, createSessionWithPassword } from "@/services/zitadel/api";
+import { verifyUserEmail, createSession, createSessionWithPassword, searchUserSessions } from "@/services/zitadel/api";
 import { getRegFlowCookie, deleteRegFlowCookie } from "../_lib/reg-flow";
-import { getCurrentSessionId } from "@/services/zitadel/current-session";
-import { getSessionCookieById } from "@/services/zitadel/cookies";
-import { zitadelApi } from "@/services/zitadel/api/client";
+import { getUserIdFromNextAuth } from "@/services/zitadel/session";
+import { getSessionCookieById, getAllSessionCookieIds } from "@/services/zitadel/cookies";
 import { finishAuth } from "../callback/success/actions";
 
 export interface VerifyState {
@@ -23,23 +22,12 @@ export async function verifyEmailAction(
 
   const flow = await getRegFlowCookie();
 
-  // Получаем userId: из куки или из текущей сессии
+  // Получаем userId: из куки регистрации или из NextAuth
   let userId: string;
   if (flow?.userId) {
     userId = flow.userId;
   } else {
-    const sessionId = await getCurrentSessionId();
-    if (!sessionId) return { errors: { form: "Сессия устарела. Войдите заново." } };
-
-    let sessionData: any;
-    try {
-      const res = await zitadelApi.get(`/v2/sessions/${sessionId}`);
-      sessionData = res.data?.session;
-    } catch {
-      return { errors: { form: "Сессия устарела. Войдите заново." } };
-    }
-
-    const uid: string | undefined = sessionData?.factors?.user?.id;
+    const uid = await getUserIdFromNextAuth();
     if (!uid) return { errors: { form: "Сессия устарела. Войдите заново." } };
     userId = uid;
   }
@@ -77,14 +65,20 @@ export async function verifyEmailAction(
     loginName = flow.loginName;
     await deleteRegFlowCookie();
   } else {
-    // Путь из профиля — сессия уже активна, берём из куки
-    const sessionId = await getCurrentSessionId();
-    if (!sessionId) return { errors: { form: "Сессия устарела. Войдите заново." } };
+    // Путь из профиля — сессия уже активна, ищем через NextAuth + sessions cookie
+    const userSessionsRes = await searchUserSessions(userId);
+    const cookieIds = await getAllSessionCookieIds();
+    const cookieIdSet = new Set(cookieIds);
 
-    const sessionCookie = await getSessionCookieById({ sessionId });
+    const zitadelSessions: any[] = userSessionsRes.success ? userSessionsRes.data?.sessions || [] : [];
+    const match = zitadelSessions.find((s: any) => cookieIdSet.has(s.id));
+
+    if (!match) return { errors: { form: "Сессия устарела. Войдите заново." } };
+
+    const sessionCookie = await getSessionCookieById({ sessionId: match.id });
     if (!sessionCookie?.token) return { errors: { form: "Сессия устарела. Войдите заново." } };
 
-    sessionData = { sessionId, sessionToken: sessionCookie.token };
+    sessionData = { sessionId: match.id, sessionToken: sessionCookie.token };
     loginName = sessionCookie.loginName;
   }
 

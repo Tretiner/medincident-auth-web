@@ -19,6 +19,7 @@ export let MockFullUser: User = {
     lastName: "Смирнов",
     middleName: "Викторович",
     email: "alex.smirnov@medsafety.ru",
+    isEmailVerified: true,
     position: "Ведущий хирург",
     avatarUrl: `/api/res/avatar/150?u=USR-7734-21`,
   },

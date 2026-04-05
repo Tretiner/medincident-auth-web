@@ -2,6 +2,16 @@ import NextAuth from "next-auth";
 import ZitadelProvider from "next-auth/providers/zitadel";
 import { env } from "@/shared/config/env"; // Ваш конфиг переменных окружения
 
+// Scopes для OIDC — вынесены чтобы использовать и в authorization, и в refresh
+const OIDC_SCOPES = [
+  "openid",
+  "profile",
+  "email",
+  "offline_access",
+  // Разрешает access token для вызовов Zitadel API (/v2/users/... и т.д.)
+  "urn:zitadel:iam:org:project:id:zitadel:aud",
+].join(" ");
+
 // Функция для обмена старого refresh_token на новый access_token
 async function refreshAccessToken(token: any) {
   try {
@@ -12,6 +22,7 @@ async function refreshAccessToken(token: any) {
         client_id: env.APP_CLIENT_ID,
         grant_type: "refresh_token",
         refresh_token: token.refreshToken,
+        scope: OIDC_SCOPES,
       }),
     });
 
@@ -36,14 +47,39 @@ async function refreshAccessToken(token: any) {
   }
 }
 
+const useSecureCookies = env.APP_URL.startsWith("https://");
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    basePath: "/api/auth",
+  basePath: "/api/auth",
+  trustHost: true,
+  cookies: {
+    pkceCodeVerifier: {
+      name: `${useSecureCookies ? "__Secure-" : ""}authjs.pkce.code_verifier`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+        maxAge: 60 * 15, // 15 минут
+      },
+    },
+    state: {
+      name: `${useSecureCookies ? "__Secure-" : ""}authjs.state`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+        maxAge: 60 * 15,
+      },
+    },
+  },
   providers: [
     ZitadelProvider({
       clientId: env.APP_CLIENT_ID,
       issuer: env.ZITADEL_API_URL,
 
-      checks: ["pkce"],
+      checks: ["pkce", "state"],
 
       client: {
         token_endpoint_auth_method: "none",
@@ -51,7 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       authorization: {
         params: {
-          scope: "openid profile email offline_access",
+          scope: OIDC_SCOPES,
         },
       },
     }),
@@ -59,11 +95,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     // Вызывается при создании и проверке JWT
     async jwt({ token, account }) {
-      // 1. Первичный логин
+      // 1. Первичный логин — account доступен только при первом входе
       if (account) {
+        console.log("[NextAuth:jwt] Логин: zitadelUserId=%s", account.providerAccountId);
+
         return {
           ...token,
           accessToken: account.access_token,
+          // Zitadel user ID — из providerAccountId (числовой, напр. "367070315047550982")
+          // token.sub может быть UUID из OIDC id_token, что НЕ совпадает с Zitadel user ID
+          zitadelUserId: account.providerAccountId,
           expiresAt: account.expires_at ? account.expires_at * 1000 : Date.now() + 12 * 60 * 60 * 1000,
           refreshToken: account.refresh_token,
         };
@@ -75,6 +116,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       // 3. Токен истек — обновляем
+      console.log("[NextAuth:jwt] Токен истёк, обновляем...");
       return await refreshAccessToken(token);
     },
 
@@ -83,6 +125,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         // @ts-ignore - прокидываем токены и ошибки в клиентскую сессию
         session.accessToken = token.accessToken;
+        // @ts-ignore - Zitadel userId (числовой) для API вызовов
+        session.zitadelUserId = token.zitadelUserId;
         // @ts-ignore
         session.error = token.error;
       }

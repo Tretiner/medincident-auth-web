@@ -79,7 +79,6 @@ export function useQrStatus(token: string | undefined, enabled: boolean) {
 }
 
 export async function logoutClient() {
-  window.location.href = "/login";
   useProfileStore.getState().clearProfile();
   await logoutAction();
 }

@@ -5,23 +5,21 @@ import { MobileTopBar } from "./_components/mobile-top-bar";
 import { Card } from "@/shared/ui/card";
 import { cn } from "@/shared/lib/utils";
 import { Suspense } from "react";
-import { getCurrentSessionId } from "@/services/zitadel/current-session";
 import { getUserById } from "@/services/zitadel/api";
-import { zitadelApi } from "@/services/zitadel/api/client";
+import { auth } from "@/services/zitadel/user/auth";
+import { getUserIdFromNextAuth } from "@/services/zitadel/session";
+import { AutoSignIn } from "../../(auth)/login/_components/auto-sign-in";
 
 async function guardEmailVerified() {
-  const sessionId = await getCurrentSessionId();
-  if (!sessionId) redirect("/");
+  // Извлекаем userId из NextAuth access_token JWT (sub claim)
+  const userId = await getUserIdFromNextAuth();
 
-  let userId: string | undefined;
-  try {
-    const res = await zitadelApi.get(`/v2/sessions/${sessionId}`);
-    userId = res.data?.session?.factors?.user?.id;
-  } catch {
-    redirect("/");
+  // Если userId неизвестен — пропускаем проверку.
+  // Пользователь аутентифицирован через OIDC, Zitadel уже проверил email.
+  if (!userId) {
+    console.log("[auth:guardEmailVerified] userId не найден в NextAuth, пропускаем проверку");
+    return;
   }
-
-  if (!userId) redirect("/");
 
   const userRes = await getUserById(userId);
   const isVerified: boolean = userRes.success
@@ -29,7 +27,7 @@ async function guardEmailVerified() {
     : false;
 
   if (!isVerified) {
-    // verify/page сам прочитает сессию и отправит код — куки писать не нужно
+    console.log("[auth:guardEmailVerified] Email не верифицирован для userId=%s, редирект на /login/verify", userId);
     redirect("/login/verify");
   }
 }
@@ -39,6 +37,11 @@ export default async function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  if (!session) {
+    return <AutoSignIn provider="zitadel" redirectTo="/profile" />;
+  }
+
   await guardEmailVerified();
   return (
     <div className="flex flex-col items-center h-[100dvh] w-full bg-background md:p-6 lg:p-8 font-sans overflow-hidden">

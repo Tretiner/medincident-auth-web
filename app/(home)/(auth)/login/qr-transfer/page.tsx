@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { consumeTransferToken } from "@/services/zitadel/transfer-store";
 import { createSessionByUserId, getSession } from "@/services/zitadel/api";
 import { addSessionToCookie } from "@/services/zitadel/cookies";
-import { setCurrentSessionId } from "@/services/zitadel/current-session";
 
 interface Props {
   searchParams: Promise<{ token?: string }>;
@@ -44,7 +43,7 @@ export default async function QrTransferPage({ searchParams }: Props) {
     cleanup: true,
   });
 
-  await setCurrentSessionId(sessionId);
+  console.log("[auth:qrTransfer] Сессия создана для userId=%s, sessionId=%s", userId, sessionId);
 
   redirect("/profile");
 }

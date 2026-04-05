@@ -6,7 +6,7 @@ import { handleZitadelRequest } from "../client-helper";
 import { zitadelApi } from "../client";
 
 export const ZitadelCompleteAuthRequestResponseSchema = z.object({
-  redirectUri: z.string().optional(),
+  callbackUrl: z.string().optional(),
   url: z.string().optional()
 }).catchall(z.any());
 
@@ -33,7 +33,7 @@ export async function approveDeviceAuthorization(
   id: string,
   sessionId: string,
   sessionToken: string
-): Promise<Result<Record<string, never>>> {
+): Promise<Result<Record<string, unknown>>> {
   return handleZitadelRequest(
     () => zitadelApi.post(`/v2/oidc/device_authorization/${id}`, {
       session: { sessionId, sessionToken },
@@ -47,20 +47,8 @@ export async function completeAuthRequest(
   sessionId: string,
   sessionToken: string
 ): Promise<Result<z.infer<typeof ZitadelCompleteAuthRequestResponseSchema>>> {
-  const isOidc = requestId.startsWith("oidc_");
   const isSaml = requestId.startsWith("saml_");
-
-  if (!isOidc && !isSaml) {
-    return {
-      success: false,
-      error: {
-        type: 'VALIDATION_ERROR',
-        message: "Неизвестный тип requestId. Ожидается префикс oidc_ или saml_",
-      }
-    };
-  }
-
-  const endpoint = isOidc ? `/v2/oidc/auth_requests/${requestId}` : `/v2/saml/auth_requests/${requestId}`;
+  const endpoint = isSaml ? `/v2/saml/auth_requests/${requestId}` : `/v2/oidc/auth_requests/${requestId}`;
 
   return handleZitadelRequest(
     () => zitadelApi.post(endpoint, {

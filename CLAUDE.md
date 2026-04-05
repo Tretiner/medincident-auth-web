@@ -17,9 +17,8 @@ app/                         — routing shells only, max ~10 lines per page
 services/                    — external integrations
   zitadel/api/requests/      — per-resource API (users, sessions, auth, idps, links)
   zitadel/user/auth.ts       — NextAuth.js config + Zitadel provider
-  zitadel/session.ts         — server-side session validation
+  zitadel/session.ts         — server-side session validation (NextAuth + Zitadel)
   zitadel/cookies.ts         — HttpOnly session cookie management
-  zitadel/current-session.ts — current session ID tracking
   zitadel/helpers.ts         — timestamp utilities
   grpc/client.ts             — nice-grpc channel config
 shared/                      — cross-cutting, zero business logic

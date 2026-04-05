@@ -8,7 +8,6 @@ import { AlertCircle, Loader2, Plus, Check } from "lucide-react";
 import { AppLogoIcon } from "@/components/icons";
 import { cn } from "@/shared/lib/utils";
 import { selectAccountAction } from "../(auth)/login/callback/success/actions";
-import { setCurrentSessionId } from "@/services/zitadel/current-session";
 import { toast } from "sonner";
 
 export interface AccountDisplayItem {
@@ -44,7 +43,6 @@ export function AccountSelectionView({ accounts, requestId, defaultSelectedId, a
     startTransition(async () => {
       try {
         if (!requestId) {
-          await setCurrentSessionId(account.id);
           router.push(localContinueLink);
           return;
         }

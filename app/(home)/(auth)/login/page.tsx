@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { redirect } from "next/navigation"; // Импортируем redirect
+import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/shared/ui/card";
 import { AppLogoIcon } from "@/components/icons";
 import { APP_NAME } from "@/shared/lib/constants";
@@ -7,8 +7,8 @@ import { QrAuthSection } from "./_components/qr-auth-section";
 import { Suspense } from "react";
 import { ExternalIdentityProviders } from "./_components/external-idp";
 import { fetchProvidersAction } from "./actions";
-import { signIn } from "@/services/zitadel/user/auth";
-import { AutoSignIn } from "./_components/auto-sign-in";
+import { getAllSessions } from "@/services/zitadel/cookies";
+import { completeAuthRequest } from "@/services/zitadel/api";
 
 export const metadata: Metadata = {
   title: "Вход",
@@ -17,14 +17,33 @@ export const metadata: Metadata = {
 
 export default async function LoginPage({ searchParams }: { searchParams: any }) {
   const resolvedSearchParams = await searchParams;
-  
+
   const requestId = resolvedSearchParams.requestId || resolvedSearchParams.authRequest;
+  const isNewAccount = resolvedSearchParams.newAccount === "true";
 
-  // if (!requestId) {
-  //   return (<AutoSignIn provider="zitadel" redirectTo="/profile" />);
-  // }
+  if (!requestId) {
+    redirect("/profile");
+  }
 
-  // Если requestId есть, продолжаем обычную отрисовку страницы
+  // Если не добавляем новый аккаунт — пробуем авто-complete
+  if (!isNewAccount) {
+    const sessions = await getAllSessions(true);
+
+    if (sessions.length === 1) {
+      const s = sessions[0];
+      const result = await completeAuthRequest(requestId, s.id, s.token);
+      if (result.success) {
+        redirect(result.data.callbackUrl || result.data.url || "/profile");
+      }
+      // При ошибке падаем на форму логина
+    }
+
+    if (sessions.length >= 2) {
+      redirect(`/?requestId=${requestId}`);
+    }
+  }
+
+  // 0 сессий — показываем форму логина
   const providers = await fetchProvidersAction();
 
   return (

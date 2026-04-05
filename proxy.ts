@@ -1,34 +1,27 @@
+import { auth } from "@/services/zitadel/user/auth";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { cleanupDeadSessionCookies } from "./services/zitadel/sync-sessions";
 
-const SECURE_PATHS = ["/profile", "/api/profile"];
-const AUTH_PATHS = ["/", "/login"];
-
-export async function proxy(req: NextRequest) {
+export default auth(async (req) => {
   const { pathname } = req.nextUrl;
+  const isLoggedIn = !!req.auth;
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const isLoggedIn = !!token;
+  console.log("[middleware] path=%s, isLoggedIn=%s", pathname, isLoggedIn);
 
-  const isSecurePath = SECURE_PATHS.some((path) => pathname.startsWith(path));
-  
-  // if (isSecurePath && !isLoggedIn) {
-  //   const loginUrl = new URL("/", req.nextUrl);
-  //   loginUrl.searchParams.set("redirect", pathname); 
-  //   return NextResponse.redirect(loginUrl);
-  // }
-
-  const isAuthPath = AUTH_PATHS.includes(pathname);
-  if (isAuthPath && isLoggedIn) {
-    return NextResponse.redirect(new URL("/profile", req.nextUrl));
+  const shouldCleanSession = pathname === "/" || pathname.startsWith("/login");
+  if (shouldCleanSession) {
+    try {
+      await cleanupDeadSessionCookies();
+    } catch (e) {
+      console.error("[middleware] Ошибка cleanupDeadSessionCookies:", e);
+    }
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api/auth).*)",
+    "/((?!_next|favicon.ico|api/auth).*)",
   ],
 };

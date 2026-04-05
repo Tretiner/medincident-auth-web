@@ -8,14 +8,16 @@ import { Label } from "@/shared/ui/label";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { EmailLoginState } from "../actions";
+import { env } from "@/shared/config/env";
 
 interface Props {
   action: (state: EmailLoginState, formData: FormData) => Promise<EmailLoginState>;
   registerHref: string;
+  initialState: any
 }
 
-export function EmailLoginForm({ action, registerHref }: Props) {
-  const [state, formAction, isPending] = useActionState(action, { errors: {} });
+export function EmailLoginForm({ action, registerHref, initialState }: Props) {
+  const [state, formAction, isPending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -52,6 +54,7 @@ export function EmailLoginForm({ action, registerHref }: Props) {
           id="password"
           name="password"
           type="password"
+          defaultValue={state.values?.password}
           placeholder="••••••••"
           disabled={isPending}
           autoComplete="current-password"
