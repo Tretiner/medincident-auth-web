@@ -66,15 +66,14 @@ export async function updateMyProfile(userId: string, profile: {
   );
 }
 
-// POST /v2/users/{userId}/avatar — загрузка аватарки
-export async function uploadMyAvatar(file: File | Blob): Promise<Result<z.infer<typeof ZitadelUpdateResponseSchema>>> {
+// POST /assets/v1/users/me/avatar — загрузка аватарки (макс. 512 КБ, только image/*)
+export async function uploadMyAvatar(file: File | Blob): Promise<Result<unknown>> {
   const formData = new FormData();
   formData.append("file", file);
 
   return handleZitadelRequest(
     () => zitadelUserApi.post("/assets/v1/users/me/avatar", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: { "Content-Type": undefined },
     }),
-    ZitadelUpdateResponseSchema
   );
 }

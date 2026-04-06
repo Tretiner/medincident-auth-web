@@ -7,6 +7,46 @@ import { uploadAvatarAction } from "../profile.actions";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/utils";
 
+const MAX_AVATAR_SIZE = 512 * 1024; // 512 КБ — лимит Zitadel
+const AVATAR_MAX_DIMENSION = 256; // px — больше для аватарки не нужно
+
+function compressImage(file: File): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, AVATAR_MAX_DIMENSION / Math.max(img.width, img.height));
+      const width = Math.round(img.width * scale);
+      const height = Math.round(img.height * scale);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Пробуем webp → jpeg с понижением качества, пока не влезем в лимит
+      const tryCompress = (format: string, quality: number) => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject(new Error("Не удалось сжать изображение"));
+            if (blob.size <= MAX_AVATAR_SIZE || quality <= 0.3) {
+              resolve(blob);
+            } else {
+              tryCompress(format, quality - 0.1);
+            }
+          },
+          format,
+          quality,
+        );
+      };
+
+      tryCompress("image/webp", 0.8);
+    };
+    img.onerror = () => reject(new Error("Не удалось загрузить изображение"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 interface EditableAvatarProps {
   currentAvatarUrl: string | undefined;
   initials: string;
@@ -29,37 +69,51 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = "";
 
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
     }
 
-    const objectUrl = URL.createObjectURL(file);
-    objectUrlRef.current = objectUrl;
-    setPreviewUrl(objectUrl);
-
     startTransition(async () => {
-      const formData = new FormData();
-      formData.append("avatar", file);
+      try {
+        const compressed = file.size > MAX_AVATAR_SIZE
+          ? await compressImage(file)
+          : file;
 
-      const result = await uploadAvatarAction(formData);
+        if (compressed.size > MAX_AVATAR_SIZE) {
+          toast.error("Не удалось сжать изображение до 512 КБ. Выберите файл поменьше");
+          return;
+        }
 
-      if (!result?.success) {
-        setPreviewUrl(currentAvatarUrl);
-        console.error("Ошибка при загрузке аватара:", result?.error);
-        toast("Ошибка загрузки");
-      }
+        const objectUrl = URL.createObjectURL(compressed);
+        objectUrlRef.current = objectUrl;
+        setPreviewUrl(objectUrl);
 
-      if (objectUrlRef.current === objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-        objectUrlRef.current = null;
+        const formData = new FormData();
+        formData.append("avatar", compressed, file.name);
+
+        const result = await uploadAvatarAction(formData);
+
+        if (!result?.success) {
+          setPreviewUrl(currentAvatarUrl);
+          console.error("Ошибка при загрузке аватара:", result?.error);
+          toast.error(result?.error || "Ошибка загрузки");
+        }
+
+        if (objectUrlRef.current === objectUrl) {
+          URL.revokeObjectURL(objectUrl);
+          objectUrlRef.current = null;
+        }
+      } catch {
+        toast.error("Не удалось обработать изображение");
       }
     });
   };
 
   return (
     <div
-      className="relative inline-block group cursor-pointer rounded-full"
+      className="relative w-16 h-16 group cursor-pointer rounded-full"
       onClick={() => fileInputRef.current?.click()}
     >
       <Avatar className="w-16 h-16 border border-border">

@@ -58,6 +58,8 @@ export async function updateProfileDataAction(data: ProfileFormData) {
   }
 }
 
+const MAX_AVATAR_SIZE = 512 * 1024; // 512 КБ — лимит Zitadel
+
 export async function uploadAvatarAction(formData: FormData) {
   await requireValidSession();
   const file = formData.get("avatar") as File | null;
@@ -65,16 +67,23 @@ export async function uploadAvatarAction(formData: FormData) {
     return { success: false, error: "Файл не выбран" };
   }
 
-  try {
-    const result = await uploadMyAvatar(file);
-
-    if (!result.success) {
-      return { success: false, error: "Ошибка загрузки аватара" };
-    }
-
-    revalidatePath("/profile");
-    return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  if (file.size > MAX_AVATAR_SIZE) {
+    return { success: false, error: "Максимальный размер аватара — 512 КБ" };
   }
+
+  const result = await uploadMyAvatar(file);
+
+  if (!result.success) {
+    const code = result.error.code;
+    if (code === 413) {
+      return { success: false, error: "Файл слишком большой. Максимум — 512 КБ" };
+    }
+    if (code === 400) {
+      return { success: false, error: "Неподдерживаемый формат. Используйте PNG, JPEG или WebP" };
+    }
+    return { success: false, error: result.error.message || "Ошибка загрузки аватара" };
+  }
+
+  revalidatePath("/profile");
+  return { success: true };
 }
