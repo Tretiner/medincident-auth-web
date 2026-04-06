@@ -7,9 +7,9 @@ import { QrAuthSection } from "./_components/qr-auth-section";
 import { Suspense } from "react";
 import { ExternalIdentityProviders } from "./_components/external-idp";
 import { fetchProvidersAction } from "./actions";
-import { getAllSessions } from "@/services/zitadel/cookies";
 import { completeAuthRequest, getAuthRequest } from "@/services/zitadel/api";
-import { Skeleton } from "@/shared/ui/skeleton";
+import { syncSessionCookies } from "@/services/zitadel/sync-sessions";
+import { getPreferredSessionId } from "@/services/zitadel/cookies";
 
 export const metadata: Metadata = {
   title: "Вход",
@@ -19,17 +19,6 @@ export const metadata: Metadata = {
 async function ProviderButtons({ requestId }: { requestId: string }) {
   const providers = await fetchProvidersAction();
   return <ExternalIdentityProviders providers={providers} requestId={requestId} />;
-}
-
-function ProviderButtonsSkeleton() {
-  return (
-    <div className="grid gap-2 md:gap-3">
-      <Skeleton className="h-12 w-full rounded-lg" />
-      <Skeleton className="h-12 w-full rounded-lg" />
-      <Skeleton className="h-4 w-8 mx-auto my-1" />
-      <Skeleton className="h-12 w-full rounded-lg" />
-    </div>
-  );
 }
 
 export default async function LoginPage({ searchParams }: { searchParams: any }) {
@@ -62,21 +51,50 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
     redirect(`/?requestId=${requestId}`);
   }
 
+  // Preferred session: пользователь выбрал аккаунт на странице выбора,
+  // клиент запустил свежий signIn() → Zitadel создал новый auth request → мы здесь.
+  // Auto-completим с выбранной сессией — PKCE cookies свежие, callbackUrl совпадёт.
+  const preferredSessionId = await getPreferredSessionId();
+  if (preferredSessionId) {
+    // Cookie истечёт сам (maxAge: 120s) — модифицировать cookies из Server Component нельзя
+    const synced = await syncSessionCookies();
+    const preferred = synced.find(({ cookie }) => cookie.id === preferredSessionId);
+    if (preferred?.cookie.token) {
+      console.log("[login] Preferred session: sessionId=%s, requestId=%s", preferred.cookie.id, requestId);
+      const result = await completeAuthRequest(requestId, preferred.cookie.id, preferred.cookie.token);
+      if (result.success) {
+        const callbackUrl = result.data.callbackUrl || result.data.url;
+        console.log("[login] Preferred session OK, callbackUrl=%s", callbackUrl);
+        redirect(callbackUrl || "/profile");
+      }
+      console.error("[login] Preferred session FAILED:", JSON.stringify(result.error));
+    }
+    // Preferred сессия не найдена или completeAuthRequest провалился — обычный flow
+  }
+
   // Если prompt=login или добавляем новый аккаунт — всегда показываем форму
   // Иначе пробуем авто-complete через существующие сессии
   if (!isNewAccount && !forceLogin) {
-    const sessions = await getAllSessions(true);
+    // Сверяем cookies с Zitadel — отсеиваем протухшие/удалённые сессии
+    const synced = await syncSessionCookies();
+    const validSessions = synced.filter(
+      ({ cookie, zitadel }) => cookie.token && zitadel?.factors?.user
+    );
 
-    if (sessions.length === 1) {
-      const s = sessions[0];
+    if (validSessions.length === 1) {
+      const s = validSessions[0].cookie;
+      console.log("[login] Auto-complete: sessionId=%s, requestId=%s", s.id, requestId);
       const result = await completeAuthRequest(requestId, s.id, s.token);
       if (result.success) {
-        redirect(result.data.callbackUrl || result.data.url || "/profile");
+        const callbackUrl = result.data.callbackUrl || result.data.url;
+        console.log("[login] Auto-complete OK, callbackUrl=%s", callbackUrl);
+        redirect(callbackUrl || "/profile");
       }
+      console.error("[login] Auto-complete FAILED:", JSON.stringify(result.error));
       // При ошибке падаем на форму логина
     }
 
-    if (sessions.length >= 2) {
+    if (validSessions.length >= 2) {
       redirect(`/?requestId=${requestId}`);
     }
   }
@@ -111,9 +129,7 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
             </div>
 
             <div className="space-y-4 md:space-y-6 w-full">
-              <Suspense fallback={<ProviderButtonsSkeleton />}>
-                <ProviderButtons requestId={requestId} />
-              </Suspense>
+              <ProviderButtons requestId={requestId} />
             </div>
 
             <p className="mt-6 md:mt-8 text-center text-xs text-muted-foreground leading-relaxed px-2 md:px-0">

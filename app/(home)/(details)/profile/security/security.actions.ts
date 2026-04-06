@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { UserSession, LinkedAccountsStatus } from "@/domain/profile/types";
 import { requireValidSession } from "@/services/zitadel/session";
-import { deleteSession, deleteUserLink, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent } from "@/services/zitadel/api";
+import { deleteSession, deleteUserLink, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent, changeUserPassword } from "@/services/zitadel/api";
 import { env } from "@/shared/config/env";
 import { redirect } from "next/navigation";
 import { parseUserAgent } from "@/shared/lib/user-agent";
@@ -129,4 +129,20 @@ export async function linkProvider(idpId: string) {
   }
 
   redirect(response.data.authUrl);
+}
+
+// CHANGE PASSWORD (Смена пароля)
+export async function changePasswordAction(currentPassword: string, newPassword: string) {
+  const { userId } = await requireValidSession();
+
+  const result = await changeUserPassword(userId, currentPassword, newPassword);
+
+  if (!result.success) {
+    const message = result.error?.type === "ZITADEL_ERROR" || result.error?.type === "API_ERROR"
+      ? "Неверный текущий пароль или новый пароль не соответствует требованиям"
+      : "Не удалось сменить пароль";
+    return { success: false, error: message };
+  }
+
+  return { success: true };
 }

@@ -215,6 +215,24 @@ export async function searchUserMetadata(
 }
 
 // ==========================================
+// СМЕНА ПАРОЛЯ
+// ==========================================
+
+export async function changeUserPassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.post(`/v2/users/${userId}/password`, {
+      currentPassword,
+      newPassword: { password: newPassword },
+    }),
+    ZitadelGenericUpdateResponseSchema
+  );
+}
+
+// ==========================================
 // ПОИСК ПОЛЬЗОВАТЕЛЕЙ
 // ==========================================
 

@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { LinkedAccountsCard } from "./_components/linked-accounts-card";
-import { SessionsList } from "./_components/sessions-list";
 import { DeviceQrSection } from "./_components/device-qr-section";
-import { useLinkedAccounts, useUserSessions, useSecurityMutations } from "./security.hooks";
+import { ChangePasswordDialog } from "./_components/change-password-dialog";
+import { useLinkedAccounts, useSecurityMutations } from "./security.hooks";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -18,7 +18,6 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
   const pathname = usePathname();
 
   const { links, isLoading: loadingLinks } = useLinkedAccounts();
-  const { sessions, isLoading: loadingSessions } = useUserSessions();
 
   const { isMutating, activeActionId, actions } = useSecurityMutations(links);
 
@@ -50,6 +49,12 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
         </div>
       )}
 
+      {/* СМЕНА ПАРОЛЯ */}
+      <div className="space-y-3">
+        <h3 className="section-label">Пароль</h3>
+        <ChangePasswordDialog />
+      </div>
+
       {/* ВХОД С ДРУГОГО УСТРОЙСТВА */}
       <div className="space-y-3">
         <h3 className="section-label">Другое устройство</h3>
@@ -80,37 +85,6 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
         />
       )}
 
-      {/* СЕССИИ */}
-      {loadingSessions || !sessions ? (
-        <div className="space-y-8">
-          <div className="space-y-3">
-            <h4 className="section-label">
-              Текущая сессия
-            </h4>
-            <Skeleton className="h-20 w-full rounded-xl" />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <h3 className="section-label">
-                  Другие сессии
-                </h3>
-                <Skeleton className="h-8 w-24 rounded-md" />
-            </div>
-            <div className="space-y-3">
-                <Skeleton className="h-16 w-full rounded-xl" />
-                <Skeleton className="h-16 w-full rounded-xl" />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <SessionsList
-          sessions={sessions}
-          activeActionId={activeActionId}
-          onRevokeSession={actions.onRevokeSession}
-          onRevokeAllOthers={actions.onRevokeAllOthers}
-        />
-      )}
     </div>
   );
 }

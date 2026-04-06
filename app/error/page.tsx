@@ -1,0 +1,89 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Button } from "@/shared/ui/button";
+import { AlertCircle, RefreshCw } from "lucide-react";
+
+/**
+ * NextAuth error page (pages.error = "/error").
+ *
+ * Основная ошибка — CallbackRouteError (state mismatch),
+ * возникает когда несколько OIDC-flow активны одновременно
+ * (две вкладки, React Strict Mode и т.д.).
+ *
+ * Разрешаем ОДНУ автоматическую повторную попытку.
+ * При повторном попадании — показываем ошибку с кнопкой ручного retry,
+ * чтобы не создавать бесконечный цикл редиректов.
+ */
+const MAX_AUTO_RETRIES = 1;
+const RETRY_COUNT_KEY = "oidc_error_retries";
+
+export default function AuthErrorPage() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  const retried = useRef(false);
+  const [showError, setShowError] = useState(false);
+
+  useEffect(() => {
+    if (retried.current) return;
+    retried.current = true;
+
+
+
+    // Проверяем счётчик повторных попыток
+    let count = 0;
+    try { count = Number(sessionStorage.getItem(RETRY_COUNT_KEY) || "0"); } catch {}
+
+    if (count >= MAX_AUTO_RETRIES) {
+      // Лимит исчерпан — показываем ошибку вместо бесконечного цикла
+      console.error("[auth:error] Превышен лимит автоматических попыток (%d). Ошибка: %s", count, error);
+      setShowError(true);
+      return;
+    }
+
+    // Увеличиваем счётчик и ретраим
+    try { sessionStorage.setItem(RETRY_COUNT_KEY, String(count + 1)); } catch {}
+    console.log("[auth:error] Автоматическая повторная попытка #%d, ошибка: %s", count + 1, error);
+    signIn("zitadel", { callbackUrl: "/profile" });
+  }, [error]);
+
+  const handleManualRetry = () => {
+    try {
+      sessionStorage.setItem(RETRY_COUNT_KEY, "0");
+    } catch {}
+    signIn("zitadel", { callbackUrl: "/profile" });
+  };
+
+  if (showError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 font-sans">
+        <div className="text-center space-y-4 max-w-sm">
+          <div className="w-12 h-12 bg-destructive/10 rounded-xl flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6 text-destructive" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground">Ошибка авторизации</h2>
+          <p className="text-sm text-muted-foreground">
+            Не удалось завершить вход. Попробуйте ещё раз.
+          </p>
+          <Button onClick={handleManualRetry} className="mt-2">
+            <RefreshCw className="mr-2" />
+            Повторить вход
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 font-sans">
+      <div className="text-center space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+        <p className="text-sm text-muted-foreground">
+          Повторная авторизация...
+        </p>
+      </div>
+    </div>
+  );
+}

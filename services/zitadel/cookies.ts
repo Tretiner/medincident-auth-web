@@ -321,3 +321,24 @@ export async function getMostRecentCookieWithLoginname<T>({
     return prev.changeTs > current.changeTs ? prev : current;
   });
 }
+
+// --- Preferred Session (короткоживущий cookie для передачи выбора из account selection в login page) ---
+
+export async function setPreferredSessionId(sessionId: string) {
+  const cookiesList = await cookies();
+  cookiesList.set({
+    name: "preferred_session",
+    value: sessionId,
+    httpOnly: true,
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 120, // 2 минуты — достаточно для redirect chain
+  });
+}
+
+export async function getPreferredSessionId(): Promise<string | undefined> {
+  const cookiesList = await cookies();
+  return cookiesList.get("preferred_session")?.value;
+}
+

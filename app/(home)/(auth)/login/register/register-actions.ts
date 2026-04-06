@@ -233,8 +233,20 @@ export async function continueRegisterEmail(
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.email = "Введите корректный email адрес";
   }
-  if (!password || password.length < 8) {
+  if (!password || password.length < 1) {
+    errors.password = "Введите пароль";
+  } else if (password.length < 8) {
     errors.password = "Пароль должен содержать не менее 8 символов";
+  } else if (password.length > 70) {
+    errors.password = "Пароль должен быть не более 70 символов";
+  } else if (!/[A-ZА-ЯЁ]/.test(password)) {
+    errors.password = "Пароль должен содержать заглавную букву";
+  } else if (!/[a-zа-яё]/.test(password)) {
+    errors.password = "Пароль должен содержать строчную букву";
+  } else if (!/\d/.test(password)) {
+    errors.password = "Пароль должен содержать цифру";
+  } else if (!/[^a-zA-Zа-яА-ЯёЁ0-9\s]/.test(password)) {
+    errors.password = "Пароль должен содержать символ или знак пунктуации";
   }
   if (password !== confirm) {
     errors.confirm = "Пароли не совпадают";

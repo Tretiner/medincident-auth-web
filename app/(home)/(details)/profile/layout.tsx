@@ -28,20 +28,6 @@ async function EmailGuardedContent({ children }: { children: React.ReactNode }) 
   return <>{children}</>;
 }
 
-function ContentSkeleton() {
-  return (
-    <div className="p-4 md:p-8 space-y-4">
-      <Skeleton className="h-8 w-48" />
-      <Skeleton className="h-4 w-72" />
-      <div className="space-y-3 mt-6">
-        <Skeleton className="h-12 w-full rounded-lg" />
-        <Skeleton className="h-12 w-full rounded-lg" />
-        <Skeleton className="h-12 w-full rounded-lg" />
-      </div>
-    </div>
-  );
-}
-
 export default async function ProfileLayout({
   children,
 }: {
@@ -88,9 +74,9 @@ export default async function ProfileLayout({
             )}
           >
             <div className="flex-1 overflow-y-auto scrollbar-app relative p-4 md:p-8 md:max-w-4xl mx-auto w-full">
-              <Suspense fallback={<ContentSkeleton />}>
-                <EmailGuardedContent>{children}</EmailGuardedContent>
-              </Suspense>
+              <EmailGuardedContent>
+                {children}
+              </EmailGuardedContent>
             </div>
           </Card>
         </main>

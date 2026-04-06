@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState, useActionState } from "react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { PasswordRequirements } from "@/shared/ui/password-requirements";
 
 // 1. Define the shape of your form fields
 export interface RegisterFormValues {
@@ -41,11 +42,12 @@ interface RegisterViewProps {
 }
 
 export function RegisterView({ action, initialData, buttonLabel = "Продолжить", showPassword }: RegisterViewProps) {
-  const [state, formAction, isPending] = useActionState(action, { 
-    success: false, 
+  const [state, formAction, isPending] = useActionState(action, {
+    success: false,
     errors: {},
     values: initialData // Кладем начальные данные в стейт
   });
+  const [password, setPassword] = useState("");
 
   return (
     <form action={formAction} className="w-full space-y-5 animate-in fade-in duration-300">
@@ -149,8 +151,10 @@ export function RegisterView({ action, initialData, buttonLabel = "Продол�
               autoComplete="new-password"
               disabled={isPending}
               placeholder="Не менее 8 символов"
+              onChange={(e) => setPassword(e.target.value)}
               className={cn(state.errors?.password && "border-destructive focus-visible:ring-destructive", "bg-card")}
             />
+            <PasswordRequirements password={password} />
             {state.errors?.password && (
               <span className="text-[11px] font-medium text-destructive mt-1 block leading-tight">
                 {state.errors.password}

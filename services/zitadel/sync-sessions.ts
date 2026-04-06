@@ -10,7 +10,7 @@ export type SyncedSession = {
 
 /**
  * Получает живые сессии, сверяя куки с Zitadel.
- * Только чтение — не изменяет куки (безопасно вызывать из Server Component).
+ * Удаляет из cookies сессии, которых больше нет в Zitadel.
  * Возвращает живые сессии вместе с данными из Zitadel.
  */
 export async function syncSessionCookies(): Promise<SyncedSession[]> {
@@ -24,6 +24,13 @@ export async function syncSessionCookies(): Promise<SyncedSession[]> {
   const zitadelSessions: any[] = response.success ? response.data?.sessions || [] : [];
 
   const activeIds = new Set(zitadelSessions.map((s: any) => s.id));
+
+  // Удаляем мёртвые сессии из cookies, чтобы они не накапливались
+  const deadSessions = knownSessions.filter((s) => !activeIds.has(s.id));
+  for (const dead of deadSessions) {
+    console.log("[sync-sessions] Удалена мёртвая сессия из cookies: id=%s, loginName=%s", dead.id, dead.loginName);
+    await removeSessionFromCookie(dead.id);
+  }
 
   return knownSessions
     .filter((s) => activeIds.has(s.id))

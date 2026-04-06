@@ -4,8 +4,9 @@
 import { redirect } from "next/navigation";
 
 // Импортируем ваши методы для работы с пользователями и сессиями
-import { createHumanUser, createSession, addIdpLinkToUser, completeAuthRequest, deleteSession, searchUserSessions } from "@/services/zitadel/api";
-import { addSessionToCookie, getAllSessions, removeSessionFromCookie } from "@/services/zitadel/cookies";
+import { createHumanUser, createSession, addIdpLinkToUser, completeAuthRequest, deleteSession, searchUserSessions, getAuthRequest } from "@/services/zitadel/api";
+import { addSessionToCookie, getAllSessions, removeSessionFromCookie, setPreferredSessionId } from "@/services/zitadel/cookies";
+import { env } from "@/shared/config/env";
 
 export async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
   const result = await completeAuthRequest(requestId, sessionId, sessionToken);
@@ -120,9 +121,53 @@ export async function handleLinkAction(targetUserId: string, intentId: string, i
 }
 
 export async function selectAccountAction(sessionId: string, sessionToken: string, requestId: string) {
-  const result = await completeAuthRequest(requestId, sessionId, sessionToken);
-  if (result.success) {
-    redirect(result.data.callbackUrl || result.data.url || "/profile");
+  console.log("[auth:selectAccount] sessionId=%s, requestId=%s", sessionId, requestId);
+
+  // Определяем, чей это OIDC flow — наш NextAuth или внешний клиент
+  const authReq = await getAuthRequest(requestId);
+  const isOwnClient = authReq.success && authReq.data.authRequest?.clientId === env.APP_CLIENT_ID;
+
+  if (isOwnClient) {
+    // Наш NextAuth flow: PKCE cookies могут быть протухшими/перезаписанными.
+    // Сохраняем выбранную сессию → клиент запустит свежий signIn() с новым PKCE.
+    // Login page подхватит preferred session и auto-completит новый auth request.
+    console.log("[auth:selectAccount] Свой клиент — сохраняем preferred session, клиент сделает signIn()");
+
+    await setPreferredSessionId(sessionId);
+
+    // Обновляем changeTs для корректной сортировки
+    const sessions = await getAllSessions(true);
+    const current = sessions.find(s => s.id === sessionId);
+    if (current) {
+      await addSessionToCookie({
+        session: { ...current, changeTs: Date.now().toString() },
+        cleanup: true,
+      });
+    }
+
+    return { success: true as const, needsSignIn: true };
   }
+
+  // Внешний OIDC клиент: завершаем auth request напрямую и редиректим на его callback
+  console.log("[auth:selectAccount] Внешний клиент — completeAuthRequest напрямую");
+
+  const result = await completeAuthRequest(requestId, sessionId, sessionToken);
+
+  if (result.success) {
+    const callbackUrl = result.data.callbackUrl || result.data.url;
+
+    if (!callbackUrl) {
+      console.error("[auth:selectAccount] Zitadel не вернул callbackUrl. Ответ:", JSON.stringify(result.data));
+      return {
+        success: false as const,
+        error: { type: "API_ERROR" as const, message: "Сервер авторизации не вернул URL для перенаправления" },
+      };
+    }
+
+    console.log("[auth:selectAccount] Редирект на callbackUrl: %s", callbackUrl);
+    redirect(callbackUrl);
+  }
+
+  console.error("[auth:selectAccount] Ошибка completeAuthRequest:", JSON.stringify(result.error));
   return { success: false as const, error: result.error };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { signIn } from "next-auth/react";
 
 export interface Props {
@@ -10,7 +10,12 @@ export interface Props {
 }
 
 export function AutoSignIn({ provider, redirectTo, forceLogin }: Props) {
+  const called = useRef(false);
+
   useEffect(() => {
+    if (called.current) return;
+    called.current = true;
+
     const options: Record<string, string> = { callbackUrl: redirectTo };
     if (forceLogin) {
       options.prompt = "login";
