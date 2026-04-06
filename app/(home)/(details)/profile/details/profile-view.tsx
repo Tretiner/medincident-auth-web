@@ -19,16 +19,23 @@ export function ProfileUserHeaderView() {
   const { user, isLoading, isError } = useProfileData();
 
   if (isLoading) return (
-    <div className="relative overflow-hidden rounded-2xl bg-primary/5 border border-primary/20 p-5">
-      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-black/[0.08] to-transparent" />
+    <div className="rounded-2xl bg-primary/5 border border-primary/20 p-5">
       <div className="flex items-center gap-5">
         <div className="shrink-0">
-          <div className="w-18 h-18 rounded-full bg-primary/15" />
+          <div className="relative overflow-hidden w-18 h-18 rounded-full bg-primary/15">
+            <div className="shimmer shimmer-primary" />
+          </div>
         </div>
         <div className="flex-1 min-w-0 space-y-2">
-          <div className="h-6 w-44 rounded-md bg-primary/15" />
-          <div className="h-4 w-32 rounded-md bg-primary/10" />
-          <div className="h-3.5 w-20 rounded-md bg-primary/10" />
+          <div className="relative overflow-hidden h-6 w-44 rounded-md bg-primary/15">
+            <div className="shimmer shimmer-primary" />
+          </div>
+          <div className="relative overflow-hidden h-4 w-32 rounded-md bg-primary/10">
+            <div className="shimmer shimmer-primary" />
+          </div>
+          <div className="relative overflow-hidden h-3.5 w-20 rounded-md bg-primary/10">
+            <div className="shimmer shimmer-primary" />
+          </div>
         </div>
       </div>
     </div>

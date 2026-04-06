@@ -68,7 +68,7 @@ function DetailRow({ label, value, mono = false }: { label: string; value: strin
           {label}
         </span>
       </div>
-      <div className="relative group flex-1 flex items-center justify-between gap-2 p-2 pl-3 rounded-lg bg-secondary/50 border border-border/50 hover:bg-secondary/80 transition-colors">
+      <div className="relative group flex-1 flex items-center justify-between gap-2 p-2 pl-3 rounded-lg border border-border bg-gradient-to-tr from-muted/20 to-white">
         <code className={cn("text-sm break-all pr-2 text-foreground", mono && "font-mono text-xs leading-relaxed")}>
           {value}
         </code>
@@ -99,8 +99,7 @@ export function SessionInfoModal({
       <DialogContent className="sm:max-w-[550px] gap-6 p-6 outline-none bg-card [&>button]:focus:ring-0 [&>button]:focus:outline-none [&>button]:focus:ring-offset-0">
         <DialogHeader>
           <div className="flex items-center gap-4 text-left mb-2">
-            {/* Иконка теперь на сером фоне (bg-secondary) */}
-            <div className="w-12 h-12 shrink-0 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center text-foreground">
+            <div className="shrink-0 text-foreground">
                <DeviceIcon name={session.deviceName} className="w-6 h-6" />
             </div>
             <div className="flex flex-col gap-1">
@@ -131,7 +130,7 @@ export function SessionInfoModal({
                   Активность
                 </span>
               </div>
-              <div className="relative flex-1 flex items-center gap-2 p-3 rounded-lg bg-secondary/50 border border-border/50">
+              <div className="relative flex-1 flex items-center gap-2 p-3 rounded-lg border border-border bg-gradient-to-tr from-muted/20 to-white">
                 <code className="text-sm leading-relaxed text-foreground">
                   {new Date(session.lastActive).toLocaleString("ru-RU", {
                     day: "2-digit", month: "long", year: "numeric",
@@ -282,26 +281,22 @@ export function SessionsList({
                 <h4 className="font-semibold text-foreground truncate">
                   {currentSession.deviceName}
                 </h4>
-                
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-3xs font-bold uppercase tracking-wider shrink-0">
-                  <span className="text-2xs">Этот браузер</span>
-                </div>
 
                 <SessionInfoModal session={currentSession}>
-                    <button 
-                      className="text-primary/40 hover:text-primary transition-colors cursor-pointer outline-none p-0.5 rounded-sm"
+                    <button
+                      className="text-primary/40 hover:text-primary transition-colors cursor-pointer outline-none p-0.5 rounded-sm shrink-0"
                       title="Показать технические данные"
                     >
                       <Info className="w-3.5 h-3.5" />
                     </button>
                 </SessionInfoModal>
               </div>
-              
-              <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-                <span className="font-mono text-xs">{currentSession.ip}</span>
-                <span className="w-1 h-1 rounded-full bg-primary" />
+
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <span className="font-mono text-xs text-muted-foreground">{currentSession.ip}</span>
+                <span className="w-1 h-1 rounded-full bg-primary shrink-0" />
                 <span className="text-primary font-medium text-xs">Онлайн</span>
-              </p>
+              </div>
             </div>
 
             {/* === ИЗМЕНЕНИЕ: КНОПКА ВЫХОДА СПРАВА === */}

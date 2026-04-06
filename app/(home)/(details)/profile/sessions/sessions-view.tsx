@@ -10,18 +10,20 @@ export function SessionsView() {
 
   if (loadingSessions || !sessions) {
     return (
-      <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
         <div className="space-y-3">
           <h4 className="section-label">Текущая сессия</h4>
-          <Skeleton className="h-20 w-full rounded-xl" />
+          <div className="relative overflow-hidden h-20 w-full rounded-xl bg-primary/5 border border-primary/20">
+            <div className="shimmer shimmer-primary" />
+          </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="section-label">Другие сессии</h3>
             <Skeleton className="h-8 w-24 rounded-md" />
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <Skeleton className="h-16 w-full rounded-xl" />
             <Skeleton className="h-16 w-full rounded-xl" />
           </div>
