@@ -22,7 +22,7 @@ export function ProfileUserHeaderView() {
     <div className="rounded-2xl bg-primary/5 border border-primary/20 p-5">
       <div className="flex items-center gap-5">
         <div className="shrink-0">
-          <div className="relative overflow-hidden w-18 h-18 rounded-full bg-primary/15">
+          <div className="relative overflow-hidden w-17 h-17 rounded-full bg-primary/15">
             <div className="shimmer shimmer-primary" />
           </div>
         </div>

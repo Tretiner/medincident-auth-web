@@ -39,12 +39,12 @@ export async function updateProfileDataAction(data: ProfileFormData) {
   try {
     await updateMyProfile(userId, { givenName: data.firstName, familyName: data.lastName });
 
-    // Обновляем email только если он изменился (Zitadel вернёт 400 если email тот же)
-    if (data.email) {
+    // Обновляем email только если он реально изменился (case-insensitive, чтобы не триггерить на UPPER/lower)
+    if (data.email && data.email.trim().length > 0) {
       const currentData = await getMe(userId);
       const currentEmail = currentData.success ? currentData.data?.user?.human?.email?.email : undefined;
-      if (data.email !== currentEmail) {
-        await updateHumanEmail(userId, data.email);
+      if (data.email.toLowerCase() !== currentEmail?.toLowerCase()) {
+        await updateHumanEmail(userId, data.email.trim());
       }
     }
 

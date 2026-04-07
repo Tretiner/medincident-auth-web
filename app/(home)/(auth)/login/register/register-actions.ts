@@ -11,6 +11,7 @@ import {
   setRegFlowCookie,
 } from "../_lib/reg-flow";
 import { env } from "@/shared/config/env";
+import { nameFieldsSchema } from "@/domain/profile/schema";
 import type { RegisterFormState } from "./_components/register-view";
 
 
@@ -23,6 +24,16 @@ function extractFormFields(formData: FormData) {
     password: (formData.get("password") as string) ?? "",
     confirm: (formData.get("confirm") as string) ?? "",
   };
+}
+
+function validateNameFields(
+  fields: { givenName: string; familyName: string; middleName: string }
+): Record<string, string> {
+  const result = nameFieldsSchema.safeParse(fields);
+  if (result.success) return {};
+  return Object.fromEntries(
+    result.error.issues.map((issue) => [issue.path[0], issue.message])
+  );
 }
 
 // ==========================================
@@ -106,11 +117,15 @@ export async function continueRegisterIdp(
 ): Promise<RegisterFormState> {
   const { givenName, familyName, middleName, email } = extractFormFields(formData);
   const values = { givenName, familyName, middleName, email };
-  const errors: Record<string, string> = {};
+  const errors: Record<string, string> = {
+    ...validateNameFields({ givenName, familyName, middleName }),
+  };
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.email = "Введите корректный email адрес";
   }
+
+  if (Object.keys(errors).length > 0) return { success: false, errors, values };
 
   const intent = await getIdpIntentCookie();
   if (!intent) return { success: false, errors: { form: "Сессия устарела. Войдите снова." }, values };
@@ -180,7 +195,9 @@ export async function continueRegisterEmail(
 ): Promise<RegisterFormState> {
   const { givenName, familyName, middleName, email, password, confirm } = extractFormFields(formData);
   const values = { givenName, familyName, middleName, email };
-  const errors: Record<string, string> = {};
+  const errors: Record<string, string> = {
+    ...validateNameFields({ givenName, familyName, middleName }),
+  };
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.email = "Введите корректный email адрес";

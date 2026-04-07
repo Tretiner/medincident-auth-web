@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const nameField = (label: string) =>
+export const nameField = (label: string) =>
   z.string()
     .min(2, `${label}: минимум 2 символа`)
     .max(50, `${label} слишком длинное`)
@@ -8,6 +8,12 @@ const nameField = (label: string) =>
       (val) => !val || /^[а-яА-ЯёЁ\s-]+$/.test(val),
       "Только русские буквы, пробелы и дефисы",
     );
+
+export const nameFieldsSchema = z.object({
+  givenName: nameField("Имя"),
+  familyName: nameField("Фамилия"),
+  middleName: z.union([nameField("Отчество"), z.literal("")]).optional(),
+});
 
 export const personalInfoSchema = z.object({
   firstName: nameField("Имя"),

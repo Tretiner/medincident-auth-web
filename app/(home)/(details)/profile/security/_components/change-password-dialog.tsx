@@ -15,7 +15,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/shared/ui/dialog";
-import { KeyRound, Loader2, Eye, EyeOff } from "lucide-react";
+import { KeyRound, Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { PasswordRequirements } from "@/shared/ui/password-requirements";
 import { changePasswordAction } from "../security.actions";
@@ -44,7 +44,6 @@ type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 export function ChangePasswordDialog() {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [showPasswords, setShowPasswords] = useState(false);
 
   const {
     register,
@@ -76,11 +75,8 @@ export function ChangePasswordDialog() {
     setOpen(isOpen);
     if (!isOpen) {
       reset();
-      setShowPasswords(false);
     }
   }
-
-  const inputType = showPasswords ? "text" : "password";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -102,25 +98,13 @@ export function ChangePasswordDialog() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
           <div className="space-y-2">
             <Label htmlFor="currentPassword">Текущий пароль</Label>
-            <div className="relative">
-              <Input
-                id="currentPassword"
-                type={inputType}
-                autoComplete="current-password"
-                className={cn(
-                  "pr-10",
-                  errors.currentPassword && "border-destructive focus-visible:ring-destructive"
-                )}
-                {...register("currentPassword")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasswords(!showPasswords)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
+            <Input
+              id="currentPassword"
+              type="password"
+              autoComplete="current-password"
+              className={cn(errors.currentPassword && "border-destructive focus-visible:ring-destructive")}
+              {...register("currentPassword")}
+            />
             {errors.currentPassword && (
               <p className="text-2xs text-destructive">{errors.currentPassword.message}</p>
             )}
@@ -128,49 +112,25 @@ export function ChangePasswordDialog() {
 
           <div className="space-y-2">
             <Label htmlFor="newPassword">Новый пароль</Label>
-            <div className="relative">
-              <Input
-                id="newPassword"
-                type={inputType}
-                autoComplete="new-password"
-                className={cn(
-                  "pr-10",
-                  errors.newPassword && "border-destructive focus-visible:ring-destructive"
-                )}
-                {...register("newPassword")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasswords(!showPasswords)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
+            <Input
+              id="newPassword"
+              type="password"
+              autoComplete="new-password"
+              className={cn(errors.newPassword && "border-destructive focus-visible:ring-destructive")}
+              {...register("newPassword")}
+            />
             <PasswordRequirements password={newPasswordValue} />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
-            <div className="relative">
-              <Input
-                id="confirmPassword"
-                type={inputType}
-                autoComplete="new-password"
-                className={cn(
-                  "pr-10",
-                  errors.confirmPassword && "border-destructive focus-visible:ring-destructive"
-                )}
-                {...register("confirmPassword")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasswords(!showPasswords)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
+            <Input
+              id="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              className={cn(errors.confirmPassword && "border-destructive focus-visible:ring-destructive")}
+              {...register("confirmPassword")}
+            />
             {errors.confirmPassword && (
               <p className="text-2xs text-destructive">{errors.confirmPassword.message}</p>
             )}
