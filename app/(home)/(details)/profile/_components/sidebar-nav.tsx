@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
-import { ShieldCheckIcon, LogOutIcon, ArrowLeft, MonitorSmartphone } from "lucide-react";
+import { ShieldCheckIcon, LogOutIcon, ArrowLeft, MonitorSmartphone, Settings2 } from "lucide-react";
 import { QrScannerButton } from "./qr-scanner-button";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
@@ -20,6 +20,7 @@ export function SidebarNav() {
   const isDetailsActive = pathname?.startsWith("/profile/details");
   const isSecurityActive = pathname?.startsWith("/profile/security");
   const isSessionsActive = pathname?.startsWith("/profile/sessions");
+  const isSettingsActive = pathname?.startsWith("/profile/settings");
 
   return (
     <nav className="flex flex-col gap-2 h-full">
@@ -63,6 +64,25 @@ export function SidebarNav() {
               )}
             />
             Сессии
+          </span>
+        </Link>
+
+        <Link href={getHref("/profile/settings")}>
+          <span
+            className={cn(
+              "flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200",
+              isSettingsActive ?
+                "bg-primary/10 text-primary shadow-sm"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <Settings2
+              className={cn(
+                "h-5 w-5",
+                isSettingsActive ? "text-primary" : "text-muted-foreground/70",
+              )}
+            />
+            Настройки
           </span>
         </Link>
 

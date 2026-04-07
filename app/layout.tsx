@@ -5,6 +5,7 @@ import { cn } from "@/shared/lib/utils";
 import "./globals.css";
 import { APP_NAME } from "@/shared/lib/constants";
 import { ThemeProvider } from "@/shared/ui/theme-provider";
+import { SettingsProvider } from "@/shared/ui/settings-provider";
 import z from "zod";
 import { ru } from "zod/v4/locales";
 import { Toaster } from "@/shared/ui/sonner";
@@ -26,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={cn("smooth-scroll", GeistSans.variable, GeistMono.variable)}
+      className={cn("scroll-smooth", GeistSans.variable, GeistMono.variable)}
       lang="ru"
       suppressHydrationWarning
     >
@@ -37,8 +38,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster richColors position="top-center" />
+          <SettingsProvider>
+            {children}
+            <Toaster richColors position="top-center" />
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

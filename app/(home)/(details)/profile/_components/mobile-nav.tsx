@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
-import { User as UserIcon, ShieldCheck, MonitorSmartphone } from "lucide-react";
+import { User as UserIcon, ShieldCheck, MonitorSmartphone, Settings2 } from "lucide-react";
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -30,6 +30,12 @@ export function MobileNav() {
       href: "/profile/sessions",
       isActive: pathname?.startsWith("/profile/sessions"),
       icon: MonitorSmartphone
+    },
+    {
+      name: "Настройки",
+      href: "/profile/settings",
+      isActive: pathname?.startsWith("/profile/settings"),
+      icon: Settings2
     }
   ];
 
