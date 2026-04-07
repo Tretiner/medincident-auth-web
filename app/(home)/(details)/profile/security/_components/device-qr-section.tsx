@@ -75,14 +75,14 @@ export function DeviceQrSection() {
 
   return (
     <>
-      <Button
-        variant="outline"
-        className="gap-2"
+      <button
+        type="button"
         onClick={() => handleOpen(true)}
+        className="flex flex-col items-center justify-center gap-2 w-28 h-28 rounded-2xl border-2 border-dashed border-border text-muted-foreground hover:bg-primary/15 hover:border-border/80 hover:text-foreground transition-all cursor-pointer"
       >
-        <QrCode className="h-4 w-4" />
-        Войти по QR
-      </Button>
+        <QrCode className="h-7 w-7" />
+        <span className="text-xs font-medium">Войти по QR</span>
+      </button>
 
       <Dialog open={open} onOpenChange={handleOpen}>
         <DialogContent className="sm:max-w-sm gap-4">

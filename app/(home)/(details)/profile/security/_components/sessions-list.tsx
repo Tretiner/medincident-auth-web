@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { UserSession } from "@/domain/profile/types";
 import { Button } from "@/shared/ui/button";
 import {
@@ -5,8 +6,19 @@ import {
   Smartphone,
   LogOut,
   Loader2,
+  Info,
+  Globe,
+  Clock,
+  Monitor,
+  Copy,
+  Check,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/shared/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +36,93 @@ interface Props {
   activeActionId: string | null;
   onRevokeSession: (id: string) => void;
   onRevokeAllOthers: () => void;
+}
+
+function CopyButton({ text, className }: { text: string; className?: string }) {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 1500);
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={handleCopy}
+      className={cn("text-muted-foreground hover:text-foreground hover:bg-secondary/80 border-0 h-6 px-2 gap-1 text-3xs [&_svg]:size-3.5", className)}
+    >
+      {isCopied ? (
+        <>
+          <Check className="text-success animate-in zoom-in duration-300" />
+          Скопировано
+        </>
+      ) : (
+        <>
+          <Copy />
+          Скопировать
+        </>
+      )}
+    </Button>
+  );
+}
+
+function SessionInfoPopover({
+  session,
+  children
+}: {
+  session: UserSession;
+  children: React.ReactNode
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        {children}
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        align="start"
+        className="w-80 p-3 space-y-2"
+      >
+        {/* User Agent */}
+        <div className="rounded-lg border border-border bg-gradient-to-tr from-muted/20 to-white py-1.5 px-2.5 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Monitor className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <span className="text-3xs text-muted-foreground uppercase tracking-wider font-medium">User Agent</span>
+            </div>
+            <CopyButton text={session.userAgent} />
+          </div>
+          <p className="text-2xs font-mono text-muted-foreground leading-relaxed break-all select-all">{session.userAgent}</p>
+        </div>
+
+        {/* IP и Активность */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-gradient-to-tr from-muted/20 to-white">
+            <Globe className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <div className="min-w-0">
+              <p className="text-3xs text-muted-foreground uppercase tracking-wider font-medium">IP</p>
+              <p className="text-xs font-mono text-foreground truncate">{session.ip}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-gradient-to-tr from-muted/20 to-white">
+            <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <div className="min-w-0">
+              <p className="text-3xs text-muted-foreground uppercase tracking-wider font-medium">Активность</p>
+              <p className="text-xs text-foreground truncate">
+                {new Date(session.lastActive).toLocaleString("ru-RU", {
+                  day: "2-digit", month: "short",
+                  hour: "2-digit", minute: "2-digit"
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 function RevokeAllConfirmDialog({ children, onConfirm }: { children: React.ReactNode; onConfirm: () => void }) {
@@ -77,13 +176,23 @@ function SessionItem({
   return (
     <div className="group flex items-center justify-between p-4 rounded-xl border border-border bg-card transition-all hover:border-border/80">
       <div className="flex items-center gap-4 overflow-hidden">
-        <div className="w-10 h-10 shrink-0 rounded-xl bg-muted flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
+        <div className="w-10 h-10 shrink-0 rounded-xl bg-muted/20 border border-border flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors">
           <DeviceIcon name={session.deviceName} />
         </div>
         <div className="flex flex-col gap-0.5 min-w-0">
-          <h4 className="font-medium text-foreground text-sm truncate">
-            {session.deviceName}
-          </h4>
+          <div className="flex items-center gap-2">
+            <h4 className="font-medium text-foreground text-sm truncate">
+              {session.deviceName}
+            </h4>
+            <SessionInfoPopover session={session}>
+              <button
+                className="text-muted-foreground/40 hover:text-primary transition-colors cursor-pointer outline-none focus-visible:text-primary p-0.5 rounded-sm shrink-0"
+                title="Показать технические данные"
+              >
+                <Info className="w-3.5 h-3.5" />
+              </button>
+            </SessionInfoPopover>
+          </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="font-mono">{session.ip}</span>
             <span className="text-muted-foreground/30">•</span>
@@ -138,17 +247,24 @@ export function SessionsList({
             </div>
 
             <div className="flex-1 z-10 min-w-0">
-              <h4 className="font-semibold text-foreground truncate">
-                {currentSession.deviceName}
-              </h4>
+              <div className="flex items-center gap-2">
+                <h4 className="font-semibold text-foreground truncate">
+                  {currentSession.deviceName}
+                </h4>
+                <SessionInfoPopover session={currentSession}>
+                  <button
+                    className="text-primary/40 hover:text-primary transition-colors cursor-pointer outline-none p-0.5 rounded-sm shrink-0"
+                    title="Показать технические данные"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                </SessionInfoPopover>
+              </div>
 
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <div className="flex items-center gap-2 mt-1">
                 <span className="font-mono text-xs text-muted-foreground">{currentSession.ip}</span>
                 <span className="w-1 h-1 rounded-full bg-primary shrink-0" />
                 <span className="text-primary font-medium text-xs">Онлайн</span>
-                <div className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-3xs font-bold uppercase tracking-wider shrink-0">
-                  Этот браузер
-                </div>
               </div>
             </div>
 

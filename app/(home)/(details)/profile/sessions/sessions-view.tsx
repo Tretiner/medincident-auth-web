@@ -13,19 +13,33 @@ export function SessionsView() {
       <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
         <div className="space-y-3">
           <h4 className="section-label">Текущая сессия</h4>
-          <div className="relative overflow-hidden h-20 w-full rounded-xl bg-primary/5 border border-primary/20">
-            <div className="shimmer shimmer-primary" />
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-primary/5 border border-primary/20">
+            <div className="relative overflow-hidden w-12 h-12 shrink-0 rounded-xl bg-primary/15">
+              <div className="shimmer shimmer-primary" />
+            </div>
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="relative overflow-hidden h-4 w-40 rounded-md bg-primary/15">
+                <div className="shimmer shimmer-primary" />
+              </div>
+              <div className="relative overflow-hidden h-3 w-32 rounded-md bg-primary/10">
+                <div className="shimmer shimmer-primary" />
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="space-y-3 sm:space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="section-label">Другие сессии</h3>
-            <Skeleton className="h-8 w-24 rounded-md" />
-          </div>
-          <div className="space-y-2 sm:space-y-3">
-            <Skeleton className="h-16 w-full rounded-xl" />
-            <Skeleton className="h-16 w-full rounded-xl" />
+          <h3 className="section-label">Другие сессии</h3>
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-border">
+                <Skeleton className="w-10 h-10 shrink-0 rounded-xl" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <Skeleton className="h-4 w-36 rounded-md" />
+                  <Skeleton className="h-3 w-28 rounded-md" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -33,10 +33,13 @@ export function QrScannerButton({ variant = "default" }: QrScannerButtonProps) {
   }
 
   function handleClose(isOpen: boolean) {
-    if (!isOpen) stopCamera();
+    if (!isOpen) {
+      stopCamera();
+    } else {
+      setError(null);
+      setScanning(false);
+    }
     setOpen(isOpen);
-    setError(null);
-    setScanning(false);
   }
 
   function handleDetected(rawValue: string) {
