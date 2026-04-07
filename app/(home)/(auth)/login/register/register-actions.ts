@@ -13,50 +13,6 @@ import {
 import { env } from "@/shared/config/env";
 import type { RegisterFormState } from "./_components/register-view";
 
-// ==========================================
-// ВАЛИДАЦИЯ ИМЕНИ (gRPC)
-// ==========================================
-
-function mapGrpcCode(code: string): string {
-  const map: Record<string, string> = {
-    REQUIRED: "Обязательное поле",
-    TOO_SHORT: "Слишком короткое значение",
-    TOO_LONG: "Слишком длинное значение",
-    CONTAINS_DIGITS: "Недопустимые цифры",
-    MIXED_SCRIPTS: "Смешение разных алфавитов",
-    SPECIAL_CHARACTERS: "Недопустимые спецсимволы",
-    INVALID_FORMAT: "Недопустимые символы",
-  };
-  return map[code] ?? "Ошибка: " + code;
-}
-
-export async function validatePersonNameGrpc(
-  givenName: string,
-  familyName: string,
-  middleName?: string
-): Promise<Record<string, string> | null> {
-  try {
-    const response = await userService.validateFullName({
-      personName: { givenName, familyName, middleName: middleName || undefined },
-    });
-
-    if (response.valid) return null;
-
-    const fieldMap: Record<string, string> = {
-      given_name: "givenName",
-      family_name: "familyName",
-      middle_name: "middleName",
-    };
-    return Object.fromEntries(
-      response.violations.map((v: any) => [fieldMap[v.field] ?? v.field, mapGrpcCode(v.code)])
-    );
-  } catch (error) {
-    if (error instanceof ClientError) {
-      return { form: "Сервис проверки данных временно недоступен" };
-    }
-    return { form: "Внутренняя ошибка при проверке данных" };
-  }
-}
 
 function extractFormFields(formData: FormData) {
   return {
@@ -155,10 +111,6 @@ export async function continueRegisterIdp(
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     errors.email = "Введите корректный email адрес";
   }
-
-  const grpcErrors = await validatePersonNameGrpc(givenName, familyName, middleName || undefined);
-  if (grpcErrors) Object.assign(errors, grpcErrors);
-  if (Object.keys(errors).length > 0) return { success: false, errors, values };
 
   const intent = await getIdpIntentCookie();
   if (!intent) return { success: false, errors: { form: "Сессия устарела. Войдите снова." }, values };

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 // Импортируем ваши методы для работы с пользователями и сессиями
 import { createHumanUser, createSession, addIdpLinkToUser, completeAuthRequest, deleteSession, searchUserSessions, getAuthRequest } from "@/services/zitadel/api";
 import { addSessionToCookie, getAllSessions, removeSessionFromCookie, setPreferredSessionId } from "@/services/zitadel/cookies";
+import { setIdpIntentCookie } from "../../_lib/reg-flow";
 import { env } from "@/shared/config/env";
 
 export async function completeAuthFlow(sessionId: string, sessionToken: string, requestId: string): Promise<string> {
@@ -94,6 +95,20 @@ export async function handleLoginAction(userId: string, intentId: string, intent
   }
 
   await finishAuth(sessionRes.data, requestId);
+}
+
+export async function saveIdpIntentAndRedirectAction(formData: FormData) {
+  const intentId = formData.get("intentId") as string;
+  const intentToken = formData.get("intentToken") as string;
+  const requestId = formData.get("requestId") as string | undefined || undefined;
+  const idpInformationRaw = formData.get("idpInformation") as string | null;
+  const idpInformation = idpInformationRaw ? JSON.parse(idpInformationRaw) : undefined;
+
+  await setIdpIntentCookie({ intentId, intentToken, idpInformation, requestId });
+
+  const regParams = new URLSearchParams({ source: "idp" });
+  if (requestId) regParams.set("requestId", requestId);
+  redirect(`/login/register?${regParams}`);
 }
 
 export async function handleLinkAction(targetUserId: string, intentId: string, intentToken: string, idpInformation: any, requestId?: string) {

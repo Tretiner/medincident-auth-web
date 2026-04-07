@@ -7,7 +7,7 @@ import { getSessionCookieById, getAllSessionCookieIds } from "@/services/zitadel
 import { finishAuth } from "../callback/success/actions";
 
 export interface VerifyState {
-  errors?: { code?: string; form?: string };
+  errors?: { code?: string; form?: string; expired?: boolean };
 }
 
 export async function verifyEmailAction(
@@ -48,8 +48,16 @@ export async function verifyEmailAction(
       sessionData = { sessionId: flow.sessionId, sessionToken: flow.sessionToken };
     } else if (flow.source === "idp" && flow.intentId && flow.intentToken) {
       const sessionRes = await createSession(flow.userId!, flow.intentId, flow.intentToken);
-      if (!sessionRes.success || !sessionRes.data?.sessionId || !sessionRes.data?.sessionToken) {
+      if (!sessionRes.success) {
+        const msg = (sessionRes as any).error?.message ?? "";
+        if (msg.includes("Intent.Expired") || msg.includes("Intent.NotSucceeded")) {
+          await deleteRegFlowCookie();
+          return { errors: { form: "Сессия Telegram истекла — войдите через Telegram заново.", expired: true } };
+        }
         return { errors: { form: "Не удалось создать сессию: " + JSON.stringify((sessionRes as any).error) } };
+      }
+      if (!sessionRes.data?.sessionId || !sessionRes.data?.sessionToken) {
+        return { errors: { form: "Не удалось создать сессию: пустой ответ сервера." } };
       }
       sessionData = sessionRes.data;
     } else if (flow.source === "email" && flow.password) {

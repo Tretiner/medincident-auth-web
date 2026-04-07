@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -16,6 +17,7 @@ interface Props {
 
 export function VerifyForm({ action, resendAction, email }: Props) {
   const [state, formAction, isPending] = useActionState(action, { errors: {} });
+  const router = useRouter();
 
   return (
     <div className="space-y-6">
@@ -25,8 +27,19 @@ export function VerifyForm({ action, resendAction, email }: Props) {
 
       <form action={formAction} className="space-y-5">
         {state.errors?.form && (
-          <div className="p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-md text-sm text-center">
-            {state.errors.form}
+          <div className="p-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-md text-sm text-center space-y-2">
+            <p>{state.errors.form}</p>
+            {state.errors.expired && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => router.push("/login")}
+              >
+                Войти заново
+              </Button>
+            )}
           </div>
         )}
 

@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { UserSession, LinkedAccountsStatus } from "@/domain/profile/types";
 import { requireValidSession } from "@/services/zitadel/session";
-import { deleteSession, deleteUserLink, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent, changeUserPassword } from "@/services/zitadel/api";
+import { deleteSession, deleteUserLink, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent, changeUserPassword, retrieveIdpIntent, addIdpLinkToUser } from "@/services/zitadel/api";
 import { env } from "@/shared/config/env";
 import { redirect } from "next/navigation";
 import { parseUserAgent } from "@/shared/lib/user-agent";
@@ -129,6 +129,33 @@ export async function linkProvider(idpId: string) {
   }
 
   redirect(response.data.authUrl);
+}
+
+// COMPLETE IDP LINK (завершить привязку после OAuth-callback)
+export async function completeLinkAction(intentId: string, intentToken: string): Promise<{ success: boolean; error?: string }> {
+  const { userId } = await requireValidSession();
+
+  const intentRes = await retrieveIdpIntent(intentId, { idpIntentToken: intentToken });
+  if (!intentRes.success) {
+    return { success: false, error: "Не удалось получить данные провайдера" };
+  }
+
+  const idpInfo = (intentRes as { success: true; data: any }).data?.idpInformation;
+  if (!idpInfo?.idpId) {
+    return { success: false, error: "Провайдер не вернул данные" };
+  }
+
+  const linkRes = await addIdpLinkToUser(userId, {
+    idpId: idpInfo.idpId,
+    userId: idpInfo.userId,
+    userName: idpInfo.userName,
+  });
+
+  if (!linkRes.success) {
+    return { success: false, error: "Не удалось привязать аккаунт" };
+  }
+
+  return { success: true };
 }
 
 // CHANGE PASSWORD (Смена пароля)

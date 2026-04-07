@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { retrieveIdpIntent } from "@/services/zitadel/api";
-import { setIdpIntentCookie } from "../../_lib/reg-flow";
-import { handleLoginAction } from "./actions";
+import { AutoActionForm } from "./_components/auto-action-form";
+import { handleLoginAction, saveIdpIntentAndRedirectAction } from "./actions";
 
 export default async function CallbackSuccessPage({
   searchParams,
@@ -9,22 +9,34 @@ export default async function CallbackSuccessPage({
   searchParams: Promise<{ requestId?: string; id?: string; token?: string; userId?: string; user?: string }>;
 }) {
   const params = await searchParams;
-  const { requestId } = params;
   const id = params.id as string;
   const token = params.token as string;
+  const requestId = params.requestId;
   const userId = params.userId ?? params.user;
 
-  if (!params.id || !params.token) {
+  if (!id || !token) {
     redirect("/login");
   }
 
-  // Пользователь уже привязан — создаём сессию автоматически
+  // Пользователь уже привязан — создаём сессию через Server Action
   if (userId) {
-    await handleLoginAction(userId, id, token, requestId);
-    return null;
+    return (
+      <AutoActionForm
+        action={async (formData: FormData) => {
+          "use server";
+          await handleLoginAction(
+            formData.get("userId") as string,
+            formData.get("intentId") as string,
+            formData.get("intentToken") as string,
+            formData.get("requestId") as string | undefined || undefined,
+          );
+        }}
+        fields={{ userId, intentId: id, intentToken: token, requestId }}
+      />
+    );
   }
 
-  // Новый пользователь — получаем данные провайдера и сохраняем в cookie
+  // Новый пользователь — читаем данные провайдера (чтение в Server Component допустимо)
   const intentRes = await retrieveIdpIntent(id, { idpIntentToken: token });
 
   if (!intentRes.success) {
@@ -33,14 +45,17 @@ export default async function CallbackSuccessPage({
     redirect(`/login/callback/failure?${failParams}`);
   }
 
-  await setIdpIntentCookie({
-    intentId: id,
-    intentToken: token,
-    idpInformation: (intentRes as { success: true; data: any }).data?.idpInformation,
-    requestId,
-  });
+  const idpInformation = (intentRes as { success: true; data: any }).data?.idpInformation;
 
-  const regParams = new URLSearchParams({ source: "idp" });
-  if (requestId) regParams.set("requestId", requestId);
-  redirect(`/login/register?${regParams}`);
+  return (
+    <AutoActionForm
+      action={saveIdpIntentAndRedirectAction}
+      fields={{
+        intentId: id,
+        intentToken: token,
+        requestId,
+        idpInformation: idpInformation ? JSON.stringify(idpInformation) : undefined,
+      }}
+    />
+  );
 }

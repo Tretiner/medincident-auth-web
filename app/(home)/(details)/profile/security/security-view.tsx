@@ -35,7 +35,7 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
     <div className="space-y-8 animate-in fade-in duration-500">
 
       {/* УВЕДОМЛЕНИЯ О ПРИВЯЗКЕ */}
-      {statusMessage === 'success' && (
+      {(statusMessage === 'success' || statusMessage === 'done') && (
         <div className="p-4 bg-success/10 text-success border border-success/20 rounded-xl flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 shrink-0" />
           <p className="text-sm font-medium">Аккаунт успешно привязан</p>
