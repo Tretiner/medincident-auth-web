@@ -35,9 +35,9 @@ export function SidebarUserCard({ isActive }: Props) {
     >
       <Avatar className="h-10 w-10 relative shrink-0">
         {showSkeleton ?
-          <Skeleton className="h-full w-full rounded-full" />
+          <Skeleton className={cn("h-full w-full rounded-full", isActive && "bg-primary/20")} />
         : <>
-            {user.photoUrl && <AvatarImage src={user.photoUrl} alt="Avatar" />}
+            {user.photoUrl && <AvatarImage key={user.photoUrl} src={user.photoUrl} alt="Avatar" className="object-cover" />}
             <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
               {`${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase()}
             </AvatarFallback>
@@ -47,7 +47,7 @@ export function SidebarUserCard({ isActive }: Props) {
 
       <div className="flex-1 min-w-0 text-left gap-0.5 flex flex-col justify-center">
         {showSkeleton ?
-          <Skeleton className="h-4 w-24 mb-1" />
+          <Skeleton className={cn("h-4 w-24 mb-1", isActive && "bg-primary/20")} />
         : <h4
             className={cn(
               "text-sm font-bold truncate transition-all",

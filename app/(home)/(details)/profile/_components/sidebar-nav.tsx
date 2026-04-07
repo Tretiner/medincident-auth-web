@@ -74,7 +74,7 @@ export function SidebarNav() {
           <Button
             variant="ghost"
             asChild
-            className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground rounded-xl font-medium hover:bg-muted hover:text-primary"
+            className="w-full justify-start gap-3 px-3 py-3 h-auto text-muted-foreground rounded-xl font-medium hover:bg-muted hover:text-primary"
           >
             <Link href={from}>
               <ArrowLeft className="h-5 w-5" />
@@ -88,7 +88,7 @@ export function SidebarNav() {
         <LogoutConfirmDialog>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 px-4 py-3 h-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
+            className="w-full justify-start gap-3 px-3 py-3 h-auto text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
           >
             <LogOutIcon className="h-5 w-5" />
             Выйти

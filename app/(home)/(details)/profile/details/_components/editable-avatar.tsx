@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar";
 import { uploadAvatarAction } from "../profile.actions";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/utils";
+import { useProfileStore } from "../../profile.store";
 
 const MAX_AVATAR_SIZE = 512 * 1024; // 512 КБ — лимит Zitadel
 const AVATAR_MAX_DIMENSION = 256; // px — больше для аватарки не нужно
@@ -55,6 +56,7 @@ interface EditableAvatarProps {
 export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarProps) {
   const [isPending, startTransition] = useTransition();
   const [previewUrl, setPreviewUrl] = useState(currentAvatarUrl);
+  const setProfile = useProfileStore((s) => s.setProfile);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const objectUrlRef = useRef<string | null>(null);
 
@@ -89,6 +91,7 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
         const objectUrl = URL.createObjectURL(compressed);
         objectUrlRef.current = objectUrl;
         setPreviewUrl(objectUrl);
+        setProfile({ photoUrl: objectUrl });
 
         const formData = new FormData();
         formData.append("avatar", compressed, file.name);
@@ -97,6 +100,7 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
 
         if (!result?.success) {
           setPreviewUrl(currentAvatarUrl);
+          setProfile({ photoUrl: currentAvatarUrl ?? null });
           console.error("Ошибка при загрузке аватара:", result?.error);
           toast.error(result?.error || "Ошибка загрузки");
         }
@@ -113,7 +117,7 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
 
   return (
     <div
-      className="relative w-16 h-16 group cursor-pointer rounded-full"
+      className="relative w-16 h-16 group/edit cursor-pointer rounded-full"
       onClick={() => fileInputRef.current?.click()}
     >
       <Avatar className="w-16 h-16 border border-border">
@@ -128,12 +132,12 @@ export function EditableAvatar({ currentAvatarUrl, initials }: EditableAvatarPro
         "transition-all duration-200 ease-in-out",
         isPending
           ? "bg-black/80 opacity-100"
-          : "bg-black/50 opacity-0 group-hover:opacity-100",
+          : "bg-black/50 opacity-0 group-hover/edit:opacity-100",
       )}>
         {isPending ? (
           <Loader2 className="w-5 h-5 text-white/80 animate-spin" />
         ) : (
-          <Camera className="w-5 h-5 text-white/70 transition-transform duration-300 ease-in-out group-hover:scale-110" />
+          <Camera className="w-5 h-5 text-white/70 transition-transform duration-300 ease-in-out group-hover/edit:scale-110" />
         )}
       </div>
 

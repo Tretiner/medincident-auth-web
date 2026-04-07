@@ -23,9 +23,9 @@ export function UserHeaderCard({ user }: { user: PersonalInfo }) {
       <div className="pointer-events-none absolute bottom-0 left-1/3 h-24 w-48 rounded-full bg-primary/5 blur-2xl" />
 
       <div className="relative flex items-center gap-5">
-        <div className="shrink-0">
-          <div className="rounded-full p-0.5 bg-gradient-to-br from-primary/60 via-primary/30 to-transparent">
-            <div className="rounded-full p-0.5 bg-background">
+        <div className="shrink-0 group/avatar">
+          <div className="rounded-full p-0.5 bg-gradient-to-tr from-primary/60 via-primary/30 to-transparent shadow-[0_0_0_0_transparent] group-hover/avatar:shadow-[0_0_16px_4px_color-mix(in_oklch,var(--color-primary)_40%,transparent)] transition-shadow duration-300">
+            <div className="rounded-full bg-background">
               <EditableAvatar currentAvatarUrl={user.avatarUrl} initials={initials} />
             </div>
           </div>
