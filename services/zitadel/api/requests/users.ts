@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Result } from "@/domain/error";
 import { handleZitadelRequest } from "../client-helper";
 import { zitadelApi } from "../client";
+import { zitadelUserApi } from "../../user/client"; // для user self-service endpoints
 import { env } from "@/shared/config/env";
 import { PaginationRequest, TextFilterMethod, ZitadelGenericUpdateResponseSchema } from "./shared";
 
@@ -224,7 +225,7 @@ export async function changeUserPassword(
   newPassword: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   return handleZitadelRequest(
-    () => zitadelApi.post(`/v2/users/${userId}/password`, {
+    () => zitadelUserApi.post(`/v2/users/${userId}/password`, {
       currentPassword,
       newPassword: { password: newPassword },
     }),

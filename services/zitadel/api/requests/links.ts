@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { Result } from "@/domain/error";
 import { handleZitadelRequest } from "../client-helper";
-import { zitadelApi } from "../client";
+import { zitadelUserApi } from "../../user/client";
 import { ZitadelDetailsSchema, ZitadelGenericUpdateResponseSchema } from "./shared";
 
 // --- Схемы ---
@@ -24,7 +24,7 @@ export async function addIdpLinkToUser(
   idpLink: { idpId: string; userId: string; userName: string; }
 ): Promise<Result<z.infer<typeof ZitadelAddIdpLinkResponseSchema>>> {
   return handleZitadelRequest(
-    () => zitadelApi.post(`/v2/users/${systemUserId}/links`, { idpLink }),
+    () => zitadelUserApi.post(`/v2/users/${systemUserId}/links`, { idpLink }),
     ZitadelAddIdpLinkResponseSchema
   );
 }
@@ -34,7 +34,7 @@ export async function searchUserLinks(
 ): Promise<Result<z.infer<typeof ZitadelSearchLinksResponseSchema>>> {
   return handleZitadelRequest(
     // Отправляем пустой объект {}, так как API ожидает POST-запрос с телом
-    () => zitadelApi.post(`/v2/users/${userId}/links/_search`, {}),
+    () => zitadelUserApi.post(`/v2/users/${userId}/links/_search`, {}),
     ZitadelSearchLinksResponseSchema
   );
 }
@@ -45,7 +45,7 @@ export async function deleteUserLink(
   linkedUserId: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   return handleZitadelRequest(
-    () => zitadelApi.delete(`/v2/users/${userId}/links/${idpId}/${linkedUserId}`),
+    () => zitadelUserApi.delete(`/v2/users/${userId}/links/${idpId}/${linkedUserId}`),
     ZitadelGenericUpdateResponseSchema
   );
 }
