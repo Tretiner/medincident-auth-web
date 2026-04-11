@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/services/zitadel/user/auth";
-import { decodeJwt } from "jose";
 import { fetchZitadel } from "@/services/zitadel/api";
 import { getAllSessionCookieIds } from "@/services/zitadel/cookies";
 
 async function getUserIdFromAuth(): Promise<string | null> {
   const session = await auth();
-  const accessToken = (session as any)?.accessToken as string | undefined;
-  if (!accessToken) return null;
-  try {
-    const claims = decodeJwt(accessToken);
-    return (claims.sub as string) ?? null;
-  } catch {
-    return null;
-  }
+  // Используем zitadelUserId (числовой ID), а не декодируем accessToken —
+  // Zitadel выдаёт opaque токены, decodeJwt на них падает.
+  return (session as any)?.zitadelUserId ?? null;
 }
 
 async function findCurrentSessionId(userId: string): Promise<string | null> {

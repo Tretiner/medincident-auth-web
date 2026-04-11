@@ -1,29 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/services/zitadel/user/auth";
-import { decodeJwt } from "jose";
 import { fetchZitadel } from "@/services/zitadel/api";
-
-// Маппинг ключей на реальные IDP ID в Zitadel.
-// ВАЖНО: Замени эти ID на реальные ID провайдеров из консоли Zitadel!
-const IDP_MAP: Record<string, string> = {
-  telegram: "123456789012345678", // ID провайдера Telegram
-  max: "987654321098765432",      // ID провайдера MAX
-};
+import { env } from "@/shared/config/env";
 
 async function getUserIdFromAuth(): Promise<string | null> {
   const session = await auth();
-  const accessToken = (session as any)?.accessToken as string | undefined;
-  if (!accessToken) return null;
-  try {
-    const claims = decodeJwt(accessToken);
-    return (claims.sub as string) ?? null;
-  } catch {
-    return null;
-  }
+  // Используем zitadelUserId (числовой ID) из NextAuth сессии.
+  // НЕ декодируем accessToken — Zitadel выдаёт opaque токены, decodeJwt на них падает.
+  return (session as any)?.zitadelUserId ?? null;
 }
 
 // GET: Получить статусы привязок
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const userId = await getUserIdFromAuth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,12 +22,13 @@ export async function GET(req: NextRequest) {
       body: JSON.stringify({})
     });
 
-    // Собираем булевый статус для фронта
-    const linkedIdps = linksRes.result || [];
-    const status = {
-      telegram: linkedIdps.some((link: any) => link.idpId === IDP_MAP.telegram),
-      max: linkedIdps.some((link: any) => link.idpId === IDP_MAP.max),
-    };
+    // Собираем булевый статус для фронта — по всем сконфигурированным провайдерам из env
+    const linkedIdps: Array<{ idpId: string }> = linksRes.result || [];
+    const status: Record<string, boolean> = {};
+    for (const provider of env.idpProviders) {
+      const idpId = env.getIdpId(provider)!; // гарантированно есть — из того же массива
+      status[provider] = linkedIdps.some((link) => link.idpId === idpId);
+    }
 
     return NextResponse.json(status);
   } catch (error: any) {
@@ -54,10 +43,20 @@ export async function POST(req: NextRequest) {
     if (!userId) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const providerKey = body.provider; // "telegram" или "max"
-    const targetIdpId = IDP_MAP[providerKey];
+    const providerKey = body.provider;
 
-    if (!targetIdpId) return NextResponse.json({ success: false, error: "Invalid provider" }, { status: 400 });
+    // Валидация: provider должен быть непустой строкой и присутствовать в ZITADEL_IDPS
+    if (typeof providerKey !== "string" || providerKey.length === 0) {
+      return NextResponse.json({ success: false, error: "Invalid provider" }, { status: 400 });
+    }
+
+    const targetIdpId = env.getIdpId(providerKey);
+    if (!targetIdpId) {
+      return NextResponse.json(
+        { success: false, error: "Провайдер не сконфигурирован" },
+        { status: 400 },
+      );
+    }
 
     // Проверяем, привязан ли уже этот IDP
     const linksRes = await fetchZitadel(`/v2/users/${userId}/idplinks/_search`, {

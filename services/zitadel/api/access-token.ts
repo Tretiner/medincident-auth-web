@@ -48,10 +48,19 @@ export async function getZitadelAccessToken(): Promise<string> {
 
   // 3. Получаем Access Token
   const tokenUrl = `${ZITADEL_DOMAIN}/oauth/v2/token`;
+  const scope = [
+    'openid',
+    'profile',
+    'email',
+    'urn:zitadel:iam:org:project:role:custom_ui_service',
+    'urn:zitadel:iam:org:project:roles',
+    'urn:zitadel:iam:org:project:id:zitadel:aud',
+    `urn:zitadel:iam:org:project:id:${env.ZITADEL_PROJECT_ID}:aud`,
+  ].join(' ');
   const body = new URLSearchParams({
     grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
     assertion: signedAssertion,
-    scope: 'openid profile email urn:zitadel:iam:org:project:role:custom_ui_service urn:zitadel:iam:org:project:roles urn:zitadel:iam:org:project:id:zitadel:aud urn:zitadel:iam:org:project:id:365068666124894213:aud',
+    scope,
   });
 
   const response = await fetch(tokenUrl, {
