@@ -58,9 +58,9 @@ export function QrAuthSection({ requestId }: QrAuthSectionProps) {
         )}
       >
         <div
-          className="absolute inset-0 opacity-[0.02] pointer-events-none"
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, var(--foreground) 1px, transparent 1px)",
             backgroundSize: "20px 20px",
           }}
         />

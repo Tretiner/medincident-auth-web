@@ -87,7 +87,7 @@ function SessionInfoPopover({
         className="w-80 p-3 space-y-2"
       >
         {/* User Agent */}
-        <div className="rounded-lg border border-border bg-gradient-to-tr from-muted/20 to-white py-1.5 px-2.5 space-y-1.5">
+        <div className="rounded-lg section-surface py-1.5 px-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Monitor className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -100,14 +100,14 @@ function SessionInfoPopover({
 
         {/* IP и Активность */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-gradient-to-tr from-muted/20 to-white">
+          <div className="flex items-center gap-2 p-2.5 rounded-lg section-surface">
             <Globe className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <div className="min-w-0">
               <p className="text-3xs text-muted-foreground uppercase tracking-wider font-medium">IP</p>
               <p className="text-xs font-mono text-foreground truncate">{session.ip}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-gradient-to-tr from-muted/20 to-white">
+          <div className="flex items-center gap-2 p-2.5 rounded-lg section-surface">
             <Clock className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <div className="min-w-0">
               <p className="text-3xs text-muted-foreground uppercase tracking-wider font-medium">Активность</p>

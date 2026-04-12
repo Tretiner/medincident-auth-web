@@ -62,9 +62,9 @@ export async function revokeAllOthersAction() {
   const { userId, currentSessionId } = await requireValidSession();
   const response = await searchUserSessions(userId);
   const knownSessions = await getAllSessions();
-  
+
   if (!response.success) return { success: false };
-  
+
   const sessionsToDelete = (response.data.sessions || []).filter((s: any) => s.id !== currentSessionId);
 
   await Promise.all(

@@ -81,9 +81,18 @@
   --sidebar-primary: var(--brand-green);
   --sidebar-border: var(--gray-200);
 
-  /* Gradients */
-  --telegram-gradient: linear-gradient(to right, #2AABEE, #229ED9);
-  --max-gradient: linear-gradient(to right, #2563eb, #9333ea);
+  /* Brand gradients (light theme): насыщенные, под белый фон */
+  --telegram-gradient: linear-gradient(to right, oklch(0.71 0.13 232), oklch(0.66 0.13 232));
+  --max-gradient: linear-gradient(to right, oklch(0.55 0.22 264), oklch(0.52 0.27 305));
+
+  /* Section gradient (light): тонкий перелив для секций внутри карточек.
+     in oklab + сплошные цвета без transparent — иначе sRGB-интерполяция с альфой
+     даёт грязный реддиш-midpoint. */
+  --section-gradient: linear-gradient(
+    in oklab to top right,
+    color-mix(in oklab, var(--muted) 35%, var(--card)),
+    var(--card)
+  );
 }
 
 .dark {
@@ -125,9 +134,21 @@
   /* Border: Должен быть светлее фона (0.25), ставим 0.35 */
   --border: oklch(0.35 0.02 270);
   --input: oklch(0.35 0.02 270);
-  
   --sidebar-background: oklch(0.25 0.02 270);
   --sidebar-foreground: oklch(0.98 0 0);
+
+  /* Brand gradients (dark theme): подняли L, чуть приглушили C, чтобы не выжигать на тёмном */
+  --telegram-gradient: linear-gradient(to right, oklch(0.75 0.12 232), oklch(0.70 0.12 232));
+  --max-gradient: linear-gradient(to right, oklch(0.62 0.20 264), oklch(0.60 0.24 305));
+
+  /* Section gradient (dark): чуть выпуклый relief на тёмных карточках.
+     in oklab + сплошные цвета (без transparent) — иначе sRGB-интерполяция с альфой
+     даёт грязный реддиш-midpoint на тёмном фоне. */
+  --section-gradient: linear-gradient(
+    in oklab to top right,
+    var(--muted),
+    var(--card)
+  );
 }
 
 @theme {
@@ -172,6 +193,7 @@
 
   --background-image-gradient-telegram: var(--telegram-gradient);
   --background-image-gradient-max: var(--max-gradient);
+  --background-image-gradient-section: var(--section-gradient);
   --color-brand-telegram: var(--palette-brand-telegram);
   --color-brand-max: var(--palette-brand-max);
 
@@ -327,6 +349,11 @@
 
 @utility section-label {
   @apply text-sm font-medium text-muted-foreground uppercase tracking-wider ml-1;
+}
+
+@utility section-surface {
+  @apply border border-border;
+  background-image: var(--section-gradient);
 }
 
 @utility shimmer {

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
-export const SECTION_CLASS = "space-y-4 p-5 rounded-xl border border-border bg-gradient-to-tr from-muted/20 to-white";
+export const SECTION_CLASS = "space-y-4 p-5 rounded-xl section-surface";
 
 export interface FormMessage {
   type: "success" | "error";

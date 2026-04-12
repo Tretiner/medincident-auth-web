@@ -1,12 +1,13 @@
 import { TelegramUser } from "@/domain/auth/types";
 import { LinkedAccountsStatus, PersonalInfo, User, UserSession } from "@/domain/profile/types";
+import { getMockAvatarUrl } from "./mock-avatar";
 
 export const MockTgUser: TelegramUser = {
   id: 773421,
   firstName: "Алексей",
   lastName: "Смирнов",
   userName: "alex_smirnov",
-  photoUrl: "https://i.pravatar.cc/150?u=USR-7734-21",
+  photoUrl: getMockAvatarUrl("USR-7734-21"),
   authDate: Math.floor(Date.now() / 1000),
   hash: "mock_dev_hash",
 };
@@ -21,7 +22,7 @@ export let MockFullUser: User = {
     email: "alex.smirnov@medsafety.ru",
     isEmailVerified: true,
     position: "Ведущий хирург",
-    avatarUrl: `/api/res/avatar/150?u=USR-7734-21`,
+    avatarUrl: getMockAvatarUrl("USR-7734-21"),
   },
   linkedAccounts: {
     telegram: true,
