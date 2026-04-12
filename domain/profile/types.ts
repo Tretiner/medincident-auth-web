@@ -28,11 +28,6 @@ export interface UserSession {
   isCurrent: boolean;
 }
 
-export interface SecurityState {
-  linkedAccounts: LinkedAccountsStatus;
-  sessions: UserSession[];
-}
-
 export interface SecurityData {
   sessions: UserSession[];
 }

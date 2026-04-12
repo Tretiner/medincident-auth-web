@@ -10,12 +10,6 @@ export interface TelegramUser {
   hash: string;
 }
 
-export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresInSeconds: number;
-}
-
 export interface JwtUser extends JWTPayload {
   sid: string;
   uid: string;
