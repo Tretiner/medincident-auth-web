@@ -3,10 +3,8 @@
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
+import { OtpInput } from "@/shared/ui/otp-input";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/shared/lib/utils";
 import { VerifyState } from "../actions";
 
 interface Props {
@@ -43,34 +41,26 @@ export function VerifyForm({ action, resendAction, email }: Props) {
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="code" className={cn(state.errors?.code && "text-destructive")}>
-            Код подтверждения
-          </Label>
-          <Input
-            id="code"
+        <div className="flex flex-col items-center gap-2">
+          <OtpInput
             name="code"
-            type="text"
-            inputMode="numeric"
-            placeholder="123456"
+            length={6}
             disabled={isPending}
-            autoComplete="one-time-code"
-            className={cn(
-              "text-center text-xl tracking-widest font-mono",
-              state.errors?.code && "border-destructive focus-visible:ring-destructive",
-              "bg-card"
-            )}
+            autoFocus
+            error={!!state.errors?.code}
           />
           {state.errors?.code && (
-            <span className="text-[11px] font-medium text-destructive block text-center">
+            <span className="text-[11px] font-medium text-destructive">
               {state.errors.code}
             </span>
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Подтвердить"}
-        </Button>
+        <div className="flex justify-center">
+          <Button type="submit" size="sm" className="px-8" disabled={isPending}>
+            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Подтвердить"}
+          </Button>
+        </div>
       </form>
 
       <form action={resendAction} className="flex justify-center">
