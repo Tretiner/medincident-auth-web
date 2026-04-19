@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { Button } from "@/shared/ui/button";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import { startZitadelSignIn } from "@/services/zitadel/user/sign-in";
 
 const MAX_AUTO_RETRIES = 1;
 const RETRY_COUNT_KEY = "oidc_error_retries";
@@ -30,12 +30,12 @@ export function AuthErrorView() {
 
     try { sessionStorage.setItem(RETRY_COUNT_KEY, String(count + 1)); } catch {}
     console.log("[auth:error] Автоматическая повторная попытка #%d, ошибка: %s", count + 1, error);
-    signIn("zitadel", { callbackUrl: "/profile" });
+    startZitadelSignIn();
   }, [error]);
 
   const handleManualRetry = () => {
     try { sessionStorage.setItem(RETRY_COUNT_KEY, "0"); } catch {}
-    signIn("zitadel", { callbackUrl: "/profile" });
+    startZitadelSignIn();
   };
 
   if (showError) {

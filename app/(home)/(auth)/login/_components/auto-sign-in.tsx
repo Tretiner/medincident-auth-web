@@ -1,32 +1,22 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { signIn } from "next-auth/react";
+import { AuthLoader } from "@/shared/ui/auth-loader";
+import { startZitadelSignIn } from "@/services/zitadel/user/sign-in";
 
-export interface Props {
-    provider: string;
-    redirectTo: string;
-    forceLogin?: boolean;
+interface Props {
+  forceLogin?: boolean;
 }
 
-export function AutoSignIn({ provider, redirectTo, forceLogin }: Props) {
+export function AutoSignIn({ forceLogin }: Props = {}) {
   const called = useRef(false);
 
   useEffect(() => {
     if (called.current) return;
     called.current = true;
 
-    const options: Record<string, string> = { callbackUrl: redirectTo };
-    if (forceLogin) {
-      options.prompt = "login";
-    }
+    startZitadelSignIn(forceLogin ? "login" : undefined);
+  }, [forceLogin]);
 
-    signIn(provider, options);
-  }, [provider, redirectTo, forceLogin]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-    </div>
-  );
+  return <AuthLoader fullScreen />;
 }

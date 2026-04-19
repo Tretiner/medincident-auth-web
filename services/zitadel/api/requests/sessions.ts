@@ -170,11 +170,11 @@ export async function getSession(
 
 export async function deleteSession(
   sessionId: string,
-  sessionToken: string
+  sessionToken?: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
   return handleZitadelRequest(
     () => zitadelApi.delete(`/v2/sessions/${sessionId}`, {
-      data: { sessionToken }
+      data: sessionToken ? { sessionToken } : {},
     }),
     ZitadelGenericUpdateResponseSchema
   );

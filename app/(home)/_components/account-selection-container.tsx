@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/shared/ui/button";
+import { AuthLoader } from "@/shared/ui/auth-loader";
 import { AppLogoIcon } from "@/components/icons";
-import { Loader2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
+import { startZitadelSignIn } from "@/services/zitadel/user/sign-in";
 import { loadSessionsAction, type AccountDisplayItem } from "../actions";
 import { selectAccountAction } from "../(auth)/login/callback/success/actions";
 import { AccountSelectionView } from "./account-selection-view";
@@ -17,7 +17,6 @@ interface AccountSelectionContainerProps {
 }
 
 export function AccountSelectionContainer({ requestId }: AccountSelectionContainerProps) {
-  const router = useRouter();
   const [accounts, setAccounts] = useState<AccountDisplayItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>();
@@ -61,15 +60,19 @@ export function AccountSelectionContainer({ requestId }: AccountSelectionContain
         const result = await selectAccountAction(account.id, account.token, requestId);
 
         if (result && "needsSignIn" in result && result.needsSignIn) {
-          signIn("zitadel", { callbackUrl: "/profile" });
+          startZitadelSignIn();
           return;
         }
 
         if (result && !result.success) {
-          toast.error("Ошибка авторизации", {
-            description: "Сессия устарела. Пожалуйста, войдите заново.",
-          });
           console.error("Zitadel Select Account Error:", result.error);
+          toast.error("Сессия входа истекла", {
+            description: "Пожалуйста, войдите заново",
+            action: {
+              label: "Войти заново",
+              onClick: () => startZitadelSignIn(),
+            },
+          });
         }
       } catch (error) {
         if (isRedirectError(error)) throw error;
@@ -83,16 +86,12 @@ export function AccountSelectionContainer({ requestId }: AccountSelectionContain
   };
 
   const handleAddAccount = () => {
-    router.push(`/login?requestId=${requestId}&newAccount=true`);
+    startZitadelSignIn("login");
   };
 
   // Загрузка
   if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center min-h-[500px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <AuthLoader />;
   }
 
   // Нет активных сессий
@@ -118,7 +117,7 @@ export function AccountSelectionContainer({ requestId }: AccountSelectionContain
           <div className="flex justify-center mt-6 mb-4">
             <Button onClick={handleAddAccount}>
               <Plus className="mr-2" />
-              Добавить сессию
+              Войти
             </Button>
           </div>
         </div>

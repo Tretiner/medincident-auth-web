@@ -14,7 +14,7 @@ export async function completeAuthFlow(sessionId: string, sessionToken: string, 
 
   if (!result.success) {
     console.error("Ошибка завершения Auth Request в ZITADEL:", result.error);
-    redirect("/login");
+    redirect("/profile");
   }
 
   const callbackUrl = result.data.callbackUrl || result.data.url;

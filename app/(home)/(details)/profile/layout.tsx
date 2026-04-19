@@ -35,7 +35,7 @@ export default async function ProfileLayout({
 }) {
   const session = await auth();
   if (!session) {
-    return <AutoSignIn provider="zitadel" redirectTo="/profile" />;
+    return <AutoSignIn />;
   }
 
   return (

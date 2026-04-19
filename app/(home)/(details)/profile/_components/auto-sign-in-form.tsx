@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Loader2 } from "lucide-react";
+import { AuthLoader } from "@/shared/ui/auth-loader";
 
 export function AutoSignInForm({ action }: { action: () => Promise<void> }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -11,8 +11,8 @@ export function AutoSignInForm({ action }: { action: () => Promise<void> }) {
   }, []);
 
   return (
-    <form ref={formRef} action={action} className="min-h-screen flex items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <form ref={formRef} action={action}>
+      <AuthLoader fullScreen />
     </form>
   );
 }

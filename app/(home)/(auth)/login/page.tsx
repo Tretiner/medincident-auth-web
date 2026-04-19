@@ -25,7 +25,6 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
   const resolvedSearchParams = await searchParams;
 
   const requestId = resolvedSearchParams.requestId || resolvedSearchParams.authRequest;
-  const isNewAccount = resolvedSearchParams.newAccount === "true";
 
   if (!requestId) {
     redirect("/profile");
@@ -72,9 +71,8 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
     // Preferred сессия не найдена или completeAuthRequest провалился — обычный flow
   }
 
-  // Если prompt=login или добавляем новый аккаунт — всегда показываем форму
-  // Иначе пробуем авто-complete через существующие сессии
-  if (!isNewAccount && !forceLogin) {
+  // Если prompt=login — всегда показываем форму, иначе пробуем авто-complete
+  if (!forceLogin) {
     // Сверяем cookies с Zitadel — отсеиваем протухшие/удалённые сессии
     const synced = await syncSessionCookies();
     const validSessions = synced.filter(

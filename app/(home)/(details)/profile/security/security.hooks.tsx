@@ -2,15 +2,16 @@
 
 import { useState, useTransition } from "react";
 import useSWR, { useSWRConfig } from "swr";
+import { toast } from "sonner";
 import { LinkedAccountsStatus, UserSession } from "@/domain/profile/types";
 
 // Импортируем наши новые Server Actions
-import { 
-  getSessionsAction, 
-  getLinkedAccountsAction, 
-  revokeSessionAction, 
-  revokeAllOthersAction, 
-  toggleLinkedAccountAction, 
+import {
+  getSessionsAction,
+  getLinkedAccountsAction,
+  revokeSessionAction,
+  revokeAllOthersAction,
+  toggleLinkedAccountAction,
   linkProvider
 } from "./security.actions";
 
@@ -56,9 +57,12 @@ export function useSecurityMutations(links: any[] | undefined) {
             await Promise.all(keysToInvalidate.map(key => mutate(key)));
         } else {
             console.error("Action failed:", result.error);
+            toast.error(result.error || "Не удалось выполнить действие");
+            await Promise.all(keysToInvalidate.map(key => mutate(key)));
         }
       } catch (e) {
          console.error("Unexpected error:", e);
+         toast.error("Произошла непредвиденная ошибка");
       } finally {
         setActiveActionId(null);
       }

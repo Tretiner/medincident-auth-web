@@ -14,6 +14,7 @@ import {
   Check,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { formatRelativeTime } from "@/shared/lib/relative-time";
 import {
   Popover,
   PopoverTrigger,
@@ -113,8 +114,11 @@ function SessionInfoPopover({
               <p className="text-3xs text-muted-foreground uppercase tracking-wider font-medium">Активность</p>
               <p className="text-xs text-foreground truncate">
                 {new Date(session.lastActive).toLocaleString("ru-RU", {
-                  day: "2-digit", month: "short",
-                  hour: "2-digit", minute: "2-digit"
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })}
               </p>
             </div>
@@ -196,8 +200,11 @@ function SessionItem({
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="font-mono">{session.ip}</span>
             <span className="text-muted-foreground/30">•</span>
-            <time dateTime={new Date(session.lastActive).toISOString()}>
-              {new Date(session.lastActive).toLocaleDateString("ru-RU")}
+            <time
+              dateTime={new Date(session.lastActive).toISOString()}
+              title={new Date(session.lastActive).toLocaleString("ru-RU")}
+            >
+              {formatRelativeTime(session.lastActive)}
             </time>
           </div>
         </div>

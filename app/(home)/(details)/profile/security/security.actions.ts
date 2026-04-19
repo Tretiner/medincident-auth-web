@@ -47,34 +47,68 @@ export async function getSessionsAction(): Promise<UserSession[]> {
 }
 
 // REVOKE SESSION (Отзыв конкретной сессии)
-export async function revokeSessionAction(targetSessionId: string) {
-  // Пытаемся найти токен этой сессии в локальном браузере
-  const knownSessions = await getAllSessions();
-  const localSession = knownSessions.find(s => s.id === targetSessionId);
-  const token = localSession ? localSession.token : ""; // Передаем токен, если он есть
+export async function revokeSessionAction(
+  targetSessionId: string
+): Promise<{ success: boolean; error?: string }> {
+  const { userId } = await requireValidSession();
 
-  await deleteSession(targetSessionId, token);
+  // Проверяем, что сессия принадлежит текущему пользователю (защита от IDOR)
+  const userSessions = await searchUserSessions(userId);
+  if (!userSessions.success) {
+    return { success: false, error: "Не удалось проверить сессии" };
+  }
+  const owned = (userSessions.data.sessions || []).some((s: any) => s.id === targetSessionId);
+  if (!owned) {
+    return { success: false, error: "Сессия не найдена" };
+  }
+
+  // Если это сессия в текущем браузере — подтягиваем её токен из кук, иначе удаляем
+  // правами service account (v2 DELETE /sessions/{id} без токена)
+  const knownSessions = await getAllSessions();
+  const localToken = knownSessions.find((s) => s.id === targetSessionId)?.token;
+
+  const result = await deleteSession(targetSessionId, localToken);
+  if (!result.success) {
+    return { success: false, error: "Не удалось завершить сессию" };
+  }
+
   return { success: true };
 }
 
 // REVOKE ALL OTHERS (Отзыв всех остальных сессий)
-export async function revokeAllOthersAction() {
+export async function revokeAllOthersAction(): Promise<{
+  success: boolean;
+  error?: string;
+  failedCount?: number;
+}> {
   const { userId, currentSessionId } = await requireValidSession();
   const response = await searchUserSessions(userId);
   const knownSessions = await getAllSessions();
 
-  if (!response.success) return { success: false };
+  if (!response.success) {
+    return { success: false, error: "Не удалось получить список сессий" };
+  }
 
-  const sessionsToDelete = (response.data.sessions || []).filter((s: any) => s.id !== currentSessionId);
+  const sessionsToDelete = (response.data.sessions || []).filter(
+    (s: any) => s.id !== currentSessionId
+  );
 
-  await Promise.all(
+  const results = await Promise.all(
     sessionsToDelete.map((s: any) => {
-      // Ищем токен в локальных куках (вдруг у нас открыто 2 аккаунта в одном браузере)
-      const localToken = knownSessions.find(ls => ls.id === s.id)?.token || "";
+      const localToken = knownSessions.find((ls) => ls.id === s.id)?.token;
       return deleteSession(s.id, localToken);
     })
   );
-  
+
+  const failedCount = results.filter((r) => !r.success).length;
+  if (failedCount > 0) {
+    return {
+      success: false,
+      failedCount,
+      error: `Не удалось завершить ${failedCount} из ${sessionsToDelete.length} сессий`,
+    };
+  }
+
   return { success: true };
 }
 
