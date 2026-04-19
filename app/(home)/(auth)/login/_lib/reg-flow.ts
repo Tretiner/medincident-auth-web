@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 
 const IDP_INTENT_COOKIE = "zitadel_idp_intent";
 const REG_FLOW_COOKIE = "zitadel_reg_flow";
+const TOTP_PENDING_COOKIE = "zitadel_totp_pending";
 const COOKIE_MAX_AGE = 60 * 15; // 15 минут
 
 // Данные IDP intent (для пути через внешний провайдер)
@@ -73,3 +74,16 @@ export const deleteIdpIntentCookie = async () => deleteCookie(IDP_INTENT_COOKIE)
 export const setRegFlowCookie = async (data: RegFlowData) => setCookie(REG_FLOW_COOKIE, data);
 export const getRegFlowCookie = async () => getCookie<RegFlowData>(REG_FLOW_COOKIE);
 export const deleteRegFlowCookie = async () => deleteCookie(REG_FLOW_COOKIE);
+
+// Состояние ожидания TOTP-кода (после успешной проверки пароля)
+export interface TotpPendingData {
+  sessionId: string;
+  sessionToken: string;
+  userId: string;
+  loginName: string;
+  requestId?: string;
+}
+
+export const setTotpPendingCookie = async (data: TotpPendingData) => setCookie(TOTP_PENDING_COOKIE, data);
+export const getTotpPendingCookie = async () => getCookie<TotpPendingData>(TOTP_PENDING_COOKIE);
+export const deleteTotpPendingCookie = async () => deleteCookie(TOTP_PENDING_COOKIE);

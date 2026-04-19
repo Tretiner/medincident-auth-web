@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
-import { ShieldCheckIcon, LogOutIcon, ArrowLeft, MonitorSmartphone, Settings2 } from "lucide-react";
+import { ShieldCheckIcon, LogOutIcon, ArrowLeft, MonitorSmartphone, Settings2, Settings } from "lucide-react";
 import { QrScannerButton } from "./qr-scanner-button";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
@@ -104,6 +104,17 @@ export function SidebarNav() {
         )}
 
         <QrScannerButton />
+
+        <Button
+          variant="ghost"
+          asChild
+          className="w-full justify-start gap-3 px-3 py-3 h-auto text-muted-foreground rounded-xl font-medium hover:bg-muted hover:text-primary"
+        >
+          <Link href="/ui/console">
+            <Settings className="h-5 w-5" />
+            Консоль управления
+          </Link>
+        </Button>
 
         <LogoutConfirmDialog>
           <Button

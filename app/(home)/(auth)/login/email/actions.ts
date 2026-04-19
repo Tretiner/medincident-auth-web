@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { createSessionWithPassword, searchUserByEmail, resendEmailVerification } from "@/services/zitadel/api";
-import { setRegFlowCookie } from "../_lib/reg-flow";
+import { createSessionWithPassword, searchUserByEmail, resendEmailVerification, listAuthMethods, hasTotpMethod } from "@/services/zitadel/api";
+import { setRegFlowCookie, setTotpPendingCookie } from "../_lib/reg-flow";
 import { finishAuth } from "../callback/success/actions";
 
 export interface EmailLoginState {
@@ -80,6 +80,23 @@ export async function loginWithEmailAction(
       const params = new URLSearchParams();
       if (requestId) params.set("requestId", requestId);
       redirect(`/login/verify?${params}`);
+    }
+
+    // Если у юзера включён TOTP — запрашиваем код перед завершением входа
+    if (user?.userId) {
+      const methods = await listAuthMethods(user.userId);
+      if (methods.success && hasTotpMethod(methods.data.authMethodTypes)) {
+        await setTotpPendingCookie({
+          sessionId,
+          sessionToken,
+          userId: user.userId,
+          loginName: email,
+          requestId,
+        });
+        const params = new URLSearchParams();
+        if (requestId) params.set("requestId", requestId);
+        redirect(`/login/totp?${params}`);
+      }
     }
   } catch (error) {
     if (isRedirectError(error)) throw error;

@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { UserSession, LinkedAccountsStatus } from "@/domain/profile/types";
 import { requireValidSession } from "@/services/zitadel/session";
-import { deleteSession, deleteUserLink, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent, changeUserPassword, retrieveIdpIntent, addIdpLinkToUser } from "@/services/zitadel/api";
+import { deleteSession, deleteUserLink, getActiveIdps as getActiveIdps, searchUserLinks, searchUserSessions, startIdpIntent, changeUserPassword, retrieveIdpIntent, addIdpLinkToUser, registerTotp, verifyTotpRegistration, removeTotp, listAuthMethods, hasTotpMethod } from "@/services/zitadel/api";
 import { env } from "@/shared/config/env";
 import { redirect } from "next/navigation";
 import { parseUserAgent } from "@/shared/lib/user-agent";
@@ -189,6 +189,51 @@ export async function completeLinkAction(intentId: string, intentToken: string):
     return { success: false, error: "Не удалось привязать аккаунт" };
   }
 
+  return { success: true };
+}
+
+// TOTP STATUS — проверить, включён ли TOTP у текущего пользователя
+export async function getTotpStatusAction(): Promise<{ enabled: boolean }> {
+  const { userId } = await requireValidSession();
+  const methods = await listAuthMethods(userId);
+  if (!methods.success) return { enabled: false };
+  return { enabled: hasTotpMethod(methods.data.authMethodTypes) };
+}
+
+// TOTP REGISTER — получить otpauth:// URI и секрет для показа QR-кода
+export async function registerTotpAction(): Promise<
+  { success: true; uri: string; secret: string } | { success: false; error: string }
+> {
+  const { userId } = await requireValidSession();
+  const res = await registerTotp(userId);
+  if (!res.success || !res.data?.uri || !res.data?.secret) {
+    return { success: false, error: "Не удалось запустить настройку TOTP" };
+  }
+  return { success: true, uri: res.data.uri, secret: res.data.secret };
+}
+
+// TOTP VERIFY — завершить регистрацию вводом первого кода из приложения
+export async function verifyTotpRegistrationAction(
+  code: string
+): Promise<{ success: boolean; error?: string }> {
+  const { userId } = await requireValidSession();
+  if (!/^\d{6}$/.test(code)) {
+    return { success: false, error: "Введите 6-значный код" };
+  }
+  const res = await verifyTotpRegistration(userId, code);
+  if (!res.success) {
+    return { success: false, error: "Неверный код. Проверьте время на устройстве и попробуйте снова." };
+  }
+  return { success: true };
+}
+
+// TOTP REMOVE — отключить 2FA у пользователя
+export async function removeTotpAction(): Promise<{ success: boolean; error?: string }> {
+  const { userId } = await requireValidSession();
+  const res = await removeTotp(userId);
+  if (!res.success) {
+    return { success: false, error: "Не удалось отключить 2FA" };
+  }
   return { success: true };
 }
 
