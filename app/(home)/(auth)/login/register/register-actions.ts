@@ -175,7 +175,7 @@ export async function continueRegisterIdp(
     await deleteIdpIntentCookie();
 
     const params = new URLSearchParams({ requestId: requestId ?? "" });
-    redirect(`/login/verify?${params}`);
+    redirect(`/login/email/verify?${params}`);
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     const zitadelFields = parseZitadelError(error.message ?? "");
@@ -256,7 +256,7 @@ export async function continueRegisterEmail(
 
     const params = new URLSearchParams();
     if (requestId) params.set("requestId", requestId);
-    redirect(`/login/verify?${params}`);
+    redirect(`/login/email/verify?${params}`);
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     const zitadelFields = parseZitadelError(error.message ?? "");

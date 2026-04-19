@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { AppLogoIcon } from "@/components/icons";
 import { APP_NAME } from "@/shared/lib/constants";
-import { QrScannerButton } from "./qr-scanner-button";
+import { QrScannerButton } from "../qr-scanner-button";
 
 export function MobileTopBar() {
   const searchParams = useSearchParams();

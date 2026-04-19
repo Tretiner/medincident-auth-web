@@ -79,7 +79,7 @@ export async function loginWithEmailAction(
       });
       const params = new URLSearchParams();
       if (requestId) params.set("requestId", requestId);
-      redirect(`/login/verify?${params}`);
+      redirect(`/login/email/verify?${params}`);
     }
 
     // Если у юзера включён TOTP — запрашиваем код перед завершением входа

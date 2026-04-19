@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { ShieldCheckIcon, LogOutIcon, ArrowLeft, MonitorSmartphone, Settings2, Settings } from "lucide-react";
-import { QrScannerButton } from "./qr-scanner-button";
+import { QrScannerButton } from "../qr-scanner-button";
 import { Button } from "@/shared/ui/button";
 import { Separator } from "@/shared/ui/separator";
 import { SidebarUserCard } from "./sidebar-user-card";
-import { LogoutConfirmDialog } from "./logout-confirm-dialog";
+import { LogoutConfirmDialog } from "../logout-confirm-dialog";
 
 export function SidebarNav() {
   const pathname = usePathname();

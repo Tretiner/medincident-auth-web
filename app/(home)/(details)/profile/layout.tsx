@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { SidebarNav } from "./_components/sidebar-nav";
-import { MobileNav } from "./_components/mobile-nav";
-import { MobileTopBar } from "./_components/mobile-top-bar";
+import { SidebarNav } from "./_components/nav/sidebar-nav";
+import { MobileNav } from "./_components/nav/mobile-nav";
+import { MobileTopBar } from "./_components/nav/mobile-top-bar";
 import { Card } from "@/shared/ui/card";
 import { cn } from "@/shared/lib/utils";
 import { Suspense } from "react";
@@ -21,7 +21,7 @@ async function EmailGuardedContent({ children }: { children: React.ReactNode }) 
       : false;
 
     if (!isVerified) {
-      redirect("/login/verify");
+      redirect("/login/email/verify");
     }
   }
 
