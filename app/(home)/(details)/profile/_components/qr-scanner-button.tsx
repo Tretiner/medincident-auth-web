@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 declare const BarcodeDetector: any;
 
 interface QrScannerButtonProps {
-  variant?: "default" | "icon";
+  variant?: "default" | "icon" | "compact";
 }
 
 export function QrScannerButton({ variant = "default" }: QrScannerButtonProps) {
@@ -129,6 +129,16 @@ export function QrScannerButton({ variant = "default" }: QrScannerButtonProps) {
           onClick={() => setOpen(true)}
         >
           <QrCode className="h-5 w-5" />
+        </Button>
+      ) : variant === "compact" ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-primary hover:bg-primary/10 gap-2"
+          onClick={() => setOpen(true)}
+        >
+          Войти по QR
+          <QrCode />
         </Button>
       ) : (
         <Button

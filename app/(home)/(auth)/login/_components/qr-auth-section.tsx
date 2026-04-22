@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { QRCode } from "react-qrcode-logo";
 import { AlertCircle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { SmoothQr } from "@/shared/ui/smooth-qr";
 import { useQrAuth, useQrStatus } from "../login.hooks";
 import { applyQrSessionAction } from "../actions";
-
-const QRCodeStyled = QRCode as any;
-const QR_FG_COLOR = "#2b3a15";
 
 interface QrAuthSectionProps {
   requestId?: string;
@@ -100,20 +97,7 @@ export function QrAuthSection({ requestId }: QrAuthSectionProps) {
             )}
           >
             {!isError && !isExpired && !isLoading && hasValidValue && (
-              <QRCodeStyled
-                value={qrUrl}
-                size={220}
-                qrStyle="fluid"
-                eyeRadius={[
-                  [12, 12, 12, 12],
-                  [12, 12, 12, 12],
-                  [12, 12, 12, 12],
-                ]}
-                quietZone={14}
-                fgColor={QR_FG_COLOR}
-                bgColor="#00000000"
-                level="H"
-              />
+              <SmoothQr value={qrUrl} size={220} quietZone={7} />
             )}
           </div>
         )}

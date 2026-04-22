@@ -31,6 +31,7 @@ import {
   DialogClose,
 } from "@/shared/ui/dialog";
 import { LogoutConfirmDialog } from "../../_components/logout-confirm-dialog";
+import { QrScannerButton } from "../../_components/qr-scanner-button";
 
 interface Props {
   sessions: UserSession[];
@@ -275,7 +276,8 @@ export function SessionsList({
               </div>
             </div>
 
-            <div className="z-10 ml-2">
+            <div className="z-10 ml-2 flex items-center gap-1">
+                <QrScannerButton variant="compact" />
                 <LogoutConfirmDialog>
                     <Button
                         variant="ghost"

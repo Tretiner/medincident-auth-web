@@ -1,17 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { QRCode } from "react-qrcode-logo";
 import { QrCode, Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/shared/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
 } from "@/shared/ui/dialog";
-
-const QRCodeStyled = QRCode as any;
+import { SmoothQr } from "@/shared/ui/smooth-qr";
 
 interface QrState {
   url?: string;
@@ -110,20 +107,7 @@ export function DeviceQrSection() {
               )}
 
               {!qr.loading && !qr.error && qr.url && (
-                <QRCodeStyled
-                  value={qr.url}
-                  size={210}
-                  qrStyle="fluid"
-                  eyeRadius={[
-                    [12, 12, 12, 12],
-                    [12, 12, 12, 12],
-                    [12, 12, 12, 12],
-                  ]}
-                  quietZone={12}
-                  fgColor="#2b3a15"
-                  bgColor="#00000000"
-                  level="H"
-                />
+                <SmoothQr value={qr.url} size={210} quietZone={6} />
               )}
             </div>
 

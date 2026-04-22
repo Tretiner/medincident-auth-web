@@ -81,6 +81,9 @@
   --sidebar-primary: var(--brand-green);
   --sidebar-border: var(--gray-200);
 
+  /* QR foreground (canvas рисует примитивный цвет, не можем использовать var в runtime без резолва) */
+  --qr-fg: oklch(0.32 0.07 128);
+
   /* Brand gradients (light theme): насыщенные, под белый фон */
   --telegram-gradient: linear-gradient(to right, oklch(0.71 0.13 232), oklch(0.66 0.13 232));
   --max-gradient: linear-gradient(to right, oklch(0.55 0.22 264), oklch(0.52 0.27 305));
@@ -136,6 +139,9 @@
   --input: oklch(0.35 0.02 270);
   --sidebar-background: oklch(0.25 0.02 270);
   --sidebar-foreground: oklch(0.98 0 0);
+
+  /* QR foreground (dark): светло-зелёный поверх тёмной карточки */
+  --qr-fg: oklch(0.89 0.08 112);
 
   /* Brand gradients (dark theme): подняли L, чуть приглушили C, чтобы не выжигать на тёмном */
   --telegram-gradient: linear-gradient(to right, oklch(0.75 0.12 232), oklch(0.70 0.12 232));
