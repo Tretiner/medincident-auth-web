@@ -142,6 +142,16 @@ export async function logoutAction() {
     console.log("[auth:logout] Нет сессий для удаления");
   }
 
-  // 4. Завершаем NextAuth сессию и редиректим на логин
-  await signOut({ redirectTo: "/login" });
+  // 4. Сносим NextAuth-куки локально (без редиректа — он будет ниже).
+  await signOut({ redirect: false });
+
+  // 5. RP-Initiated Logout: уводим пользователя через /oidc/v1/end_session,
+  //    чтобы Zitadel завершил OIDC-сессию на IdP. post_logout_redirect_uri
+  //    должен побайтово совпадать с Post Logout URIs в Zitadel-приложении.
+  //    Spec: https://openid.net/specs/openid-connect-rpinitiated-1_0.html
+  const params = new URLSearchParams({
+    client_id: env.APP_CLIENT_ID,
+    post_logout_redirect_uri: `${env.APP_URL}/logout`,
+  });
+  redirect(`${env.ZITADEL_API_URL}/oidc/v1/end_session?${params}`);
 }

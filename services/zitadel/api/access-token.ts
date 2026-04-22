@@ -15,10 +15,8 @@ export async function getZitadelAccessToken(): Promise<string> {
   const now = Date.now();
 
   if (cachedAccessToken && tokenExpiresAt && now < tokenExpiresAt - 5 * 60 * 1000) {
-    console.log("cached access token:", cachedAccessToken)
     return cachedAccessToken;
   }
-  console.log("NOT CACHED access token")
 
   let machineKey;
   try {
@@ -46,12 +44,11 @@ export async function getZitadelAccessToken(): Promise<string> {
     .setExpirationTime('1m')
     .sign(privateKey);
 
-  // 3. Получаем Access Token
+  // 3. Получаем Access Token (M2M: без openid/profile/email, иначе Zitadel
+  // привяжет токен к OIDC-сессии и checkSessionNotTerminatedAfter будет
+  // падать с "Errors.OIDCSession.Token.Invalid").
   const tokenUrl = `${ZITADEL_DOMAIN}/oauth/v2/token`;
   const scope = [
-    'openid',
-    'profile',
-    'email',
     'urn:zitadel:iam:org:project:role:custom_ui_service',
     'urn:zitadel:iam:org:project:roles',
     'urn:zitadel:iam:org:project:id:zitadel:aud',

@@ -29,16 +29,16 @@ export function EmailLoginForm({ action, registerHref, initialState }: Props) {
 
       <div className="space-y-2">
         <Label htmlFor="email" className={cn(state.errors?.email && "text-destructive")}>
-          Email
+          Email или имя пользователя
         </Label>
         <Input
           id="email"
           name="email"
-          type="email"
+          type="text"
           defaultValue={state.values?.email}
-          placeholder="your@email.com"
+          placeholder="you@example.com или username"
           disabled={isPending}
-          autoComplete="email"
+          autoComplete="username"
           className={cn(state.errors?.email && "border-destructive focus-visible:ring-destructive", "bg-card")}
         />
         {state.errors?.email && (

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { createSessionWithPassword, searchUserByEmail, resendEmailVerification, listAuthMethods, hasTotpMethod } from "@/services/zitadel/api";
+import { createSessionWithPassword, searchUserByEmail, searchUserByLoginName, resendEmailVerification, listAuthMethods, hasTotpMethod } from "@/services/zitadel/api";
 import { setRegFlowCookie, setTotpPendingCookie } from "../_lib/reg-flow";
 import { finishAuth } from "../callback/success/actions";
 
@@ -11,18 +11,26 @@ export interface EmailLoginState {
   values?: { email?: string };
 }
 
+// Поле формы называется "email" для обратной совместимости, но принимает
+// и email, и username — ровно так же ведёт себя, например, Google/GitHub.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_RE = /^[\p{L}0-9._-]{1,64}$/u;
+
 export async function loginWithEmailAction(
   requestId: string | undefined,
   prevState: EmailLoginState,
   formData: FormData
 ): Promise<EmailLoginState> {
-  const email = (formData.get("email") as string)?.trim();
+  const identifier = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
+
+  const isEmail = !!identifier && EMAIL_RE.test(identifier);
+  const isUsername = !!identifier && !isEmail && USERNAME_RE.test(identifier);
 
   const errors: EmailLoginState["errors"] = {};
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = "Введите корректный email";
+  if (!identifier || (!isEmail && !isUsername)) {
+    errors.email = "Введите email или имя пользователя";
   }
   if (!password || password.length < 1) {
     errors.password = "Введите пароль";
@@ -41,26 +49,36 @@ export async function loginWithEmailAction(
   }
 
   if (Object.keys(errors).length > 0) {
-    return { errors, values: { email } };
+    return { errors, values: { email: identifier } };
   }
 
-  const sessionRes = await createSessionWithPassword(email, password);
+  // Zitadel /v2/sessions ищет строго по loginName, но пользователь мог
+  // ввести или email, или username. Резолвим до loginName:
+  //  - email    → searchUserByEmail → user.preferredLoginName
+  //  - username → searchUserByLoginName → user.preferredLoginName (для
+  //               downstream-проверок verify/totp нужна запись user)
+  const lookup = isEmail
+    ? await searchUserByEmail(identifier)
+    : await searchUserByLoginName(identifier);
+  const user = lookup.success ? lookup.data?.result?.[0] : undefined;
+  const loginName = user?.preferredLoginName ?? identifier;
+
+  const sessionRes = await createSessionWithPassword(loginName, password);
 
   if (!sessionRes.success || !sessionRes.data?.sessionId || !sessionRes.data?.sessionToken) {
     const errCode = (sessionRes as any).error?.code;
     const message =
       errCode === 4 || errCode === 5
-        ? "Неверный email или пароль"
+        ? "Неверный email/имя пользователя или пароль"
         : "Ошибка входа. Проверьте данные и попробуйте снова.";
-    return { errors: { form: message }, values: { email } };
+    return { errors: { form: message }, values: { email: identifier } };
   }
 
   const { sessionId, sessionToken } = sessionRes.data;
+  const userEmail = user?.human?.email?.email ?? (isEmail ? identifier : "");
 
   try {
-    // Проверяем, подтверждён ли email пользователя
-    const userSearch = await searchUserByEmail(email);
-    const user = userSearch.success ? userSearch.data?.result?.[0] : undefined;
+    // Проверяем, подтверждён ли email пользователя (user уже получен выше).
     const isVerified = user?.human?.email?.isVerified ?? true;
 
     if (!isVerified && user?.userId) {
@@ -69,11 +87,11 @@ export async function loginWithEmailAction(
       await setRegFlowCookie({
         givenName: user.human?.profile?.givenName ?? "",
         familyName: user.human?.profile?.familyName ?? "",
-        email,
+        email: userEmail,
         source: "login",
         requestId,
         userId: user.userId,
-        loginName: email,
+        loginName,
         sessionId,
         sessionToken,
       });
@@ -90,7 +108,7 @@ export async function loginWithEmailAction(
           sessionId,
           sessionToken,
           userId: user.userId,
-          loginName: email,
+          loginName,
           requestId,
         });
         const params = new URLSearchParams();
@@ -103,7 +121,7 @@ export async function loginWithEmailAction(
     // Если проверка не удалась — продолжаем без неё (не блокируем вход)
   }
 
-  await finishAuth(sessionRes.data, requestId, email);
+  await finishAuth(sessionRes.data, requestId, loginName);
   // finishAuth вызывает redirect() — до этой строки не доходим
-  return { errors: {}, values: { email } };
+  return { errors: {}, values: { email: identifier } };
 }

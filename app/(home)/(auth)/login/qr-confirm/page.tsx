@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getQrEntry } from "@/services/zitadel/qr-store";
 import { getOptionalSession } from "@/services/zitadel/session";
+import { getSession } from "@/services/zitadel/api";
 import { QrConfirmForm } from "./_components/qr-confirm-form";
 import { AppLogoIcon } from "@/components/icons";
 
@@ -26,9 +27,11 @@ export default async function QrConfirmPage({ searchParams }: Props) {
     redirect(`/login?returnTo=${returnTo}`);
   }
 
+  const sessionRes = await getSession(session.currentSessionId);
+  const factors = sessionRes.success ? sessionRes.data?.session?.factors : undefined;
   const displayName =
-    session.sessionData?.factors?.user?.displayName ||
-    session.sessionData?.factors?.user?.loginName ||
+    factors?.user?.displayName ||
+    factors?.user?.loginName ||
     "Пользователь";
 
   return (

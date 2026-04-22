@@ -294,3 +294,21 @@ export async function searchUserByEmail(
     ZitadelSearchUsersResponseSchema
   );
 }
+
+export async function searchUserByLoginName(
+  loginName: string
+): Promise<Result<z.infer<typeof ZitadelSearchUsersResponseSchema>>> {
+  return handleZitadelRequest(
+    () => zitadelApi.post("/v2/users", {
+      queries: [
+        {
+          loginNameQuery: {
+            loginName,
+            method: "TEXT_FILTER_METHOD_EQUALS",
+          },
+        },
+      ],
+    }),
+    ZitadelSearchUsersResponseSchema
+  );
+}

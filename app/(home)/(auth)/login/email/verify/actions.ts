@@ -1,10 +1,10 @@
 "use server";
 
 import { verifyUserEmail, createSession, createSessionWithPassword, searchUserSessions } from "@/services/zitadel/api";
-import { getRegFlowCookie, deleteRegFlowCookie } from "../_lib/reg-flow";
+import { getRegFlowCookie, deleteRegFlowCookie } from "../../_lib/reg-flow";
 import { getUserIdFromNextAuth } from "@/services/zitadel/session";
 import { getSessionCookieById, getAllSessionCookieIds } from "@/services/zitadel/cookies";
-import { finishAuth } from "../callback/success/actions";
+import { finishAuth } from "../../callback/success/actions";
 
 export interface VerifyState {
   errors?: { code?: string; form?: string; expired?: boolean };

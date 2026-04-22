@@ -103,8 +103,6 @@ export function SidebarNav() {
           </Button>
         )}
 
-        <QrScannerButton />
-
         <Button
           variant="ghost"
           asChild
@@ -112,9 +110,11 @@ export function SidebarNav() {
         >
           <Link href="/ui/console">
             <Settings className="h-5 w-5" />
-            Консоль управления
+            Админизация
           </Link>
         </Button>
+
+        <QrScannerButton />
 
         <LogoutConfirmDialog>
           <Button

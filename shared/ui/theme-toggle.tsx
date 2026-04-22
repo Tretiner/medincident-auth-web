@@ -6,9 +6,6 @@ import { Button } from '@/shared/ui/button';
 import { cn } from '@/shared/lib/utils';
 
 interface ThemeToggleProps {
-  /** 'icon' — одна кнопка-иконка с циклом light→dark→system
-   *  'segmented' — три кнопки в ряд (по умолчанию)
-   */
   variant?: 'icon' | 'segmented';
   className?: string;
 }

@@ -2,21 +2,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/services/zitadel/user/auth";
 import { searchUserSessions } from "./api";
 import { getAllSessionCookieIds } from "./cookies";
-import { zitadelApi } from "./api/client";
-
-/**
- * Возвращает список активных Zitadel-сессий пользователя — отфильтровывает
- * "пустышки" без подтверждённого user-factor (Zitadel может вернуть протухшие).
- */
-async function listActiveZitadelSessions(userId: string): Promise<any[] | null> {
-  const res = await searchUserSessions(userId);
-  if (!res.success) {
-    console.error("[auth:listActiveZitadelSessions] Ошибка поиска сессий:", res.error);
-    return null;
-  }
-  const sessions = res.data?.sessions || [];
-  return sessions.filter((s: any) => s?.factors?.user?.id);
-}
+import { env } from "@/shared/config/env";
 
 /**
  * Извлекает Zitadel userId из NextAuth сессии.
@@ -32,43 +18,71 @@ export async function getUserIdFromNextAuth(): Promise<string | null> {
     console.log("[auth:getUserId] NextAuth сессия отсутствует");
     return null;
   }
-
-  const zitadelUserId = (session as any)?.zitadelUserId as string | undefined;
-  if (zitadelUserId) {
-    console.log("[auth:getUserId] zitadelUserId=%s", zitadelUserId);
-    return zitadelUserId;
+  if ((session as { error?: unknown }).error) {
+    // back-channel logout / refresh failure — сессия числится как невалидная
+    return null;
   }
 
-  console.log("[auth:getUserId] zitadelUserId не найден в сессии");
+  const zitadelUserId = (session as { zitadelUserId?: string }).zitadelUserId;
+  if (zitadelUserId) return zitadelUserId;
+
   return null;
 }
 
 /**
- * Находит текущий sessionId среди уже полученного списка Zitadel-сессий —
- * по пересечению с `sessions` cookie этого браузера.
+ * Реактивная проверка «жива ли OIDC-сессия в Zitadel» — один вызов
+ * {ZITADEL_API_URL}/oidc/v1/userinfo с access_token из NextAuth.
+ *
+ * 200 — сессия валидна.
+ * 401/403 — токен/сессия отозваны; нужно разлогинить.
+ *
+ * Это дешевле и каноничнее связки list-sessions + get-session, и работает
+ * даже если OIDC-сессия закрыта другим клиентом — Zitadel сам помечает
+ * все производные токены как недействительные.
+ *   docs: https://zitadel.com/blog/session-timeouts-logouts
  */
-async function pickCurrentSessionFromList(
-  zitadelSessions: any[]
-): Promise<{ sessionId: string; sessionData: any } | null> {
-  const cookieIds = await getAllSessionCookieIds();
-  const cookieIdSet = new Set(cookieIds);
-
-  const match = zitadelSessions.find((s: any) => cookieIdSet.has(s.id));
-  if (!match) {
-    console.log("[auth:pickCurrentSessionFromList] Нет пересечения между Zitadel сессиями и куками браузера",
-      { zitadelIds: zitadelSessions.map((s: any) => s.id), cookieIds });
-    return null;
+async function isOidcSessionAlive(accessToken: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${env.ZITADEL_API_URL}/oidc/v1/userinfo`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    });
+    return res.ok;
+  } catch (err) {
+    console.error("[auth:isOidcSessionAlive] userinfo запрос упал:", err);
+    return false;
   }
-  return { sessionId: match.id, sessionData: match };
 }
 
 /**
- * Если в Zitadel у пользователя нет ни одной активной сессии — NextAuth держать
- * нельзя: профильные страницы должны жить только пока жива хоть одна сессия в Zitadel.
- * Завершаем NextAuth и редиректим на /login. signOut() и redirect() оба бросают
- * NEXT_REDIRECT — поэтому функция в норме никогда не возвращается, но TS не умеет
- * сужать control flow после `await Promise<never>` (microsoft/TypeScript#34955),
- * поэтому в caller всегда стоит `throw new Error("unreachable")` после вызова.
+ * Пикает текущий sessionId из куков браузера.
+ *
+ * Обычно у пользователя один cookie-id — возвращаем сразу. Если больше
+ * одного (несколько аккаунтов в одном браузере) — выбираем тот, что реально
+ * принадлежит этому userId: дергаем список активных сессий в Zitadel через
+ * машинный токен (без OIDC-сессии, без warn'ов) и пересекаем с куками.
+ */
+async function pickCurrentSessionId(userId: string): Promise<string | null> {
+  const cookieIds = await getAllSessionCookieIds();
+  if (cookieIds.length === 0) return null;
+  if (cookieIds.length === 1) return cookieIds[0]!;
+
+  const res = await searchUserSessions(userId);
+  if (!res.success) return null;
+
+  const userSessionIds = new Set(
+    (res.data?.sessions ?? [])
+      .filter((s: { factors?: { user?: { id?: unknown } } }) => s?.factors?.user?.id)
+      .map((s: { id?: string }) => s.id)
+      .filter((id): id is string => typeof id === "string"),
+  );
+
+  return cookieIds.find((id) => userSessionIds.has(id)) ?? null;
+}
+
+/**
+ * Завершает NextAuth-сессию и редиректит на /login. signOut и redirect оба
+ * бросают NEXT_REDIRECT, поэтому функция в норме никогда не возвращается.
  */
 async function killNextAuthAndRedirect(reason: string): Promise<never> {
   console.warn("[auth:killNextAuth] %s — завершаем NextAuth", reason);
@@ -76,92 +90,71 @@ async function killNextAuthAndRedirect(reason: string): Promise<never> {
   redirect("/login");
 }
 
-export async function getOptionalSession(): Promise<{
+export interface ValidSession {
   currentSessionId: string;
   userId: string;
-  sessionData: any;
-} | null> {
-  const userId = await getUserIdFromNextAuth();
-  if (!userId) return null;
-
-  const zitadelSessions = await listActiveZitadelSessions(userId);
-  if (!zitadelSessions || zitadelSessions.length === 0) return null;
-
-  const result = await pickCurrentSessionFromList(zitadelSessions);
-  if (!result) return null;
-
-  console.log("[auth:getOptionalSession] userId=%s, sessionId=%s", userId, result.sessionId);
-  return {
-    currentSessionId: result.sessionId,
-    userId,
-    sessionData: result.sessionData,
-  };
 }
 
-export async function requireValidSession(): Promise<{
-  currentSessionId: string;
-  userId: string;
-  sessionData: any;
-}> {
-  const userId = await getUserIdFromNextAuth();
-  if (!userId) {
+/**
+ * Возвращает валидную сессию или null — ничего не рушит. Для route
+ * handler'ов, где 401-ответ осмысленнее редиректа.
+ */
+export async function getOptionalSession(): Promise<ValidSession | null> {
+  const session = await auth();
+  if (!session || (session as { error?: unknown }).error) return null;
+
+  const userId = (session as { zitadelUserId?: string }).zitadelUserId;
+  const accessToken = (session as { accessToken?: string }).accessToken;
+  if (!userId || !accessToken) return null;
+
+  if (!(await isOidcSessionAlive(accessToken))) return null;
+
+  const currentSessionId = await pickCurrentSessionId(userId);
+  if (!currentSessionId) return null;
+
+  return { currentSessionId, userId };
+}
+
+/**
+ * Жёсткая проверка для server actions / layout'ов — при любой проблеме
+ * сносит NextAuth и редиректит на /login. В норме возвращает {userId,
+ * currentSessionId}.
+ */
+export async function requireValidSession(): Promise<ValidSession> {
+  const session = await auth();
+  if (!session) {
     console.log("[auth:requireValidSession] Нет NextAuth сессии, редирект на /");
     redirect("/");
   }
 
-  // Получаем активные Zitadel-сессии этого пользователя
-  const zitadelSessions = await listActiveZitadelSessions(userId);
-
-  // Сетевая ошибка / Zitadel недоступен — не можем подтвердить, выкидываем
-  if (zitadelSessions === null) {
+  if ((session as { error?: unknown }).error) {
     await killNextAuthAndRedirect(
-      `Не удалось получить сессии Zitadel для userId=${userId}`
+      `NextAuth session.error=${String((session as { error?: unknown }).error)}`,
     );
     throw new Error("unreachable");
   }
 
-  // У пользователя нет ни одной активной сессии в Zitadel — NextAuth жить не должен
-  if (zitadelSessions.length === 0) {
+  const userId = (session as { zitadelUserId?: string }).zitadelUserId;
+  const accessToken = (session as { accessToken?: string }).accessToken;
+  if (!userId || !accessToken) {
+    await killNextAuthAndRedirect("NextAuth session без zitadelUserId/accessToken");
+    throw new Error("unreachable");
+  }
+
+  if (!(await isOidcSessionAlive(accessToken))) {
     await killNextAuthAndRedirect(
-      `Нет активных Zitadel-сессий для userId=${userId}`
+      `Zitadel userinfo отказал — OIDC-сессия мертва (userId=${userId})`,
     );
     throw new Error("unreachable");
   }
 
-  // Сматчим с sessions cookie этого браузера. Если пересечения нет —
-  // в этом браузере нет валидной сессии, выкидываем.
-  const matched = await pickCurrentSessionFromList(zitadelSessions);
-  if (!matched) {
+  const currentSessionId = await pickCurrentSessionId(userId);
+  if (!currentSessionId) {
     await killNextAuthAndRedirect(
-      `Sessions cookie не пересекается с Zitadel для userId=${userId}`
+      `Не удалось сопоставить browser cookie с активной сессией Zitadel (userId=${userId})`,
     );
     throw new Error("unreachable");
   }
 
-  // Дополнительно валидируем найденную сессию через Zitadel API
-  let sessionData: any;
-  try {
-    const res = await zitadelApi.get(`/v2/sessions/${matched.sessionId}`);
-    sessionData = res.data?.session;
-  } catch (error) {
-    console.error("[auth:requireValidSession] Ошибка валидации сессии в Zitadel:", error);
-    await killNextAuthAndRedirect(
-      `Ошибка валидации сессии sessionId=${matched.sessionId}`
-    );
-    throw new Error("unreachable");
-  }
-
-  if (!sessionData?.factors?.user?.id) {
-    await killNextAuthAndRedirect(
-      `Сессия невалидна (нет user factors), sessionId=${matched.sessionId}`
-    );
-    throw new Error("unreachable");
-  }
-
-  console.log("[auth:requireValidSession] OK userId=%s, sessionId=%s", userId, matched.sessionId);
-  return {
-    currentSessionId: matched.sessionId,
-    userId,
-    sessionData,
-  };
+  return { currentSessionId, userId };
 }

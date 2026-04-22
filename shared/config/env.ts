@@ -1,7 +1,6 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
-// Числовые Zitadel ID (snowflake-style, обычно 18 цифр)
 const zitadelId = () => z.string().regex(/^\d+$/, "должен быть числовой Zitadel ID");
 
 const envConfig = createEnv({

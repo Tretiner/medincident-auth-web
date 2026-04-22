@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { AppLogoIcon } from "@/components/icons";
-import { getRegFlowCookie } from "../_lib/reg-flow";
+import { getRegFlowCookie } from "../../_lib/reg-flow";
 import { VerifyForm } from "./_components/verify-form";
 import { verifyEmailAction } from "./actions";
 import { resendEmailVerification, getUserById } from "@/services/zitadel/api";
