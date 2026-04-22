@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { UserSession } from "@/domain/profile/types";
 import { Button } from "@/shared/ui/button";
 import {
@@ -10,8 +9,6 @@ import {
   Globe,
   Clock,
   Monitor,
-  Copy,
-  Check,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { formatRelativeTime } from "@/shared/lib/relative-time";
@@ -30,6 +27,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/shared/ui/dialog";
+import { CopyButton } from "@/shared/ui/copy-button";
 import { LogoutConfirmDialog } from "../../_components/logout-confirm-dialog";
 import { QrScannerButton } from "../../_components/qr-scanner-button";
 
@@ -38,37 +36,6 @@ interface Props {
   activeActionId: string | null;
   onRevokeSession: (id: string) => void;
   onRevokeAllOthers: () => void;
-}
-
-function CopyButton({ text, className }: { text: string; className?: string }) {
-  const [isCopied, setIsCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 1500);
-  };
-
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={handleCopy}
-      className={cn("text-muted-foreground hover:text-foreground hover:bg-secondary/80 border-0 h-6 px-2 gap-1 text-3xs [&_svg]:size-3.5", className)}
-    >
-      {isCopied ? (
-        <>
-          <Check className="text-success animate-in zoom-in duration-300" />
-          Скопировано
-        </>
-      ) : (
-        <>
-          <Copy />
-          Скопировать
-        </>
-      )}
-    </Button>
-  );
 }
 
 function SessionInfoPopover({

@@ -12,6 +12,7 @@ import {
 } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { OtpInput } from "@/shared/ui/otp-input";
+import { CopyButton } from "@/shared/ui/copy-button";
 import { Loader2, Copy, Check, ShieldCheck } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
@@ -32,7 +33,6 @@ export function TotpSetupDialog({ open, onOpenChange, onSuccess }: Props) {
   const [code, setCode] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
   const [isVerifying, startVerify] = useTransition();
-  const [copied, setCopied] = useState(false);
 
   async function start() {
     setStep("loading");
@@ -62,12 +62,6 @@ export function TotpSetupDialog({ open, onOpenChange, onSuccess }: Props) {
 
   function handleOpenChange(next: boolean) {
     onOpenChange(next);
-  }
-
-  function copySecret() {
-    navigator.clipboard.writeText(secret);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
   }
 
   function submit() {
@@ -121,14 +115,17 @@ export function TotpSetupDialog({ open, onOpenChange, onSuccess }: Props) {
               <div className="rounded-lg bg-white p-3">
                 <QRCode value={uri} size={180} quietZone={0} />
               </div>
-              <button
-                type="button"
-                onClick={copySecret}
+              <CopyButton
+                text={secret}
                 className="inline-flex items-center gap-1.5 text-3xs font-mono text-muted-foreground hover:text-foreground transition-colors"
               >
-                {copied ? <Check className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3" />}
-                {secret}
-              </button>
+                {({ copied }) => (
+                  <>
+                    {copied ? <Check className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3" />}
+                    {secret}
+                  </>
+                )}
+              </CopyButton>
             </div>
 
             <div className="flex flex-col items-center gap-2">

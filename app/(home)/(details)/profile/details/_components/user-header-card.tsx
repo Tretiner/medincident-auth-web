@@ -1,22 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { PersonalInfo } from "@/domain/profile/types";
 import { EditableAvatar } from "./editable-avatar";
 import { Check, UserRoundCog } from "lucide-react";
 import { Button } from "@/shared/ui/button";
+import { CopyButton } from "@/shared/ui/copy-button";
 import { startZitadelSignIn } from "@/services/zitadel/user/sign-in";
 
 export function UserHeaderCard({ user }: { user: PersonalInfo }) {
   const initials = `${user.firstName[0] ?? ""}${user.lastName[0] ?? ""}`.toUpperCase();
   const fullName = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ");
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyId = () => {
-    navigator.clipboard.writeText(user.id);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
 
   const handleSwitchAccount = () => {
     startZitadelSignIn("select_account");
@@ -45,14 +38,17 @@ export function UserHeaderCard({ user }: { user: PersonalInfo }) {
             </p>
           )}
 
-          <button
-            onClick={handleCopyId}
-            title="Нажмите, чтобы скопировать"
+          <CopyButton
+            text={user.id}
             className="flex items-center gap-1.5 font-mono text-xs rounded-md px-1.5 py-0.5 -ml-1.5 text-muted-foreground/60 hover:text-muted-foreground hover:bg-primary/10 transition-all duration-150 active:scale-95 cursor-pointer"
           >
-            {copied && <Check className="w-3.5 h-3.5 shrink-0 text-success" />}
-            <span>{copied ? "Скопировано" : user.id}</span>
-          </button>
+            {({ copied }) => (
+              <>
+                {copied && <Check className="w-3.5 h-3.5 shrink-0 text-success" />}
+                <span>{copied ? "Скопировано" : user.id}</span>
+              </>
+            )}
+          </CopyButton>
         </div>
 
         <Button
