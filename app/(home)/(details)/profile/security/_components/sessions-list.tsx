@@ -85,7 +85,7 @@ function SessionInfoPopover({
       <PopoverContent
         side="bottom"
         align="start"
-        className="w-80 p-3 space-y-2"
+        className="w-90 p-3 space-y-2"
       >
         {/* User Agent */}
         <div className="rounded-lg section-surface py-1.5 px-2.5 space-y-1.5">
@@ -240,7 +240,7 @@ export function SessionsList({
 
   return (
     <div className="space-y-8">
-      {/* 1. CURRENT SESSION */}
+      {/* 1. Текущая сессия */}
       <div className="space-y-3">
         <h4 className="section-label">
           Текущая сессия
@@ -249,7 +249,7 @@ export function SessionsList({
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center gap-4 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
-            <div className="w-12 h-12 shrink-0 rounded-xl bg-background/60 border border-primary/20 flex items-center justify-center text-primary">
+            <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
               <DeviceIcon name={currentSession.deviceName} />
             </div>
 
@@ -271,7 +271,7 @@ export function SessionsList({
               <div className="flex items-center gap-2 mt-1">
                 <span className="font-mono text-xs text-muted-foreground">{currentSession.ip}</span>
                 <span className="w-1 h-1 rounded-full bg-primary shrink-0" />
-                <span className="text-primary font-medium text-xs">Онлайн</span>
+                <span className="text-primary font-medium text-xs">В сети</span>
               </div>
             </div>
 
@@ -291,7 +291,7 @@ export function SessionsList({
         )}
       </div>
 
-      {/* 2. OTHER SESSIONS */}
+      {/* 2. Другие сессии */}
       {otherSessions.length > 0 && (
          <div className="space-y-4">
            <div className="flex items-center justify-between">

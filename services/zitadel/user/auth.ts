@@ -2,17 +2,14 @@ import NextAuth from "next-auth";
 import ZitadelProvider from "next-auth/providers/zitadel";
 import { env } from "@/shared/config/env";
 
-// Scopes для OIDC — вынесены чтобы использовать и в authorization, и в refresh
 const OIDC_SCOPES = [
   "openid",
   "profile",
   "email",
   "offline_access",
-  // Разрешает access token для вызовов Zitadel API (/v2/users/... и т.д.)
   "urn:zitadel:iam:org:project:id:zitadel:aud",
 ].join(" ");
 
-// Функция для обмена старого refresh_token на новый access_token
 async function refreshAccessToken(token: any) {
   try {
     const response = await fetch(`${env.ZITADEL_API_URL}/oauth/v2/token`, {
@@ -106,7 +103,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    // Вызывается при создании и проверке JWT
     async jwt({ token, account }) {
       // 1. Первичный логин — account доступен только при первом входе
       if (account) {
@@ -133,7 +129,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return await refreshAccessToken(token);
     },
 
-    // Вызывается при каждом вызове auth() или useSession()
     async session({ session, token }) {
       if (token) {
         // @ts-ignore - прокидываем токены и ошибки в клиентскую сессию

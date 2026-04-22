@@ -6,8 +6,8 @@ import { SecurityView } from "./security-view";
 import { completeLinkAction } from "./security.actions";
 
 export const metadata: Metadata = {
-  title: "Безопасность",
-  description: "Управление доступом и сессиями",
+  title: "Устройства",
+  description: "Управление активными сессиями и входом с устройств",
 };
 
 export default async function SecurityPage({
@@ -17,7 +17,6 @@ export default async function SecurityPage({
 }) {
   const { link, id, token } = await searchParams;
 
-  // OAuth-callback от Zitadel после попытки привязки провайдера
   if (link === "success" && id && token) {
     const result = await completeLinkAction(id, token);
     redirect(result.success ? "/profile/security?link=done" : "/profile/security?link=failed");
@@ -27,7 +26,7 @@ export default async function SecurityPage({
     <div className="space-y-6">
       <PageHeader
         title="Безопасность и вход"
-        description="Управление привязанными аккаунтами и активными сессиями"
+        description="Управление активными сессиями и входом с устройств"
         icon={ShieldCheck}
       />
 

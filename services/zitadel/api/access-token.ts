@@ -33,7 +33,6 @@ export async function getZitadelAccessToken(): Promise<string> {
 
   const privateKey = crypto.createPrivateKey(machineKey.key);
 
-  // 2. Создаем JWT Assertion
   const signedAssertion = await new SignJWT({
     iss: machineKey.userId,
     sub: machineKey.userId,
@@ -44,13 +43,8 @@ export async function getZitadelAccessToken(): Promise<string> {
     .setExpirationTime('1m')
     .sign(privateKey);
 
-  // 3. Получаем Access Token (M2M: без openid/profile/email, иначе Zitadel
-  // привяжет токен к OIDC-сессии и checkSessionNotTerminatedAfter будет
-  // падать с "Errors.OIDCSession.Token.Invalid").
   const tokenUrl = `${ZITADEL_DOMAIN}/oauth/v2/token`;
   const scope = [
-    'urn:zitadel:iam:org:project:role:custom_ui_service',
-    'urn:zitadel:iam:org:project:roles',
     'urn:zitadel:iam:org:project:id:zitadel:aud',
     `urn:zitadel:iam:org:project:id:${env.ZITADEL_PROJECT_ID}:aud`,
   ].join(' ');
@@ -74,7 +68,6 @@ export async function getZitadelAccessToken(): Promise<string> {
 
   const data = await response.json();
 
-  // 4. Кэшируем
   cachedAccessToken = data.access_token;
   tokenExpiresAt = now + (data.expires_in * 1000);
 

@@ -26,7 +26,3 @@ export const personalInfoSchema = z.object({
 });
 
 export type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;
-
-export const toggleLinkSchema = z.object({
-  provider: z.enum(['telegram', 'max']),
-});
