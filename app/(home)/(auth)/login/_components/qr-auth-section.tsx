@@ -5,7 +5,7 @@ import { AlertCircle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { SmoothQr } from "@/shared/ui/smooth-qr";
 import { useQrAuth, useQrStatus } from "../login.hooks";
-import { applyQrSessionAction } from "../actions";
+import { applyDeviceTokensAction } from "../actions";
 
 interface QrAuthSectionProps {
   requestId?: string;
@@ -16,10 +16,9 @@ export function QrAuthSection({ requestId }: QrAuthSectionProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const { qrUrl, qrToken, isError, isLoading, refresh } = useQrAuth(isVisible, requestId);
+  const { qrUrl, isError, isLoading, refresh } = useQrAuth(isVisible, requestId);
   const { status } = useQrStatus(
-    qrToken,
-    isVisible && !isError && !isLoading && !!qrToken,
+    isVisible && !isError && !isLoading && !!qrUrl,
   );
 
   useEffect(() => {
@@ -32,12 +31,12 @@ export function QrAuthSection({ requestId }: QrAuthSectionProps) {
   }, []);
 
   useEffect(() => {
-    if (status === "confirmed" && qrToken && !isPending) {
+    if (status === "confirmed" && !isPending) {
       startTransition(async () => {
-        await applyQrSessionAction(qrToken);
+        await applyDeviceTokensAction();
       });
     }
-  }, [status, qrToken, isPending]);
+  }, [status, isPending]);
 
   const hasValidValue = qrUrl && qrUrl.trim() !== "";
   const isConfirmed = status === "confirmed" || isPending;

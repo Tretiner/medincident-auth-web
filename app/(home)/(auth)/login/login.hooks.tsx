@@ -18,9 +18,11 @@ const QrStatusSchema = z.object({
   status: z.enum(["pending", "confirmed", "expired"]),
 });
 
-async function fetchQrStatus(token: string): Promise<{ status: QrStatus }> {
-  const res = await fetch(`/api/auth/qr/status?token=${token}`, {
+async function fetchQrStatus(): Promise<{ status: QrStatus }> {
+  // deviceCode хранится в HttpOnly cookie на сервере — ничего не передаём.
+  const res = await fetch(`/api/auth/qr/status`, {
     cache: "no-store",
+    credentials: "same-origin",
   });
   if (!res.ok) return { status: "expired" };
   const data = QrStatusSchema.safeParse(await res.json());
@@ -65,17 +67,17 @@ export function useQrAuth(enabled: boolean = true, requestId?: string) {
   };
 }
 
-export function useQrStatus(token: string | undefined, enabled: boolean) {
+export function useQrStatus(enabled: boolean) {
   const [status, setStatus] = useState<QrStatus>("pending");
 
   useEffect(() => {
-    if (!enabled || !token) {
+    if (!enabled) {
       setStatus("pending");
       return;
     }
 
-    // SSE — одно соединение вместо polling каждые 3 секунды
-    const es = new EventSource(`/api/auth/qr/status?token=${token}`);
+    // SSE — одно соединение. Сервер читает deviceCode из HttpOnly cookie.
+    const es = new EventSource(`/api/auth/qr/status`, { withCredentials: true });
 
     es.addEventListener("status", (e) => {
       try {
@@ -88,13 +90,12 @@ export function useQrStatus(token: string | undefined, enabled: boolean) {
     });
 
     es.onerror = () => {
-      // SSE connection lost — fallback: одноразовый запрос
       es.close();
-      fetchQrStatus(token).then((data) => setStatus(data.status));
+      fetchQrStatus().then((data) => setStatus(data.status));
     };
 
     return () => es.close();
-  }, [token, enabled]);
+  }, [enabled]);
 
   return { status };
 }

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { LinkedAccountsCard } from "./_components/linked-accounts-card";
-import { DeviceQrSection } from "./_components/device-qr-section";
 import { ChangePasswordDialog } from "./_components/change-password-dialog";
 import { TotpCard } from "./_components/totp-card";
 import { useLinkedAccounts, useSecurityMutations } from "./security.hooks";
@@ -60,12 +59,6 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
       <div className="space-y-3">
         <h3 className="section-label">Двухфакторная аутентификация</h3>
         <TotpCard />
-      </div>
-
-      {/* ВХОД С ДРУГОГО УСТРОЙСТВА */}
-      <div className="space-y-3">
-        <h3 className="section-label">Другое устройство</h3>
-        <DeviceQrSection />
       </div>
 
       {/* СОЦИАЛЬНЫЕ СЕТИ */}

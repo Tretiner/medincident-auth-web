@@ -1,28 +1,40 @@
-// app/api/auth/qr/route.ts
 import { QrData } from "@/domain/auth/types";
 import { env } from "@/shared/config/env";
-import { storeQrEntry } from "@/services/zitadel/qr-store";
+import { setDeviceCtx, clearDeviceTokens, sealDeviceHint } from "@/services/zitadel/device-context";
+import { rateLimit, clientKeyFromRequest } from "@/shared/lib/rate-limit";
+import { parseUserAgent } from "@/shared/lib/user-agent";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
-  try {
-    // Сохраняем requestId если QR показывается в контексте OIDC авторизации
-    const requestId = req.nextUrl.searchParams.get("requestId") || undefined;
+const DEFAULT_EXPIRES_IN = 300;
 
-    const res = await fetch(
-      `${env.ZITADEL_API_URL}/oauth/v2/device_authorization`,
+export async function GET(req: NextRequest) {
+  const rl = rateLimit(`qr:init:${clientKeyFromRequest(req)}`, 10, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Слишком много запросов" },
       {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          client_id: env.APP_CLIENT_ID,
-          scope: "openid profile email",
-        }),
-        cache: "no-store",
-      }
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) },
+      },
     );
+  }
+
+  try {
+    const requestId = req.nextUrl.searchParams.get("requestId") || undefined;
+    const nonce = crypto.randomUUID();
+    const browser = parseUserAgent(req.headers.get("user-agent") ?? "");
+
+    const res = await fetch(`${env.ZITADEL_API_URL}/oauth/v2/device_authorization`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: env.APP_CLIENT_ID,
+        scope: "openid profile email offline_access",
+      }),
+      cache: "no-store",
+    });
 
     if (!res.ok) {
       console.error("device_authorization error:", await res.text());
@@ -30,17 +42,54 @@ export async function GET(req: NextRequest) {
     }
 
     const zitadelData = await res.json();
-    const { device_code, user_code, expires_in } = zitadelData;
+    const {
+      device_code,
+      user_code,
+      expires_in,
+      verification_uri_complete,
+      verification_uri,
+    } = zitadelData;
 
-    storeQrEntry(user_code, device_code, expires_in ?? 300, requestId);
+    const expiresIn = Number(expires_in) || DEFAULT_EXPIRES_IN;
 
-    const url = `${env.APP_URL}/login/qr-confirm?user_code=${user_code}`;
+    // Чистим старые токены — если юзер перегенерирует QR, старые tokens неактуальны.
+    await clearDeviceTokens();
+
+    await setDeviceCtx({
+      deviceCode: device_code,
+      userCode: user_code,
+      nonce,
+      requestId,
+      browser,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + expiresIn * 1000,
+    });
+
+    // hint — зашифрованная метадата о Device A (browser/os), читается на /device
+    // для visual confirmation. Не содержит секретов.
+    const hint = await sealDeviceHint({ browser, createdAt: Date.now() });
+
+    // QR — URL кастомной verification-страницы с user_code, nonce как state и hint.
+    const url =
+      `${env.APP_URL}/device` +
+      `?user_code=${encodeURIComponent(user_code)}` +
+      `&state=${encodeURIComponent(nonce)}` +
+      `&hint=${encodeURIComponent(hint)}`;
 
     const data: QrData = {
       url,
       token: user_code,
-      expiresInSeconds: expires_in ?? 300,
+      expiresInSeconds: expiresIn,
     };
+
+    // verification_uri_* — не логируем как чувствительное, но заметим в dev
+    if (env.isDev && (verification_uri_complete || verification_uri)) {
+      console.log(
+        "[device-auth] Zitadel verification_uri=%s, verification_uri_complete=%s",
+        verification_uri,
+        verification_uri_complete,
+      );
+    }
 
     return NextResponse.json(data);
   } catch (error) {

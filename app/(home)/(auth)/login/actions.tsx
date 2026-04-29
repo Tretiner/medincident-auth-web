@@ -4,9 +4,14 @@ import { redirect } from "next/navigation";
 import { env } from "@/shared/config/env";
 import { deleteSession, getActiveIdps, startIdpIntent, createSessionByUserId, getSession, completeAuthRequest, searchUserSessions } from "@/services/zitadel/api";
 import { addSessionToCookie, getAllSessions, removeSessionFromCookie } from "@/services/zitadel/cookies";
-import { getQrEntry } from "@/services/zitadel/qr-store";
+import {
+  clearDeviceCtx,
+  clearDeviceTokens,
+  getDeviceCtx,
+  getDeviceTokens,
+} from "@/services/zitadel/device-context";
+import { verifyIdToken } from "@/services/zitadel/id-token";
 import { getUserIdFromNextAuth } from "@/services/zitadel/session";
-import { decodeJwt } from "jose";
 import { signOut } from "@/services/zitadel/user/auth";
 
 export async function fetchProvidersAction() {
@@ -43,22 +48,46 @@ export async function loginWithProviderAction(idpId: string, requestId?: string)
   redirect(response.data.authUrl);
 }
 
-export async function applyQrSessionAction(token: string) {
-  // token = user_code
-  const entry = getQrEntry(token);
-
-  if (!entry || entry.status !== "confirmed" || !entry.idToken) {
-    throw new Error("QR токен недействителен или истёк");
+/**
+ * Применяет tokens полученные через Device Flow.
+ *
+ * Последовательность защит:
+ *  1. zdc_tokens cookie существует и не истёк (HttpOnly, SameSite=Lax, Secure).
+ *  2. zdc_ctx всё ещё существует — или уже подчищен; главное, что nonce совпадает.
+ *  3. id_token валидирован через Zitadel JWKS (подпись, iss, aud, exp).
+ *  4. nonce в tokens совпадает с тем, что был в ctx — связывает QR с полученными токенами.
+ *
+ * Только после всех четырёх проверок создаём Zitadel session v2 для sub из id_token.
+ * Это не «машинный shortcut» — это запись о том, что Device Flow успешно завершён
+ * конкретным пользователем, подтверждённым Zitadel IdP на Device B.
+ */
+export async function applyDeviceTokensAction() {
+  const tokens = await getDeviceTokens();
+  if (!tokens) {
+    throw new Error("Сессия устройства недействительна или истекла");
   }
 
-  // Извлекаем userId из id_token JWT (sub = userId в ZITADEL)
-  const claims = decodeJwt(entry.idToken);
+  // ctx мог быть уже очищен (status route чистит его при успехе) — тогда nonce сверяем
+  // только если он есть. Главный binding — подпись id_token от Zitadel.
+  const ctx = await getDeviceCtx();
+  if (ctx && ctx.nonce !== tokens.nonce) {
+    await clearDeviceTokens();
+    await clearDeviceCtx();
+    throw new Error("Привязка устройства нарушена");
+  }
+
+  let claims;
+  try {
+    claims = await verifyIdToken(tokens.idToken);
+  } catch (e) {
+    await clearDeviceTokens();
+    await clearDeviceCtx();
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`Невалидный id_token: ${msg}`);
+  }
+
   const userId = claims.sub;
-  if (!userId) {
-    throw new Error("Не удалось извлечь userId из токена");
-  }
 
-  // Создаём сессию для Device A через машинный юзер
   const sessionRes = await createSessionByUserId(userId);
   if (!sessionRes.success || !sessionRes.data?.sessionId || !sessionRes.data?.sessionToken) {
     throw new Error("Не удалось создать сессию");
@@ -66,7 +95,6 @@ export async function applyQrSessionAction(token: string) {
 
   const { sessionId, sessionToken } = sessionRes.data;
 
-  // Получаем полные данные сессии (loginName, organizationId и т.д.)
   const sessionDataRes = await getSession(sessionId);
   const session = sessionDataRes.success ? sessionDataRes.data?.session : undefined;
   const userFactors = session?.factors?.user || {};
@@ -76,7 +104,7 @@ export async function applyQrSessionAction(token: string) {
       id: sessionId,
       token: sessionToken,
       creationTs: new Date(session?.creationDate || Date.now()).getTime().toString(),
-      expirationTs: new Date(session?.expirationDate || Date.now() + 86400000).getTime().toString(),
+      expirationTs: new Date(session?.expirationDate || Date.now() + 86_400_000).getTime().toString(),
       changeTs: new Date(session?.changeDate || Date.now()).getTime().toString(),
       loginName: userFactors.loginName || "unknown",
       organization: userFactors.organizationId || "",
@@ -84,10 +112,18 @@ export async function applyQrSessionAction(token: string) {
     cleanup: true,
   });
 
-  console.log("[auth:applyQrSession] Сессия создана для userId=%s, sessionId=%s", userId, sessionId);
+  console.log(
+    "[auth:applyDeviceTokens] Device Flow: userId=%s, sessionId=%s",
+    userId,
+    sessionId,
+  );
 
-  // Если QR показывался в контексте OIDC флоу — завершаем auth request
-  const requestId = entry.requestId;
+  const requestId = ctx?.requestId;
+
+  // После успеха — чистим ctx и tokens.
+  await clearDeviceTokens();
+  await clearDeviceCtx();
+
   if (requestId) {
     const authRes = await completeAuthRequest(requestId, sessionId, sessionToken);
     if (authRes.success) {

@@ -45,8 +45,8 @@ export function QrScannerButton({ variant = "default" }: QrScannerButtonProps) {
   function handleDetected(rawValue: string) {
     try {
       const parsed = new URL(rawValue);
-      // Принимаем только QR коды нашего приложения
-      if (parsed.pathname.startsWith("/login/qr-confirm")) {
+      // Принимаем только QR коды нашего приложения на /device.
+      if (parsed.pathname === "/device" && parsed.searchParams.get("user_code")) {
         stopCamera();
         setOpen(false);
         router.push(parsed.pathname + parsed.search);
