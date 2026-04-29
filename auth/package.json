@@ -7,7 +7,7 @@
     "build": "env-cmd -f .env bun --bun next build",
     "build:errors": "__NEXT_TEST_MODE=true next build",
     "start": "env-cmd -f .env bun --bun next start -p 80",
-    "lint": "next lint",
+    "lint": "eslint .",
     "proto:update": "buf dep update",
     "proto:generate": "mkdir -p lib/generated/proto && buf generate"
   },
