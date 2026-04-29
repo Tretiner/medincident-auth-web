@@ -273,17 +273,6 @@ services:
         max-size: "25m"
         max-file: "3"
 
-  actions-service:
-    build: ./actions-service
-    restart: unless-stopped
-    networks:
-      - zitadel
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "25m"
-        max-file: "3"
-
   postgres:
     image: ${POSTGRES_IMAGE}
     restart: unless-stopped
