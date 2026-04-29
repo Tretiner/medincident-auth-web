@@ -1,45 +1,7 @@
 name: zitadel
 
-# -----------------------------------------------------------------
-# Shared env block для custom-ui сервисов.
-# Значения берутся из .env (см. .env.example, секция "Custom UI").
-# Используется через YAML merge-key (<<: *custom-ui-env) в services
-# ниже — и в build.args (для @t3-oss/env валидации на билде),
-# и в environment (runtime).
-# -----------------------------------------------------------------
-x-custom-ui: &custom-ui
-  ZITADEL_API_URL: ${ZITADEL_API_URL}
-  ZITADEL_SECRET: ${ZITADEL_SECRET}
-  ZITADEL_MACHINE_KEY_PATH: ${ZITADEL_MACHINE_KEY_PATH:-/app/secrets/key.json}
-  ZITADEL_ORG_ID: ${ZITADEL_ORG_ID}
-  ZITADEL_PROJECT_ID: ${ZITADEL_PROJECT_ID}
-  APP_URL: ${APP_URL}
-  APP_CLIENT_ID: ${APP_CLIENT_ID}
-  API_URL: ${API_URL}
-  GRPC_API_URL: ${GRPC_API_URL}
-  AUTH_SECRET: ${AUTH_SECRET}
-  AUTH_URL: ${AUTH_URL}
-  AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
 
 services:
-  medincident-zitadel-actions:
-    image: ghcr.io/medincident/medincident-zitadel-actions:latest
-    container_name: medincident-zitadel-actions
-    restart: unless-stopped
-    volumes:
-      - ./zitadel-actions-config.yaml:/etc/medincident-zitadel-actions/config.yaml:ro
-      - ./zitadel-actions.log:/var/log/medincident-zitadel-actions/app.log
-    environment:
-      APP_ENV: production
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
-    networks:
-      - zitadel
-
   proxy:
     image: ${TRAEFIK_IMAGE}
     restart: unless-stopped
@@ -234,8 +196,8 @@ services:
       context: ./auth
       dockerfile: Dockerfile
     restart: unless-stopped
+    env_file: .env
     environment:
-      <<: *custom-ui
       # Hot reload через Docker bind mount (inotify не пробрасывается)
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
@@ -278,11 +240,8 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile.production
-      args:
-        <<: *custom-ui
     restart: unless-stopped
-    environment:
-      <<: *custom-ui
+    env_file: .env
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1"]
       interval: 300s

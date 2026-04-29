@@ -13,46 +13,24 @@ RUN bun install --frozen-lockfile || bun install
 
 COPY . .
 
-ARG ZITADEL_API_URL
-ARG ZITADEL_SECRET
-ARG ZITADEL_MACHINE_KEY_PATH=/app/secrets/key.json
-ARG ZITADEL_ORG_ID
-ARG ZITADEL_PROJECT_ID
-ARG APP_URL
-ARG APP_CLIENT_ID
-ARG API_URL
-ARG GRPC_API_URL
-ARG AUTH_SECRET
-ARG AUTH_URL
-ARG AUTH_TRUST_HOST=true
-
-ENV ZITADEL_API_URL=${ZITADEL_API_URL} \
-    ZITADEL_SECRET=${ZITADEL_SECRET} \
-    ZITADEL_MACHINE_KEY_PATH=${ZITADEL_MACHINE_KEY_PATH} \
-    ZITADEL_ORG_ID=${ZITADEL_ORG_ID} \
-    ZITADEL_PROJECT_ID=${ZITADEL_PROJECT_ID} \
-    APP_URL=${APP_URL} \
-    APP_CLIENT_ID=${APP_CLIENT_ID} \
-    API_URL=${API_URL} \
-    GRPC_API_URL=${GRPC_API_URL} \
-    AUTH_SECRET=${AUTH_SECRET} \
-    AUTH_URL=${AUTH_URL} \
-    AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
-
-# --bun = нативный Bun runtime для максимальной ��корости билда
+# Сборка проекта
+# --bun = нативный Bun runtime для максимальной скорости билда
 RUN bun --bun run next build
 
 # --- Stage 3: Minimal production runner ---
 FROM oven/bun:1-alpine AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
+# Копируем зависимости из первого стейджа
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
-# Результат билда
+# Копируем результат билда и необходимые файлы
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
@@ -61,6 +39,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/next.config.ts ./
 RUN mkdir -p /app/secrets && chown nextjs:nodejs /app/secrets
 
 USER nextjs
+
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"

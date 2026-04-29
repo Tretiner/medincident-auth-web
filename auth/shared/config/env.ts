@@ -6,17 +6,17 @@ const zitadelId = () => z.string().regex(/^\d+$/, "должен быть чис�
 const envConfig = createEnv({
   server: {
     // Zitadel core
-    ZITADEL_API_URL: z.url(),
-    ZITADEL_SECRET: z.string().min(32),
-    ZITADEL_MACHINE_KEY_PATH: z.string(),
-    ZITADEL_ORG_ID: z.string().min(1),
-    ZITADEL_PROJECT_ID: zitadelId(),
+    ZITADEL_API_URL: z.url().default("http://localhost:8080"),
+    ZITADEL_SECRET: z.string().min(32).default("placeholder_secret_at_least_32_chars_long"),
+    ZITADEL_MACHINE_KEY_PATH: z.string().default("/app/secrets/key.json"),
+    ZITADEL_ORG_ID: z.string().min(1).default("123456789"),
+    ZITADEL_PROJECT_ID: zitadelId().default("123456789"),
 
     // App
-    APP_URL: z.url(),
-    APP_CLIENT_ID: z.string(),
-    API_URL: z.url(),
-    GRPC_API_URL: z.string(),
+    APP_URL: z.url().default("http://localhost"),
+    APP_CLIENT_ID: z.string().default("placeholder-client-id"),
+    API_URL: z.url().default("http://localhost"),
+    GRPC_API_URL: z.string().default("localhost:8080"), // legacy
 
     // Runtime
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
