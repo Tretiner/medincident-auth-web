@@ -1,0 +1,41 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# === Secrets & env files ===
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p8
+secrets/
+
+# === Dependencies ===
+node_modules/
+.pnp
+.pnp.*
+
+# === Next.js ===
+.next/
+out/
+
+# === Build output ===
+build/
+dist/
+
+# === Logs ===
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# === Misc ===
+.DS_Store
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+coverage/
+
+# === Backups ===
+*.dump
+*.sql.gz

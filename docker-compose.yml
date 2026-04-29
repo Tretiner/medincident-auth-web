@@ -1,6 +1,5 @@
 name: zitadel
 
-
 services:
   proxy:
     image: ${TRAEFIK_IMAGE}
@@ -188,10 +187,10 @@ services:
       options:
         max-size: "25m"
         max-file: "3"
-  
+
   # === DEV: next dev + hot reload, монтирование исходников ===
   custom-ui-dev:
-    profiles: [dev]
+    profiles: [ dev ]
     build:
       context: ./auth
       dockerfile: Dockerfile
@@ -202,7 +201,7 @@ services:
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1"]
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1" ]
       interval: 300s
       timeout: 30s
       retries: 12
@@ -234,16 +233,17 @@ services:
         max-size: "25m"
         max-file: "3"
 
-  # === PROD: multi-stage build, standalone server ===
+  # === PROD: образ собирается в CI (GitHub Actions) и пушится в GHCR.
+  # Watchtower следит за обновлением тега :latest и перезапускает контейнер.
   custom-ui:
-    profiles: [prod]
+    profiles: [ prod ]
     build:
       context: ./auth
       dockerfile: Dockerfile.production
     restart: unless-stopped
     env_file: .env
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1"]
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1" ]
       interval: 300s
       timeout: 30s
       retries: 12
@@ -272,7 +272,7 @@ services:
       options:
         max-size: "25m"
         max-file: "3"
-        
+
   actions-service:
     build: ./actions-service
     restart: unless-stopped
@@ -342,6 +342,31 @@ services:
       driver: "json-file"
       options:
         max-size: "25m"
+        max-file: "3"
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    environment:
+      # GHCR credentials
+      REPO_USER: ${GHCR_USERNAME}
+      REPO_PASS: ${GHCR_TOKEN}
+      # Poll interval in seconds (default: 86400 = 24h)
+      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL:-86400}
+      # Only update containers that have the watchtower label
+      WATCHTOWER_LABEL_ENABLE: "true"
+      # Send notifications (optional, set WATCHTOWER_NOTIFICATION_URL)
+      WATCHTOWER_NOTIFICATIONS: ${WATCHTOWER_NOTIFICATIONS:-}
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL:-}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - zitadel
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
         max-file: "3"
 
 networks:
