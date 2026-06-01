@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { AppLogoIcon } from "@/app/_components/icons";
 import { RegisterView } from "./_components/register-view";
 import { continueRegisterIdp, continueRegisterEmail } from "./register-actions";
 import { getIdpIntentCookie } from "../_lib/reg-flow";
@@ -39,8 +38,7 @@ export default async function RegisterPage({
         <div className="min-h-full flex items-center justify-center px-4 py-6 sm:py-8">
           <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
             <BackLink href={backHref} />
-            <h1 className="mb-6 sm:mb-8 flex items-center justify-center gap-2 text-xl md:text-2xl font-semibold tracking-tight text-foreground">
-              <AppLogoIcon className="size-5 md:size-6 text-primary shrink-0" />
+            <h1 className="mb-6 sm:mb-8 text-center text-xl md:text-2xl font-semibold tracking-tight text-foreground">
               Регистрация
             </h1>
             <RegisterView action={boundAction} initialData={initialData} />
@@ -58,8 +56,7 @@ export default async function RegisterPage({
       <div className="min-h-full flex items-center justify-center px-4 py-6 sm:py-8">
         <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
           <BackLink href={backHref} />
-          <h1 className="mb-6 sm:mb-8 flex items-center justify-center gap-2 text-xl md:text-2xl font-semibold tracking-tight text-foreground">
-            <AppLogoIcon className="size-5 md:size-6 text-primary shrink-0" />
+          <h1 className="mb-6 sm:mb-8 text-center text-xl md:text-2xl font-semibold tracking-tight text-foreground">
             Регистрация
           </h1>
           <RegisterView

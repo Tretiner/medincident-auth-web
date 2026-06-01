@@ -4,7 +4,6 @@ import { memo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { Loader2, Plus } from "lucide-react";
-import { AppLogoIcon } from "@/app/_components/icons";
 import { cn } from "@/shared/lib/utils";
 import type { AccountDisplayItem } from "../actions";
 
@@ -94,8 +93,7 @@ export function AccountSelectionView({
       <div className="absolute -bottom-[60%] -right-[60%] size-[80%] rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 py-6 sm:py-8">
-        <h1 className="mb-8 flex items-center justify-center gap-2 text-xl md:text-2xl font-semibold tracking-tight">
-          <AppLogoIcon className="size-5 md:size-6 text-primary shrink-0" />
+        <h1 className="mb-8 text-center text-xl md:text-2xl font-semibold tracking-tight">
           Выберите аккаунт
         </h1>
 

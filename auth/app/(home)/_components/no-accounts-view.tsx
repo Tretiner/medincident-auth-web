@@ -16,9 +16,7 @@ export function NoAccountsView({ onAddAccount }: NoAccountsViewProps) {
 
       <div className="relative z-10 flex flex-col py-6 sm:py-8">
         <div className="mb-8 flex flex-col items-center">
-          <div className="size-12 md:size-16 mb-4 md:mb-6 flex items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
-            <AppLogoIcon className="size-6 md:size-8" />
-          </div>
+          <AppLogoIcon className="size-12 md:size-16 mb-4 md:mb-6" />
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-center">
             Нет активных сессий
           </h1>

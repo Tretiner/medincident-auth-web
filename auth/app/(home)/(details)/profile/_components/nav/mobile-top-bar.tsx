@@ -15,7 +15,7 @@ export function MobileTopBar({ adminSlot }: { adminSlot?: ReactNode }) {
   return (
     <div className="flex items-center justify-between px-4 py-2 h-14">
       <div className="flex items-center gap-2">
-        <AppLogoIcon className="size-6 text-primary" />
+        <AppLogoIcon className="size-6" />
         <span className="text-primary font-medium">{APP_NAME}</span>
 
         {adminSlot}

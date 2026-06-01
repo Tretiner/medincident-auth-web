@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AlertTriangle, MonitorSmartphone, Clock, AppWindow, KeyRound } from "lucide-react";
-import { AppLogoIcon } from "@/app/_components/icons";
 import { getOptionalSession } from "@/services/zitadel/session";
 import { getSession, getDeviceAuthorization } from "@/services/zitadel/api";
 import { unsealDeviceHint } from "@/services/zitadel/device-context";
@@ -60,8 +59,8 @@ export default async function DevicePage({ searchParams }: Props) {
     <main className="h-dvh overflow-y-auto overflow-x-hidden flex flex-col items-center px-4 pt-8 pb-8 sm:pt-16 md:pt-24 bg-background font-sans">
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
         <div className="flex flex-col items-center mb-6 sm:mb-8 text-center">
-          <div className="size-14 sm:size-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 text-primary border border-primary/20">
-            <AppLogoIcon className="size-7 sm:size-8" />
+          <div className="size-14 sm:size-16 mb-4 sm:mb-6 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+            <MonitorSmartphone className="size-7 sm:size-8" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
             Вход с другого устройства

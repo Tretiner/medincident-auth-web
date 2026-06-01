@@ -35,9 +35,7 @@ export default async function EmailLoginPage({
       <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
         <BackLink href={backHref} />
         <div className="flex flex-col items-center mb-8 text-center">
-          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 text-primary border border-primary/20">
-            <AppLogoIcon className="w-8 h-8" />
-          </div>
+          <AppLogoIcon className="w-16 h-16 mb-6" />
           <h1 className="text-3xl font-bold text-foreground tracking-tight">
             Вход в {APP_NAME}
           </h1>

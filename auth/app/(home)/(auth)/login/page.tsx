@@ -88,9 +88,7 @@ export default async function LoginPage({ searchParams }: { searchParams: any })
         {/* RIGHT COLUMN */}
         <CardContent className="p-6 sm:p-8 md:p-12 flex flex-col justify-center min-h-[450px] md:min-h-auto">
           <div className="flex flex-col items-center md:items-start mb-6 md:mb-8">
-            <div className="size-12 md:size-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-primary border border-primary/20">
-              <AppLogoIcon className="size-6 md:size-8" />
-            </div>
+            <AppLogoIcon className="size-12 md:size-16 mb-4 md:mb-6" />
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-center md:text-left">
               Вход в {APP_NAME}
             </h1>

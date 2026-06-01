@@ -76,9 +76,7 @@ export default async function VerifyPage({
         </div>
 
         <div className="flex flex-col items-center mb-6 sm:mb-8 text-center">
-          <div className="size-14 sm:size-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 text-primary border border-primary/20">
-            <AppLogoIcon className="size-7 sm:size-8" />
-          </div>
+          <AppLogoIcon className="size-14 sm:size-16 mb-4 sm:mb-6" />
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
             Подтвердите email
           </h1>

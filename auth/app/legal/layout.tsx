@@ -22,9 +22,7 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <span className="text-sm font-medium">{APP_NAME}</span>
-            <span className="size-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary border border-primary/20">
-              <AppLogoIcon className="size-4" />
-            </span>
+            <AppLogoIcon className="size-7" />
           </Link>
         </header>
         {children}
