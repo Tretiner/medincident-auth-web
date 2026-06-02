@@ -47,15 +47,21 @@ export async function loadSessionsAction(): Promise<{
 
         const userData = userResult.data.user;
         const human = userData.human;
-        const displayName = human?.profile?.displayName || human?.profile?.givenName || "Пользователь";
+        const givenName = human?.profile?.givenName ?? "";
+        const familyName = human?.profile?.familyName ?? "";
+        const fullName =
+          `${givenName} ${familyName}`.trim() || human?.profile?.displayName || "Пользователь";
+        const initials =
+          `${givenName[0] ?? ""}${familyName[0] ?? ""}`.toUpperCase() ||
+          fullName.substring(0, 2).toUpperCase();
 
         return {
           id: cookie.id,
           token: cookie.token,
-          title: displayName,
+          title: fullName,
           subtitle: userData.preferredLoginName || human?.username || "",
           avatarUrl: human?.profile?.avatarUrl || "",
-          initials: displayName.substring(0, 2).toUpperCase(),
+          initials,
         } satisfies AccountDisplayItem;
       } catch {
         return null;

@@ -51,6 +51,7 @@ services:
 
   zitadel-api:
     image: ghcr.io/zitadel/zitadel:${ZITADEL_VERSION}
+    pull_policy: missing
     restart: unless-stopped
     user: "0"
     command: start-from-init --masterkey "${ZITADEL_MASTERKEY}"
@@ -175,6 +176,7 @@ services:
 
   zitadel-login:
     image: ghcr.io/zitadel/zitadel-login:${ZITADEL_VERSION}
+    pull_policy: missing
     restart: unless-stopped
     user: "0"
     environment:

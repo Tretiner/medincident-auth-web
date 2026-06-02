@@ -81,7 +81,11 @@ export async function getProfileDataAction() {
 export async function updateProfileDataAction(data: ProfileFormData) {
   const { userId } = await requireValidSession();
   try {
-    await updateMyProfile(userId, { givenName: data.firstName, familyName: data.lastName });
+    await updateMyProfile(userId, {
+      givenName: data.firstName,
+      familyName: data.lastName,
+      displayName: `${data.firstName} ${data.lastName}`.trim(),
+    });
 
     // Обновляем email только если он реально изменился (case-insensitive, чтобы не триггерить на UPPER/lower)
     if (data.email && data.email.trim().length > 0) {

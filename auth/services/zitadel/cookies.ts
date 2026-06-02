@@ -340,3 +340,8 @@ export async function getPreferredSessionId(): Promise<string | undefined> {
   return cookiesList.get("preferred_session")?.value;
 }
 
+export async function clearPreferredSessionId() {
+  const cookiesList = await cookies();
+  cookiesList.delete("preferred_session");
+}
+

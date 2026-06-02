@@ -61,6 +61,7 @@ export function useProfileData() {
 export function useFormProfileDetails(user?: PersonalInfo) {
   const router = useRouter();
   const { mutate } = useSWRConfig();
+  const setProfileStore = useProfileStore((s) => s.setProfile);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<ProfileMessage | null>(null);
 
@@ -93,6 +94,15 @@ export function useFormProfileDetails(user?: PersonalInfo) {
           }
 
           await mutate(PROFILE_API_KEY, result.data, false);
+          if (result.data) {
+            setProfileStore({
+              firstName: result.data.firstName,
+              lastName: result.data.lastName,
+              photoUrl: result.data.avatarUrl,
+              isEmailVerified: result.data.isEmailVerified,
+              email: result.data.email,
+            });
+          }
           router.refresh();
 
           // Сбрасываем isDirty, чтобы кнопка «Сохранить» задизейблилась.
@@ -102,7 +112,7 @@ export function useFormProfileDetails(user?: PersonalInfo) {
           setTimeout(() => setMessage(null), 3000);
         });
       }),
-    [form, mutate, router],
+    [form, mutate, router, setProfileStore],
   );
 
   const onCancel = useCallback(() => {

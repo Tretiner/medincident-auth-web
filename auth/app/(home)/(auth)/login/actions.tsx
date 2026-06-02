@@ -10,7 +10,7 @@ import {
   searchUserSessions,
   startIdpIntent,
 } from "@/services/zitadel/api";
-import { addSessionToCookie, getAllSessions, removeSessionFromCookie, setPreferredSessionId } from "@/services/zitadel/cookies";
+import { addSessionToCookie, clearPreferredSessionId, getAllSessions, removeSessionFromCookie, setPreferredSessionId } from "@/services/zitadel/cookies";
 import {
   clearDeviceCtx,
   getDeviceCtx,
@@ -155,6 +155,7 @@ export async function logoutAction(options: LogoutOptions = {}) {
   }
 
   await signOut({ redirect: false });
+  await clearPreferredSessionId();
 
   if (skipRedirect) {
     return;
