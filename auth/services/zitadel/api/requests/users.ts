@@ -8,10 +8,6 @@ import { zitadelUserApi } from "../../user/client"; // для user self-service 
 import { env } from "@/shared/config/env";
 import { PaginationRequest, TextFilterMethod, ZitadelGenericUpdateResponseSchema } from "./shared";
 
-// ==========================================
-// 1. СХЕМЫ ОТВЕТОВ (RESPONSES)
-// ==========================================
-
 export const ZitadelCreateHumanUserResponseSchema = z.object({
   userId: z.string(),
   details: z.any().optional(),
@@ -34,11 +30,6 @@ export const ZitadelSearchMetadataResponseSchema = z.object({
   details: z.any().optional(),
   result: z.array(ZitadelMetadataSchema).optional(),
 }).catchall(z.any());
-
-
-// ==========================================
-// 2. МОДЕЛИ ТЕЛ ЗАПРОСОВ (REQUEST BODIES)
-// ==========================================
 
 export interface ZitadelUpdateHumanProfileRequest {
   profile: {
@@ -77,13 +68,8 @@ export interface ZitadelSearchMetadataRequest {
   queries?: MetadataSearchFilter[];
 }
 
-
-// ==========================================
-// 3. API МЕТОДЫ
-// ==========================================
-
 export async function createHumanUser(
-  body: any // Можно заменить на конкретный тип Request, если он у вас описан
+  body: any
 ): Promise<Result<z.infer<typeof ZitadelCreateHumanUserResponseSchema>>> {
   return handleZitadelRequest(
     () => zitadelApi.post("/v2/users/human", body, {
@@ -112,7 +98,6 @@ export async function updateHumanProfile(
   gender?: number
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
 
-  // Формируем строго типизированный body
   const body: ZitadelUpdateHumanProfileRequest = {
     profile: { givenName, familyName, nickName, displayName, preferredLanguage, gender }
   };
@@ -164,12 +149,7 @@ export async function updateHumanAvatar(
   );
 }
 
-// ==========================================
-// МЕТАДАННЫЕ (METADATA)
-// ==========================================
-
 export async function updateUserMiddleName(userId: string, value: string) {
-  // Теперь передаем оригинальную строку, updateUserMetadata сама переведет ее в Base64
   return await updateUserMetadata(userId, "middleName", value);
 }
 
@@ -197,10 +177,9 @@ export async function getUserMiddleName(userId: string): Promise<string | undefi
 export async function updateUserMetadata(
   userId: string,
   key: string,
-  value: string // Принимаем обычную строку
+  value: string
 ): Promise<Result<z.infer<typeof ZitadelGenericUpdateResponseSchema>>> {
 
-  // Надежно переводим строку в Base64
   const base64Value = Buffer.from(value).toString('base64');
 
   const body: ZitadelUpdateUserMetadataRequest = {
@@ -225,10 +204,6 @@ export async function searchUserMetadata(
   );
 }
 
-// ==========================================
-// СМЕНА ПАРОЛЯ
-// ==========================================
-
 export async function changeUserPassword(
   userId: string,
   currentPassword: string,
@@ -242,10 +217,6 @@ export async function changeUserPassword(
     ZitadelGenericUpdateResponseSchema
   );
 }
-
-// ==========================================
-// СБРОС ПАРОЛЯ (forgot password)
-// ==========================================
 
 // Просим Zitadel выслать пользователю код сброса на email.
 // Используем sendCode (не sendLink), чтобы пользователь возвращался в наш UI и
@@ -273,10 +244,6 @@ export async function setPasswordWithCode(
     ZitadelGenericUpdateResponseSchema
   );
 }
-
-// ==========================================
-// ПОИСК ПОЛЬЗОВАТЕЛЕЙ
-// ==========================================
 
 export const ZitadelSearchUsersResponseSchema = z.object({
   details: z.any().optional(),

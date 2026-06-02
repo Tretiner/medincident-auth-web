@@ -14,7 +14,6 @@ export const ZitadelIdpOptionsSchema = z.object({
   isCreationAllowed: z.boolean(),
 });
 
-// --- Схемы Ответов ---
 export const ZitadelIdpSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -37,7 +36,6 @@ export const ZitadelRetrieveIdpIntentResponseSchema = z.object({
   idpInformation: z.any().optional(),
 }).catchall(z.any());
 
-// --- Модели Тела Запросов ---
 export interface ZitadelStartIdpIntentBody {
   idpId: string;
   urls: { successUrl: string; failureUrl: string };
@@ -47,7 +45,6 @@ export interface ZitadelRetrieveIdpIntentBody {
   idpIntentToken: string;
 }
 
-// --- Методы ---
 export async function getActiveIdps(): Promise<Result<z.infer<typeof ZitadelGetIdpsResponseSchema>>> {
   return handleZitadelRequest(
     () => zitadelApi.get("/v2/settings/login/idps"),

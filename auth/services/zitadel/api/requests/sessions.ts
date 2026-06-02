@@ -22,8 +22,6 @@ async function getRequestUserAgent() {
   }
 }
 
-// --- Схемы ---
-
 export const ZitadelSessionUserFactorSchema = z.object({
   verifiedAt: z.string().optional(),
   id: z.string().optional(),
@@ -59,8 +57,6 @@ export const ZitadelCreateSessionResponseSchema = z.object({
   sessionId: z.string(),
   sessionToken: z.string(),
 }).catchall(z.any());
-
-// --- Запросы ---
 
 export async function searchSessions(
   sessionIds: string[]

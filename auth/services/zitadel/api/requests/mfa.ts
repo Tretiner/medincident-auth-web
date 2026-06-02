@@ -6,8 +6,6 @@ import { handleZitadelRequest } from "../client-helper";
 import { zitadelApi } from "../client";
 import { ZitadelGenericUpdateResponseSchema } from "./shared";
 
-// --- Схемы ---
-
 export const ZitadelRegisterTotpResponseSchema = z.object({
   details: z.any().optional(),
   uri: z.string(),
@@ -21,8 +19,6 @@ export const ZitadelAuthMethodTypesResponseSchema = z.object({
   details: z.any().optional(),
   authMethodTypes: z.array(z.string()).optional(),
 }).catchall(z.any());
-
-// --- Запросы ---
 
 // Регистрация TOTP — возвращает otpauth:// URI (для QR) и секрет текстом
 export async function registerTotp(

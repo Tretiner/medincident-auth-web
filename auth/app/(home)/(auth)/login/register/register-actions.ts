@@ -19,7 +19,6 @@ import { nameFieldsSchema } from "@/domain/profile/schema";
 import { testPasswordValid } from "@/domain/auth/password-policy";
 import type { RegisterFormState } from "./_components/register-view";
 
-
 function extractFormFields(formData: FormData) {
   return {
     givenName: (formData.get("givenName") as string)?.trim() ?? "",
@@ -61,10 +60,6 @@ function validateNameFields(
     result.error.issues.map((issue) => [issue.path[0], issue.message])
   );
 }
-
-// ==========================================
-// ПАРСИНГ ОШИБОК ZITADEL
-// ==========================================
 
 const ZITADEL_FIELD_MAP: Record<string, string> = {
   GivenName: "givenName",
@@ -132,10 +127,7 @@ function formatUnexpectedError(error: any): string {
   return "Ошибка регистрации";
 }
 
-// ==========================================
-// IDP ПУТЬ: создаём пользователя, сохраняем userId → /verify
-// ==========================================
-
+// IDP путь: создаём пользователя, сохраняем userId → /verify
 export async function continueRegisterIdp(
   requestId: string | undefined,
   _prevState: RegisterFormState,
@@ -227,10 +219,7 @@ export async function continueRegisterIdp(
   }
 }
 
-// ==========================================
-// EMAIL ПУТЬ: создаём пользователя с паролем → /verify
-// ==========================================
-
+// Email путь: создаём пользователя с паролем → /verify
 export async function continueRegisterEmail(
   requestId: string | undefined,
   _prevState: RegisterFormState,

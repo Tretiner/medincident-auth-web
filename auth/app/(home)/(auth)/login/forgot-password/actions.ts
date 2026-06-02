@@ -37,13 +37,12 @@ export async function requestResetAction(
     return { errors: { email: "Введите корректный email адрес" }, values: { email } };
   }
 
-  // Шаг 1: ищем юзера. Если не нашли — ВСЁ РАВНО возвращаем sent=true,
-  // чтобы не раскрывать существование email.
+  // Если юзера не нашли — ВСЁ РАВНО возвращаем sent=true, чтобы не раскрывать существование email.
   const lookup = await searchUserByEmail(email);
   const user = lookup.success ? lookup.data?.result?.[0] : undefined;
 
   if (user?.userId) {
-    // Шаг 2: триггерим Zitadel password_reset. Он сам выслет код на email.
+    // Триггерим Zitadel password_reset — он сам вышлет код на email.
     const reset = await requestPasswordReset(user.userId);
     if (reset.success) {
       await setPasswordResetCookie({ userId: user.userId, requestId });

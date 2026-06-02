@@ -7,7 +7,6 @@ const ServerErrorSchema = z.object({
   traceId: z.string().optional(),
 });
 
-
 export async function handleFetch<T>(
   request: () => Promise<Response>,
   schema: z.Schema<T>,
@@ -15,7 +14,6 @@ export async function handleFetch<T>(
   try {
     const response = await request();
 
-    // Обработка ошибок (4xx, 5xx)
     if (!response.ok) {
       let errorMessage = "Ошибка сервера";
       let errorCode: string | number = response.status;

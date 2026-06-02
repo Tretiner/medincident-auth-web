@@ -135,7 +135,6 @@ export async function updateSessionCookie<T>({
   }
 }
 
-// ИСПРАВЛЕННАЯ ФУНКЦИЯ
 export async function removeSessionFromCookie(
   sessionId: string,
   cleanup?: boolean,
@@ -144,7 +143,6 @@ export async function removeSessionFromCookie(
   const cookiesList = await cookies();
   const stringifiedCookie = cookiesList.get("sessions");
 
-  // Если куки пустые, нам нечего удалять
   if (!stringifiedCookie?.value) {
     return;
   }

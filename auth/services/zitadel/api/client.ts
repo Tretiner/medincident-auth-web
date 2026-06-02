@@ -20,9 +20,7 @@ zitadelApi.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-
-// LOGS
-// ─── "none" | "compact" | "pretty" ───────────────────────────────────────────
+// LOG_BODY: "none" | "compact" | "pretty"
 const LOG_BODY: LogBodyMode = "compact";
 const LOG_HEADERS = false;
 

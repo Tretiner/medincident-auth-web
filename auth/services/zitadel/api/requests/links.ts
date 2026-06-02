@@ -6,8 +6,6 @@ import { handleZitadelRequest } from "../client-helper";
 import { zitadelUserApi } from "../../user/client";
 import { ZitadelDetailsSchema, ZitadelGenericUpdateResponseSchema } from "./shared";
 
-// --- Схемы ---
-
 export const ZitadelAddIdpLinkResponseSchema = z.object({
   details: z.any().optional(),
 }).catchall(z.any());
@@ -16,8 +14,6 @@ export const ZitadelSearchLinksResponseSchema = z.object({
   details: ZitadelDetailsSchema.optional(),
   result: z.array(z.any()).optional()
 }).catchall(z.any());
-
-// --- Запросы ---
 
 export async function addIdpLinkToUser(
   systemUserId: string,

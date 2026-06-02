@@ -26,16 +26,13 @@ export async function loadSessionsAction(): Promise<{
   const syncedSessions = await syncSessionCookies();
   const removedCount = countBefore - syncedSessions.length;
 
-  // Фильтруем валидные сессии
   const validSessions = syncedSessions.filter(
     ({ cookie, zitadel }) => cookie.token && zitadel?.factors?.user
   );
 
-  // Определяем дефолтный выбор
   const mostRecent = await getMostRecentSessionCookie();
   const defaultSelectedId = validSessions.find(({ cookie }) => cookie.id === mostRecent?.id)?.cookie.id;
 
-  // Обогащаем данными пользователей
   const displayAccountsRaw = await Promise.all(
     validSessions.map(async ({ cookie, zitadel }) => {
       const userId = zitadel?.factors?.user?.id;

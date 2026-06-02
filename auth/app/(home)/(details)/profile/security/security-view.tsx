@@ -66,7 +66,6 @@ export function SecurityView({ linkStatus }: SecurityViewProps) {
     }
   }, [linkStatus, pathname, router]);
 
-  // Производим items только когда меняются вход. данные.
   const items = useMemo(() => {
     if (!links) return null;
     const typed = links as LinkRecord[];

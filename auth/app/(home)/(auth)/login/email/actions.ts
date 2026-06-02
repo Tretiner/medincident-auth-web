@@ -61,7 +61,6 @@ export async function loginWithEmailAction(
   const { sessionId, sessionToken } = sessionRes.data;
   const userEmail = user?.human?.email?.email ?? (isEmail ? identifier : "");
 
-  // Проверяем, подтверждён ли email пользователя (user уже получен выше).
   const isVerified = user?.human?.email?.isVerified ?? true;
 
   if (!isVerified && user?.userId) {

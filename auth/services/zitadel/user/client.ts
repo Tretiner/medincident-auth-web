@@ -13,7 +13,7 @@ export const zitadelUserApi = axios.create({
   },
 });
 
-// ─── Auth interceptor (NextAuth session token) ────────────────────────────────
+// Auth interceptor (NextAuth session token)
 zitadelUserApi.interceptors.request.use(async (config) => {
   const session = await auth();
   const accessToken = (session as any)?.accessToken as string | undefined;
@@ -28,7 +28,7 @@ zitadelUserApi.interceptors.request.use(async (config) => {
   return config;
 });
 
-// ─── HTTP Logging (помечаем как [user-session]) ───────────────────────────────
+// HTTP logging (помечаем как [user-session])
 const LOG_BODY: LogBodyMode = "compact";
 const LOG_HEADERS = false;
 const TAG = "[user-session]";

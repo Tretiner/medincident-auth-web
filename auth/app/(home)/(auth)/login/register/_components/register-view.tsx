@@ -10,7 +10,6 @@ import { PasswordRequirements } from "@/shared/ui/password-requirements";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { CONSENT_URL, PRIVACY_URL, TERMS_URL } from "@/shared/lib/constants";
 
-// 1. Define the shape of your form fields
 export interface RegisterFormValues {
   givenName: string;
   familyName: string;
@@ -18,7 +17,6 @@ export interface RegisterFormValues {
   email: string;
 }
 
-// 2. Define the exact fields that can have errors, plus a generic 'form' error
 export interface RegisterFormErrors {
   form?: string;
   givenName?: string;
@@ -31,7 +29,6 @@ export interface RegisterFormErrors {
   agreePdn?: string;
 }
 
-// 3. Define the overall state returned by the Server Action
 export interface RegisterFormState {
   success: boolean;
   errors?: RegisterFormErrors;
@@ -49,7 +46,7 @@ export function RegisterView({ action, initialData, buttonLabel = "Продол�
   const [state, formAction, isPending] = useActionState(action, {
     success: false,
     errors: {},
-    values: initialData // Кладем начальные данные в стейт
+    values: initialData
   });
   const [password, setPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);

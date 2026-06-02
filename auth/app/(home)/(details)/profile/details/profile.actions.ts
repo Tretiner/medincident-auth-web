@@ -77,7 +77,6 @@ export async function getProfileDataAction() {
   };
 }
 
-// PATCH
 export async function updateProfileDataAction(data: ProfileFormData) {
   const { userId } = await requireValidSession();
   try {

@@ -169,7 +169,6 @@ export function ProfileForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      {/* ── ЛИЧНЫЕ ДАННЫЕ ─── */}
       <div className={SECTION_CLASS}>
         <SectionLabel icon={User} label="Личные данные" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -188,7 +187,6 @@ export function ProfileForm({
         </EditableField>
       </div>
 
-      {/* ── КОНТАКТЫ ─── */}
       <div className={SECTION_CLASS}>
         <SectionLabel icon={Mail} label="Контакты" />
         <div className="space-y-1.5">
@@ -202,7 +200,6 @@ export function ProfileForm({
         </div>
       </div>
 
-      {/* ── РАБОЧИЕ ДАННЫЕ ─── */}
       <div className={SECTION_CLASS}>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 select-none mb-3">
           <div className="flex items-center gap-2">
@@ -229,7 +226,6 @@ export function ProfileForm({
         </div>
       </div>
 
-      {/* ── FOOTER ─── */}
       <div className="flex items-center justify-end gap-2 pt-4 mt-4 min-h-[36px]">
         {messageBlock}
         {isDirty && (

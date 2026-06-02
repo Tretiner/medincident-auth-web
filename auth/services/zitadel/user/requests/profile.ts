@@ -5,10 +5,6 @@ import { handleZitadelRequest } from "../../api/client-helper";
 import { zitadelUserApi } from "../client";
 import { Result } from "@/domain/error";
 
-// ==========================================
-// СХЕМЫ ОТВЕТОВ
-// ==========================================
-
 export const ZitadelMeResponseSchema = z.object({
   user: z.object({
     id: z.string().optional(),
@@ -38,10 +34,6 @@ export const ZitadelMeResponseSchema = z.object({
 const ZitadelUpdateResponseSchema = z.object({
   details: z.any().optional(),
 }).catchall(z.any());
-
-// ==========================================
-// API МЕТОДЫ (user session token)
-// ==========================================
 
 // GET /v2/users/{userId} — профиль пользователя
 export async function getMe(userId: string): Promise<Result<z.infer<typeof ZitadelMeResponseSchema>>> {

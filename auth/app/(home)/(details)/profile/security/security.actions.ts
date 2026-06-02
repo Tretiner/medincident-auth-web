@@ -8,7 +8,6 @@ import { redirect } from "next/navigation";
 import { parseUserAgent } from "@/shared/lib/user-agent";
 import { getAllSessions } from "@/services/zitadel/cookies";
 
-// GET: Получить все активные сессии пользователя
 export async function getSessionsAction(): Promise<UserSession[]> {
   const { userId, currentSessionId } = await requireValidSession();
 
@@ -17,14 +16,10 @@ export async function getSessionsAction(): Promise<UserSession[]> {
 
   const rawSessions = response.data.sessions || [];
 
-  // 3. Форматируем данные под интерфейс твоего компонента SessionsList
   const formattedSessions: UserSession[] = rawSessions.map((sess: any) => {
     const ua = sess.userAgent || {};
 
-    // Получаем сырую строку
     const rawDescription = ua.header?.["user-agent"]?.values?.join(" ") || ua.description || "";
-
-    // Прогоняем через наш кастомный парсер
     const prettyDeviceName = parseUserAgent(rawDescription);
 
     return {
@@ -37,7 +32,7 @@ export async function getSessionsAction(): Promise<UserSession[]> {
     };
   });
 
-  // 4. Сортируем: текущая сессия на самом верху, остальные по убыванию даты активности
+  // Текущая сессия на самом верху, остальные по убыванию даты активности
   return formattedSessions.sort((a, b) => {
     if (a.isCurrent) return -1;
     if (b.isCurrent) return 1;
@@ -45,7 +40,6 @@ export async function getSessionsAction(): Promise<UserSession[]> {
   });
 }
 
-// REVOKE SESSION (Отзыв конкретной сессии)
 export async function revokeSessionAction(
   targetSessionId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -74,7 +68,6 @@ export async function revokeSessionAction(
   return { success: true };
 }
 
-// REVOKE ALL OTHERS (Отзыв всех остальных сессий)
 export async function revokeAllOthersAction(): Promise<{
   success: boolean;
   error?: string;
@@ -111,7 +104,6 @@ export async function revokeAllOthersAction(): Promise<{
   return { success: true };
 }
 
-// GET LINKED ACCOUNTS
 export async function getLinkedAccountsAction() {
   const { userId } = await requireValidSession();
 
@@ -129,7 +121,6 @@ export async function getLinkedAccountsAction() {
   }));
 }
 
-// TOGGLE LINK
 export async function toggleLinkedAccountAction(idpId: string, isCurrentlyConnected: boolean) {
   const { userId } = await requireValidSession();
 
@@ -164,7 +155,7 @@ export async function linkProvider(idpId: string) {
   redirect(response.data.authUrl);
 }
 
-// COMPLETE IDP LINK (завершить привязку после OAuth-callback)
+// Завершить привязку IdP после OAuth-callback
 export async function completeLinkAction(intentId: string, intentToken: string): Promise<{ success: boolean; error?: string }> {
   const { userId } = await requireValidSession();
 
@@ -191,7 +182,6 @@ export async function completeLinkAction(intentId: string, intentToken: string):
   return { success: true };
 }
 
-// TOTP STATUS — проверить, включён ли TOTP у текущего пользователя
 export async function getTotpStatusAction(): Promise<{ enabled: boolean }> {
   const { userId } = await requireValidSession();
   const methods = await listAuthMethods(userId);
@@ -199,7 +189,7 @@ export async function getTotpStatusAction(): Promise<{ enabled: boolean }> {
   return { enabled: hasTotpMethod(methods.data.authMethodTypes) };
 }
 
-// TOTP REGISTER — получить otpauth:// URI и секрет для показа QR-кода
+// Возвращает otpauth:// URI и секрет для показа QR-кода
 export async function registerTotpAction(): Promise<
   { success: true; uri: string; secret: string } | { success: false; error: string }
 > {
@@ -211,7 +201,6 @@ export async function registerTotpAction(): Promise<
   return { success: true, uri: res.data.uri, secret: res.data.secret };
 }
 
-// TOTP VERIFY — завершить регистрацию вводом первого кода из приложения
 export async function verifyTotpRegistrationAction(
   code: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -226,7 +215,6 @@ export async function verifyTotpRegistrationAction(
   return { success: true };
 }
 
-// TOTP REMOVE — отключить 2FA у пользователя
 export async function removeTotpAction(): Promise<{ success: boolean; error?: string }> {
   const { userId } = await requireValidSession();
   const res = await removeTotp(userId);
@@ -236,7 +224,6 @@ export async function removeTotpAction(): Promise<{ success: boolean; error?: st
   return { success: true };
 }
 
-// CHANGE PASSWORD (Смена пароля)
 export async function changePasswordAction(currentPassword: string, newPassword: string) {
   const { userId } = await requireValidSession();
 

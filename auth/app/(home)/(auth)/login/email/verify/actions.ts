@@ -32,7 +32,6 @@ export async function verifyEmailAction(
     userId = uid;
   }
 
-  // Верифицируем email
   const verifyRes = await verifyUserEmail(userId, code);
   if (!verifyRes.success) {
     return { errors: { code: "Неверный или просроченный код. Запросите новый." } };

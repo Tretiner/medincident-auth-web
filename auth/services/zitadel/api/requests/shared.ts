@@ -2,8 +2,6 @@
 
 import { z } from "zod";
 
-// --- БАЗОВЫЕ ИНТЕРФЕЙСЫ (REQUESTS) ---
-
 export type TextFilterMethod =
   | "TEXT_FILTER_METHOD_EQUALS"
   | "TEXT_FILTER_METHOD_EQUALS_IGNORE_CASE"
@@ -15,8 +13,6 @@ export interface PaginationRequest {
   limit?: number;
   asc?: boolean;
 }
-
-// --- БАЗОВЫЕ СХЕМЫ ZOD (RESPONSES) ---
 
 // ZITADEL почти всегда возвращает объект details с метаданными операции
 export const ZitadelDetailsSchema = z.object({

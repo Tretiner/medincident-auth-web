@@ -2,8 +2,6 @@
 
 export type LogBodyMode = "none" | "compact" | "pretty";
 
-// ─── ANSI ────────────────────────────────────────────────────────────────────
-
 const c = {
   reset:  "\x1b[0m",
   dim:    "\x1b[2m",
@@ -14,8 +12,6 @@ const c = {
   red:    "\x1b[31m",
   gray:   "\x1b[90m",
 };
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function methodColor(method: string): string {
   switch (method.toUpperCase()) {
@@ -44,8 +40,6 @@ export function formatBody(data: unknown, mode: Exclude<LogBodyMode, "none">): s
   // compact — одна строка без пробелов
   return JSON.stringify(parsed);
 }
-
-// ─── Log functions ────────────────────────────────────────────────────────────
 
 function logHeaders(headers: Record<string, unknown>): void {
   const safe = { ...headers };

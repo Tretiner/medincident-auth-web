@@ -26,15 +26,13 @@ async function* authMiddleware<Request, Response>(
   return yield* call.next(call.request, options);
 }
 
-// --- 2. MIDDLEWARE ЛОГИРОВАНИЯ (Самый последний перед сетью) ---
 async function* loggingMiddleware<Request, Response>(
   call: ClientMiddlewareCall<Request, Response>,
   options: CallOptions
 ) {
   const { path } = call.method;
 
-  // Извлекаем все метаданные (заголовки), включая те, что только что добавил authMiddleware
-  // nice-grpc Metadata — это итерируемый объект, переводим его в обычный словарь для красивого лога
+  // nice-grpc Metadata — итерируемый объект, переводим в обычный словарь для лога
   const metadataArray = options.metadata ? Array.from(options.metadata) : [];
   const metadataRecord = Object.fromEntries(metadataArray);
 
@@ -45,7 +43,6 @@ async function* loggingMiddleware<Request, Response>(
   const startTime = Date.now();
 
   try {
-    // Отправляем реальный запрос на сервер
     const response = yield* call.next(call.request, options);
 
     const duration = Date.now() - startTime;
@@ -59,11 +56,10 @@ async function* loggingMiddleware<Request, Response>(
     console.error("Код:", error.code);
     console.error("Детали:", error.details || error.message);
 
-    throw error; // Пробрасываем ошибку дальше
+    throw error;
   }
 }
 
-// --- 3. СОЗДАНИЕ КЛИЕНТА ---
 const channel = createChannel(env.GRPC_API_URL);
 
 // ПОРЯДОК ОЧЕНЬ ВАЖЕН:

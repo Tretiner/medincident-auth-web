@@ -111,29 +111,23 @@ export async function finishAuth(
     redirect("/profile");
   }
 }
-// ==========================================
-// ЭКШЕНЫ ДЛЯ КЛИЕНТСКОГО КОМПОНЕНТА
-// ==========================================
 
 export async function handleLoginAction(userId: string, intentId: string, intentToken: string, requestId?: string) {
-  // --- НАЧАЛО БОРЬБЫ С ДУБЛИКАТАМИ ---
+  // Удаляем старые сессии этого юзера, уже лежащие в этом браузере, чтобы не плодить дубликаты
   const knownSessions = await getAllSessions(true);
   
   const userSessionsRes = await searchUserSessions(userId);
   if (userSessionsRes.success && userSessionsRes.data.sessions) {
     const activeSessions = userSessionsRes.data.sessions;
     
-    // Ищем, есть ли среди активных сессий юзера те, что лежат у нас в браузере
     for (const activeSess of activeSessions) {
       const localSess = knownSessions.find(ks => ks.id === activeSess.id);
       if (localSess) {
-        // Нашли старую сессию этого юзера в этом же браузере! Удаляем ее.
         await deleteSession(localSess.id, localSess.token);
         await removeSessionFromCookie(localSess.id);
       }
     }
   }
-  // --- КОНЕЦ БОРЬБЫ С ДУБЛИКАТАМИ ---
 
   const sessionRes = await createSession(userId, intentId, intentToken);
   console.log("Ответ от createSession:", JSON.stringify(sessionRes));
